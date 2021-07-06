@@ -15,6 +15,7 @@ dm-haiku = "*"
 coax = "*"
 optax = "*"
 gym = "*"
+torch = "*"
 
 [dev-packages]
 ipykernel = "*"

@@ -19,6 +19,8 @@ def video_as_numpy(filename, videos_path):
     cap.release()
 
     all_frames = np.mean(np.array(all_frames), axis=3)
+    # Normalise
+    all_frames = all_frames / np.max(all_frames)
     return all_frames
 
 
@@ -76,9 +78,9 @@ def label_more_frames(x, ed_i, es_i, weight=0.75):
         )
         frames = np.arange(some_before_ed_i, some_after_es_i + 1)
         labels = (
-            ["diastole"] * (ed_i - some_before_ed_i + 1)
-            + ["systole"] * (es_i - ed_i + 1)
-            + ["diastole"] * (some_after_es_i - es_i + 1)
+            [0] * (ed_i - some_before_ed_i + 1)  # Diastole
+            + [1] * (es_i - ed_i + 1)  # Systole
+            + [0] * (some_after_es_i - es_i + 1)  # Diastole
         )
         return (frames, labels)
     else:
@@ -90,9 +92,9 @@ def label_more_frames(x, ed_i, es_i, weight=0.75):
         )
         frames = np.arange(some_before_es_i, some_after_ed_i + 1)
         labels = (
-            ["systole"] * (es_i - some_before_es_i + 1)
-            + ["diastole"] * (ed_i - es_i + 1)
-            + ["systole"] * (some_after_ed_i - ed_i + 1)
+            [1] * (es_i - some_before_es_i + 1)  # Systole
+            + [0] * (ed_i - es_i + 1)  # Diastole
+            + [1] * (some_after_ed_i - ed_i + 1)  # Systole
         )
         return (frames, labels)
 
