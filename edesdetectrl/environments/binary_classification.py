@@ -5,6 +5,7 @@ from gym import spaces
 import numpy as np
 
 from edesdetectrl.util.echonet_loader import EchoNetDataset
+from edesdetectrl.config import config
 
 
 def get_reward(current_frame, current_prediction, all_predictions, ground_truths):
@@ -34,7 +35,9 @@ def get_observation(seq, frame):
 
 
 def get_seq_iterator():
-    echonet_dataset = EchoNetDataset()
+    echonet_dataset = EchoNetDataset(
+        config["data"]["processed_output_path"], config["data"]["videos_path"]
+    )
 
     while True:
         index = random.randint(0, echonet_dataset.num_videos - 1)

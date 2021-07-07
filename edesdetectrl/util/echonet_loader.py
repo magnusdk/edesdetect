@@ -100,11 +100,7 @@ def label_more_frames(x, ed_i, es_i, weight=0.75):
 
 
 class EchoNetDataset:
-    def __init__(
-        self,
-        processed_labels_csv_file="processed_labels.csv",
-        videos_path="/home/magnus/research/data/EchoNet-Dynamic/Videos/",
-    ):
+    def __init__(self, processed_labels_csv_file, videos_path):
         self.df = pd.read_csv(processed_labels_csv_file)
         self.num_videos = len(self.df)
         self.videos_path = videos_path
@@ -122,7 +118,11 @@ def test_it():
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation
 
-    echonet_dataset = EchoNetDataset()
+    from edesdetectrl.config import config
+
+    echonet_dataset = EchoNetDataset(
+        config["data"]["processed_output_path"], config["data"]["videos_path"]
+    )
     x, labels = echonet_dataset.get_video_and_labels(1000)
 
     fig, ax = plt.subplots()

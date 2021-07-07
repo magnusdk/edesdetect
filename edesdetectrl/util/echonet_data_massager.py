@@ -1,6 +1,8 @@
 import math
 import pandas as pd
 
+from edesdetectrl.config import config
+
 
 def calculate_tracing_volumes(volumetracings, filename, filter_tracings_count=21):
     """
@@ -59,9 +61,8 @@ def convert_to_better_format(
             f.write(f'{output_filename},{ed_es["ED"]},{ed_es["ES"]}\n')
 
 
-def main_convert_to_better_format(
-    filelist_path="/home/magnus/research/data/EchoNet-Dynamic/FileList.csv",
-    volumetracings_path="/home/magnus/research/data/EchoNet-Dynamic/VolumeTracings.csv",
-    output_path="processed_labels.csv",
-):
-    convert_to_better_format(filelist_path, volumetracings_path, output_path)
+convert_to_better_format(
+        config["data"]["filelist_path"],
+        config["data"]["volumetracings_path"],
+        config["data"]["processed_output_path"],
+    )

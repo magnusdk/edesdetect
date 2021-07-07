@@ -16,6 +16,7 @@ coax = "*"
 optax = "*"
 gym = "*"
 torch = "*"
+toml = "*"
 
 [dev-packages]
 ipykernel = "*"
