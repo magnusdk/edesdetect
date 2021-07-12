@@ -5,7 +5,6 @@ name = "pypi"
 
 [packages]
 jax = "*"
-jaxlib = "*"
 simpleitk = "*"
 matplotlib = "*"
 ed-es-detection-rl = {editable = true, path = "."}
@@ -21,6 +20,7 @@ toml = "*"
 [dev-packages]
 ipykernel = "*"
 black = "*"
+ipympl = "*"
 
 [requires]
 python_version = "3.8"

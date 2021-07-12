@@ -2,3 +2,5 @@
 .vscode/
 __pycache__/
 config_local.toml
+tensorboard/
+processed_labels.csv

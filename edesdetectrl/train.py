@@ -1,11 +1,10 @@
 import coax
 import optax
-import haiku as hk
-import jax
-import jax.numpy as jnp
 import gym
 
 import edesdetectrl.environments.binary_classification
+from edesdetectrl.config import config
+import edesdetectrl.model as model
 
 
 # FROM: https://coax.readthedocs.io/en/latest/examples/stubs/dqn.html
@@ -14,29 +13,11 @@ import edesdetectrl.environments.binary_classification
 # pick environment
 env = gym.make("EDESClassification-v0")
 env = coax.wrappers.TrainMonitor(
-    env, tensorboard_dir="tensorboard", tensorboard_write_all=True
+    env, tensorboard_dir="tensorboard", tensorboard_write_all=True, log_all_metrics=True
 )
 
-
-def func_approx(S, is_training):
-    f = hk.Sequential(
-        [
-            coax.utils.diff_transform,  # Preprocess the frames to get position, velocity, acceleration, etc...
-            hk.Conv2D(16, kernel_shape=8, stride=4),
-            jax.nn.relu,
-            hk.Conv2D(32, kernel_shape=4, stride=2),
-            jax.nn.relu,
-            hk.Flatten(),
-            hk.Linear(256),
-            jax.nn.relu,
-            hk.Linear(env.action_space.n, w_init=jnp.zeros),
-        ]
-    )
-    return f(S)  # Output shape: (batch_size, num_actions=2)
-
-
 # function approximator
-q = coax.Q(func_approx, env)
+q = coax.Q(model.get_func_approx(env), env)
 pi = coax.EpsilonGreedy(q, epsilon=0.1)
 
 
@@ -57,7 +38,7 @@ buffer = coax.experience_replay.SimpleReplayBuffer(capacity=1000000)
 epsilon = coax.utils.StepwiseLinearFunction((0, 1), (1000000, 0.1), (2000000, 0.01))
 
 
-while env.T < 5000:  # 3000000:
+while env.T < 50:  # 3000000:
     pi.epsilon = epsilon(env.T)
     s = env.reset()
 
@@ -87,5 +68,8 @@ while env.T < 5000:  # 3000000:
         s = s_next
 
     print(f"{env.T}: {env.avg_G}")
+
+trained_params = q.params
+coax.utils.dump(trained_params, config['data']['trained_params_path'])
 
 env.close()

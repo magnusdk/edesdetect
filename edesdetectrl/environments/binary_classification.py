@@ -113,10 +113,11 @@ class EDESClassification_v0(gym.Env):
             self.current_frame, action, self.predictions, self.ground_truth
         )
         done = self.current_frame == self.num_frames - 1
+        info = None
 
         # Go to the next frame
         self.current_frame += 1
-        return observation, reward, done, None
+        return observation, reward, done, info
 
     def render(self, mode="human"):
         pass
