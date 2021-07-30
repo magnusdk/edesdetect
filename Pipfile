@@ -16,11 +16,13 @@ optax = "*"
 gym = "*"
 torch = "*"
 toml = "*"
+chex = "*"
 
 [dev-packages]
 ipykernel = "*"
 black = "*"
 ipympl = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.8"
