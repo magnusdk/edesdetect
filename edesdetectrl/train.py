@@ -5,6 +5,7 @@ import gym
 import edesdetectrl.environments.binary_classification
 from edesdetectrl.config import config
 import edesdetectrl.model as model
+from util.checkpoints import CheckpointManager
 
 
 # FROM: https://coax.readthedocs.io/en/latest/examples/stubs/dqn.html
@@ -38,7 +39,13 @@ buffer = coax.experience_replay.SimpleReplayBuffer(capacity=1000000)
 epsilon = coax.utils.StepwiseLinearFunction((0, 1), (1000000, 0.1), (2000000, 0.01))
 
 
-while env.T < 50:  # 3000000:
+# set up checkpointing and possibly restore a previous checkpoint
+checkpoint_path = "_checkpoints/checkpoint.pkl.lz4"
+checkpoint_manager = CheckpointManager(q, env, checkpoint_path)
+checkpoint_manager.restore_latest()
+
+
+while env.T < 500:  # 3000000:
     pi.epsilon = epsilon(env.T)
     s = env.reset()
 
@@ -61,6 +68,10 @@ while env.T < 50:  # 3000000:
         # periodically sync target model
         if env.ep % 10 == 0:
             q_targ.soft_update(q, tau=1.0)
+
+        # periodically save checkpoints
+        if env.ep % 100 == 0:
+            checkpoint_manager.save_checkpoint()
 
         if done:
             break
