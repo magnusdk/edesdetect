@@ -1,3 +1,2 @@
 [data]
-processed_output_path = "processed_labels.csv"
-trained_params_path = "trained_params.pkl.lz4"
+trained_params_path = "trained_params2.pkl.lz4"

@@ -2,7 +2,6 @@
 1. Create a file called =config_local.toml=.
 2. Fill in local configuration values. See an example in the following subsection.
 3. Install dependencies via pipenv: =pipenv install=.
-4. Run the script (only needs to be run once) =edesdetectrl.util.echonet_data_massager.py= in the created virtual environment.
 
 ** Local configuration example
 This example contains all the needed values:

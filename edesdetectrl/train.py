@@ -1,18 +1,33 @@
+from concurrent.futures.thread import ThreadPoolExecutor
+
 import coax
-import optax
 import gym
+import optax
 
+import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.environments.binary_classification
-from edesdetectrl.config import config
 import edesdetectrl.model as model
-from util.checkpoints import CheckpointManager
-
+from edesdetectrl.config import config
+from edesdetectrl.util.checkpoints import CheckpointManager
 
 # FROM: https://coax.readthedocs.io/en/latest/examples/stubs/dqn.html
 
 
 # pick environment
-env = gym.make("EDESClassification-v0")
+volumetracings_csv_file = config["data"]["volumetracings_path"]
+filelist_csv_file = config["data"]["filelist_path"]
+videos_dir = config["data"]["videos_path"]
+split = "TRAIN"
+thread_pool_executor = ThreadPoolExecutor()
+seq_iterator = echonet.get_generator(
+    thread_pool_executor,
+    volumetracings_csv_file,
+    filelist_csv_file,
+    videos_dir,
+    split,
+    buffer_maxsize=50,
+)
+env = gym.make("EDESClassification-v0", seq_iterator=seq_iterator)
 env = coax.wrappers.TrainMonitor(
     env, tensorboard_dir="tensorboard", tensorboard_write_all=True, log_all_metrics=True
 )
@@ -81,6 +96,6 @@ while env.T < 500:  # 3000000:
     print(f"{env.T}: {env.avg_G}")
 
 trained_params = q.params
-coax.utils.dump(trained_params, config['data']['trained_params_path'])
+coax.utils.dump(trained_params, config["data"]["trained_params_path"])
 
 env.close()
