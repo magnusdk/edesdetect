@@ -5,3 +5,4 @@ config_local.toml
 tensorboard/
 processed_labels.csv
 _checkpoints/
+.nfs*
