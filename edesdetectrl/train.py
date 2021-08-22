@@ -47,7 +47,7 @@ qlearning = coax.td_learning.QLearning(q, q_targ=q_targ, optimizer=optax.adam(0.
 
 # specify how to trace the transitions
 tracer = coax.reward_tracing.NStep(n=1, gamma=0.9)
-buffer = coax.experience_replay.SimpleReplayBuffer(capacity=1000000)
+buffer = coax.experience_replay.SimpleReplayBuffer(capacity=10000)
 
 
 # schedule for pi.epsilon (exploration)
