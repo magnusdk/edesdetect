@@ -31,7 +31,7 @@ seq_iterator = echonet.get_generator(
     filelist_csv_file,
     videos_dir,
     split,
-    buffer_maxsize=50,
+    buffer_maxsize=5,
 )
 env = gym.make("EDESClassification-v0", seq_iterator=seq_iterator)
 env = coax.wrappers.TrainMonitor(
