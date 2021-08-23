@@ -1,3 +1,9 @@
+# A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
+# It is believed that it caused by some weird caching of XLA (Jax low-level code) backends.
+# Calling xb.backends() is a workaround.
+from jax.lib import xla_bridge as xb
+xb.backends()
+
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import coax
