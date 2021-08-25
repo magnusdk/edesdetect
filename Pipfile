@@ -23,6 +23,7 @@ ipykernel = "*"
 black = "*"
 ipympl = "*"
 pytest = "*"
+pysimplegui = "*"
 
 [requires]
 python_version = "3.6"
