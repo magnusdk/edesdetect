@@ -19,18 +19,14 @@ SORT_OPTION_BEST = "best"
 SORT_OPTION_WORST = "worst"
 
 
-def present_video_selector_file_options(options):
-    return [f"{option['filename']} ({option['perf']:.2f})" for option in options]
-
-
 def video_selector_file_options_sort_fn(sort_order):
     if sort_order == SORT_OPTION_FILENAME:
-        return lambda video: video["filename"]
+        return lambda video: video.filename
     elif sort_order == SORT_OPTION_BEST:
         # Sort by negative perf, because lower perf should be sorted last
-        return lambda video: -video["perf"]
+        return lambda video: -video.perf
     elif sort_order == SORT_OPTION_WORST:
-        return lambda video: video["perf"]
+        return lambda video: video.perf
 
 
 class DropDownOption:
@@ -45,6 +41,15 @@ class DropDownOption:
         return str((self.value, self.label))
 
 
+class VideoFileListItem:
+    def __init__(self, filename, perf) -> None:
+        self.filename = filename
+        self.perf = perf
+
+    def __str__(self) -> str:
+        return f"{self.filename} ({self.perf:.2f})"
+
+
 sort_options = [
     DropDownOption(SORT_OPTION_BEST, "Best"),
     DropDownOption(SORT_OPTION_WORST, "Worst"),
@@ -54,7 +59,7 @@ sort_options = [
 filelist_df = pd.read_csv(config["data"]["filelist_path"])
 filenames = filelist_df["FileName"].tolist()
 video_selector_file_options = [
-    {"filename": filename, "perf": random.random()} for filename in filenames
+    VideoFileListItem(filename, random.random()) for filename in filenames
 ]
 video_selector_file_options.sort(
     key=video_selector_file_options_sort_fn(sort_options[0].value)
@@ -111,8 +116,8 @@ def _(values, window):
 @dispatch_on(VIDEO_SELECTOR_LAST_BUTTON)
 def _(values, window):
     video_selector = window[VIDEO_SELECTOR]
-    last_video = len(video_selector_file_options) - 1
-    video_selector.update(set_to_index=last_video, scroll_to_index=last_video)
+    last_video_index = len(video_selector_file_options) - 1
+    video_selector.update(set_to_index=last_video_index, scroll_to_index=last_video_index)
     (selected_video,) = video_selector.get()
     handle_video_file_selected(selected_video, window)
 
@@ -120,7 +125,7 @@ def _(values, window):
 @dispatch_on(VIDEO_SELECTOR_SORT_BY)
 def _(values, window):
     # Before re-sorting (and thus resetting the dropbox values), let's get the currently selected value.
-    (selected_filename,) = values[VIDEO_SELECTOR]
+    (selected_video_file,) = values[VIDEO_SELECTOR]
 
     # Sort the video_selector_file_options based on the selected_sort_order.
     selected_sort_order = values[VIDEO_SELECTOR_SORT_BY].value
@@ -131,11 +136,9 @@ def _(values, window):
     # Now let's re-render the video_selector with the re-sorted video_selector_file_options.
     video_selector = window[VIDEO_SELECTOR]
     # Reset the dropbox options.
-    video_selector.update(
-        values=present_video_selector_file_options(video_selector_file_options)
-    )
+    video_selector.update(values=video_selector_file_options)
     # Re-select the selected value.
-    video_selector.set_value(selected_filename)
+    video_selector.set_value([selected_video_file])
     # Scroll to the selected value.
     (current_index,) = video_selector.get_indexes()
     video_selector.update(scroll_to_index=current_index)
@@ -156,9 +159,7 @@ def start_event_loop(window):
 
 window = sg.Window(
     "Performance insight",
-    layout.get_layout(
-        sort_options, present_video_selector_file_options(video_selector_file_options)
-    ),
+    layout.get_layout(sort_options, video_selector_file_options),
 )
 start_event_loop(window)
 window.close()
