@@ -34,7 +34,13 @@ class EDESClassification_v0(gym.Env):
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.float32
         )
-        self.seq_iterator = seq_iterator
+
+        def enough_frames(video_and_labels):
+            video, labels = video_and_labels
+            return video.shape[0] >= N_CHANNELS
+
+        # Let's filter out all videos that have less frames than the number of channels.
+        self.seq_iterator = filter(seq_iterator, enough_frames)
         self.reset()
 
     def reset(self):

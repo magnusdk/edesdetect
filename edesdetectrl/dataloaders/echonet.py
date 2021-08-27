@@ -3,9 +3,9 @@ import random
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import cv2
+import edesdetectrl.util.generators as generators
 import numpy as np
 import pandas as pd
-from edesdetectrl.util.async_buffered_generator import get_async_buffered_generator
 from scipy.ndimage.filters import gaussian_filter
 
 
@@ -118,11 +118,9 @@ def label_frames(x, ed_i, es_i, weight=0.75):
         return (frames, labels)
 
 
-def get_item(filename, volumetracings_df, videos_dir):
+def get_item(filename, traces, videos_dir):
     if os.path.splitext(filename)[1] == "":
         filename = filename + ".avi"  # Assume avi if no suffix
-
-    traces = volumetracings_df.loc[filename]
     # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
     # Largest (diastolic) frame is first
     ed = int(traces.iloc[0]["Frame"])
@@ -164,38 +162,17 @@ def get_generator(
     filelist_df = filelist_df[filelist_df["Split"] == split]
     filenames = filelist_df["FileName"].tolist()
 
-    def exists_in_volumetracings(filename):
-        if os.path.splitext(filename)[1] == "":
-            filename = filename + ".avi"  # Assume avi if no suffix
-        try:
-            traces = volumetracings_df.loc[filename]
-            return True
-        except Exception:
-            return False
+    def task_gen():
+        while True:
+            filename = random.choice(filenames)
+            # Some traces are missing from the dataset and we must skip those.
+            traces = volumetracings_df.FileName.get(filename)
+            if traces:
+                task = lambda: get_item(filename, traces, videos_dir)
+                yield task
 
-    # TODO: Clean this up... We must pre-process data more...
-    filenames = [
-        filename for filename in filenames if exists_in_volumetracings(filename)
-    ]
-
-    def get_task_fn():
-        filename = random.choice(filenames)
-        task_fn = lambda: get_item(filename, volumetracings_df, videos_dir)
-        return task_fn
-
-    def leq_than_7_frames(t):
-        # TODO: Clean this up... We must pre-process data more...
-        video, labels = t
-        return video.shape[0] >= 7
-
-    return filter(
-        leq_than_7_frames,
-        get_async_buffered_generator(
-            thread_pool_executor,
-            get_task_fn,
-            buffer_maxsize=buffer_maxsize,
-        ),
-    )
+    # Let's optimize the code a bit by making it multi-threaded and storing videos and labels in a buffer, ready for use.
+    return generators.async_buffered(thread_pool_executor, buffer_maxsize, task_gen())
 
 
 def example():
