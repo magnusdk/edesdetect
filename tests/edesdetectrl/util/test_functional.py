@@ -1,6 +1,5 @@
 import edesdetectrl.util.functional as func
 import operator as op
-import pytest
 
 
 def test_chainf_functions():
