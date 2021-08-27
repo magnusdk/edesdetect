@@ -118,6 +118,7 @@ def test_checkpoint_manager_integration():
     model_params_after_training = q.params
     train_monitor_counters_after_training = env.get_counters()
     # Assert that the parameters really change. This is not really what we are testing for here, but is a nice sanity check.
+    # TODO: This is a flaky assertion and will sometimes fail...
     with pytest.raises(AssertionError):
         chex.assert_trees_all_close(model_params_after_training, orig_model_params)
     assert not counters_equal(
