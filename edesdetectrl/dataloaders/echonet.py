@@ -119,8 +119,6 @@ def label_frames(x, ed_i, es_i, weight=0.75):
 
 
 def get_item(filename, traces, videos_dir):
-    if os.path.splitext(filename)[1] == "":
-        filename = filename + ".avi"  # Assume avi if no suffix
     # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
     # Largest (diastolic) frame is first
     ed = int(traces.iloc[0]["Frame"])
@@ -165,11 +163,15 @@ def get_generator(
     def task_gen():
         while True:
             filename = random.choice(filenames)
+            if os.path.splitext(filename)[1] == "":
+                filename = filename + ".avi"  # Assume avi if no suffix
+
             # Some traces are missing from the dataset and we must skip those.
-            traces = volumetracings_df.FileName.get(filename)
-            if traces:
-                task = lambda: get_item(filename, traces, videos_dir)
-                yield task
+            try:
+                traces = volumetracings_df.loc[filename]
+                yield lambda: get_item(filename, traces, videos_dir)
+            except KeyError:
+                continue  # Try another random filename.
 
     # Let's optimize the code a bit by making it multi-threaded and storing videos and labels in a buffer, ready for use.
     return generators.async_buffered(thread_pool_executor, buffer_maxsize, task_gen())
