@@ -25,34 +25,38 @@ def get_observation(seq, frame):
     return seq[frame - N_PREV_AND_NEXT_FRAMES : frame + N_PREV_AND_NEXT_FRAMES + 1]
 
 
-class EDESClassification_v0(gym.Env):
+class EDESClassificationBase_v0(gym.Env):
+    """Base class for ED/ES Binary Classification environment.
+
+    Constructor takes a single video and ground truth list.
+    For an environment that uses random videos instead, see EDESClassificationRandomVideos_v0"""
+
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self, seq_iterator):
-        super(EDESClassification_v0, self).__init__()
+    def __init__(self, seq=None, ground_truth=None):
+        super(EDESClassificationBase_v0, self).__init__()
         self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.float32
         )
-
-        def has_enough_frames(video_and_labels):
-            video, labels = video_and_labels
-            return video.shape[0] >= N_CHANNELS
-
-        # Let's filter out all videos that have less frames than the number of channels.
-        self.seq_iterator = filter(has_enough_frames, seq_iterator)
+        self._set_seq_and_ground_truth(seq, ground_truth)
         self.reset()
 
-    def reset(self):
-        # Get the next image sequence and ground_truth.
-        # Every time we call reset() we use a different image sequence, determined by the next item in self.seq_iterator.
-        seq, ground_truth = next(self.seq_iterator)
+    def _set_seq_and_ground_truth(self, seq, ground_truth):
+        assert (
+            seq is not None and seq.shape[0] >= N_CHANNELS
+        ), f"Video must have more than {N_CHANNELS} frames."
+        assert (
+            ground_truth is not None and len(ground_truth) == seq.shape[0]
+        ), "Ground truth must have the same number of labels as there are frames in the seq."
+
         self.seq = seq
-        self.num_frames = seq.shape[0]
         self.ground_truth = ground_truth
+        self.num_frames = self.seq.shape[0]
+
+    def reset(self):
         self.current_frame = N_PREV_AND_NEXT_FRAMES
         self.predictions = []
-
         observation = get_observation(self.seq, self.current_frame)
         return observation
 
@@ -79,9 +83,29 @@ class EDESClassification_v0(gym.Env):
         pass
 
 
+class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
+    def __init__(self, seq_iterator):
+        def has_enough_frames(seq_and_labels):
+            seq, labels = seq_and_labels
+            return seq.shape[0] >= N_CHANNELS
+
+        # Let's filter out all seqs that have less frames than the number of channels.
+        self.seq_iterator = filter(has_enough_frames, seq_iterator)
+        seq, ground_truth = next(self.seq_iterator)
+        super(EDESClassificationRandomVideos_v0, self).__init__(seq, ground_truth)
+
+    def reset(self):
+        # Get the next image sequence and ground_truth.
+        # Every time we call reset() we use a different image sequence, determined by the next item in self.seq_iterator.
+        seq, ground_truth = next(self.seq_iterator)
+        parent = super(EDESClassificationRandomVideos_v0, self)
+        parent._set_seq_and_ground_truth(seq, ground_truth)
+        return parent.reset()
+
+
 gym.register(
     id="EDESClassification-v0",
-    entry_point="edesdetectrl.environments.binary_classification:EDESClassification_v0",
+    entry_point="edesdetectrl.environments.binary_classification:EDESClassificationRandomVideos_v0",
     max_episode_steps=200,
 )
 
@@ -109,7 +133,7 @@ def timeit_test():
             split,
             buffer_maxsize=50,
         )
-        env = EDESClassification_v0(seq_iterator)
+        env = EDESClassificationRandomVideos_v0(seq_iterator)
 
         def thunk():
             env.reset()

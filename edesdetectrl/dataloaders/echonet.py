@@ -69,6 +69,7 @@ def prev_maximum_diff(x, start_i):
     return max_diff_i
 
 
+# TODO: Add test(s) for this function
 def label_frames(x, ed_i, es_i, weight=0.75):
     """
     Grab some frames before first keyframe (either ED or ES) where we are sure of the phase.
@@ -98,8 +99,8 @@ def label_frames(x, ed_i, es_i, weight=0.75):
         frames = np.arange(some_before_ed_i, some_after_es_i + 1)
         labels = (
             [0] * (ed_i - some_before_ed_i + 1)  # Diastole
-            + [1] * (es_i - ed_i + 1)  # Systole
-            + [0] * (some_after_es_i - es_i + 1)  # Diastole
+            + [1] * (es_i - ed_i)  # Systole
+            + [0] * (some_after_es_i - es_i)  # Diastole
         )
         return (frames, labels)
     else:
@@ -112,8 +113,8 @@ def label_frames(x, ed_i, es_i, weight=0.75):
         frames = np.arange(some_before_es_i, some_after_ed_i + 1)
         labels = (
             [1] * (es_i - some_before_es_i + 1)  # Systole
-            + [0] * (ed_i - es_i + 1)  # Diastole
-            + [1] * (some_after_ed_i - ed_i + 1)  # Systole
+            + [0] * (ed_i - es_i)  # Diastole
+            + [1] * (some_after_ed_i - ed_i)  # Systole
         )
         return (frames, labels)
 
