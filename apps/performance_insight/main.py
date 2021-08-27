@@ -61,41 +61,60 @@ video_selector_file_options.sort(
 )
 
 
+## Miscellaneous handlers
+def handle_video_file_selected(selected_video, window):
+    print(f"Selected video: '{selected_video}'")
+    pass
+
+
 ## Event dispatchers
-
-
 @dispatch_on(VIDEO_SELECTOR)
 def _(values, window):
-    pass
+    (selected_video,) = values[VIDEO_SELECTOR]
+    handle_video_file_selected(selected_video, window)
 
 
 @dispatch_on(VIDEO_SELECTOR_FIRST_BUTTON)
 def _(values, window):
-    window[VIDEO_SELECTOR].update(set_to_index=0, scroll_to_index=0)
+    video_selector = window[VIDEO_SELECTOR]
+    video_selector.update(set_to_index=0, scroll_to_index=0)
+    (selected_video,) = video_selector.get()
+    handle_video_file_selected(selected_video, window)
 
 
 @dispatch_on(VIDEO_SELECTOR_PREVIOUS_BUTTON)
 def _(values, window):
     video_selector = window[VIDEO_SELECTOR]
-    (current_video,) = video_selector.get_indexes()
-    previous_video = max(current_video - 1, 0)
-    scroll_index = previous_video
-    video_selector.update(set_to_index=previous_video, scroll_to_index=scroll_index)
+    (current_video_index,) = video_selector.get_indexes()
+    previous_video_index = max(current_video_index - 1, 0)
+    scroll_index = previous_video_index
+    video_selector.update(
+        set_to_index=previous_video_index, scroll_to_index=scroll_index
+    )
+    (selected_video,) = video_selector.get()
+    handle_video_file_selected(selected_video, window)
 
 
 @dispatch_on(VIDEO_SELECTOR_NEXT_BUTTON)
 def _(values, window):
     video_selector = window[VIDEO_SELECTOR]
-    (current_video,) = video_selector.get_indexes()
-    next_video = min(current_video + 1, len(video_selector_file_options) - 1)
-    scroll_index = next_video
-    video_selector.update(set_to_index=next_video, scroll_to_index=scroll_index)
+    (current_video_index,) = video_selector.get_indexes()
+    next_video_index = min(
+        current_video_index + 1, len(video_selector_file_options) - 1
+    )
+    scroll_index = next_video_index
+    video_selector.update(set_to_index=next_video_index, scroll_to_index=scroll_index)
+    (selected_video,) = video_selector.get()
+    handle_video_file_selected(selected_video, window)
 
 
 @dispatch_on(VIDEO_SELECTOR_LAST_BUTTON)
 def _(values, window):
+    video_selector = window[VIDEO_SELECTOR]
     last_video = len(video_selector_file_options) - 1
-    window[VIDEO_SELECTOR].update(set_to_index=last_video, scroll_to_index=last_video)
+    video_selector.update(set_to_index=last_video, scroll_to_index=last_video)
+    (selected_video,) = video_selector.get()
+    handle_video_file_selected(selected_video, window)
 
 
 @dispatch_on(VIDEO_SELECTOR_SORT_BY)
