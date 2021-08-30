@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
+from apps.performance_insight._layout.video import Video
 
+VIDEO = "VIDEO"
 VIDEO_SELECTOR = "VIDEO_SELECTOR"
 VIDEO_SELECTOR_SORT_BY = (VIDEO_SELECTOR, "SORT_BY")
 VIDEO_SELECTOR_FIRST_BUTTON = (VIDEO_SELECTOR, "FIRST_BUTTON")
@@ -14,7 +16,7 @@ def get_layout(sort_options, video_selector_files_options):
         [sg.Text("There will be a timeline here")],
     ]
 
-    video_layout = [[sg.Text("There will be a video playing here")]]
+    video_layout = [[Video(key=VIDEO)]]
 
     video_selector = [
         [
