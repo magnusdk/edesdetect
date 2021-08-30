@@ -1,10 +1,12 @@
 import random
 
 import apps.performance_insight.layout as layout
+import edesdetectrl.dataloaders.echonet as echonet
 import pandas as pd
 import PySimpleGUI as sg
 from apps.performance_insight.events import dispatch_on, handle_event
 from apps.performance_insight.layout import (
+    VIDEO,
     VIDEO_SELECTOR,
     VIDEO_SELECTOR_FIRST_BUTTON,
     VIDEO_SELECTOR_LAST_BUTTON,
@@ -56,8 +58,7 @@ sort_options = [
     DropDownOption(SORT_OPTION_FILENAME, "Filename"),
 ]
 
-filelist_df = pd.read_csv(config["data"]["filelist_path"])
-filenames = filelist_df["FileName"].tolist()
+filenames = echonet.get_filenames(config["data"]["filelist_path"])
 video_selector_file_options = [
     VideoFileListItem(filename, random.random()) for filename in filenames
 ]
@@ -68,8 +69,7 @@ video_selector_file_options.sort(
 
 ## Miscellaneous handlers
 def handle_video_file_selected(selected_video, window):
-    print(f"Selected video: '{selected_video}'")
-    pass
+    window[VIDEO].set_video(seq, window, start_animation=True)
 
 
 ## Event dispatchers

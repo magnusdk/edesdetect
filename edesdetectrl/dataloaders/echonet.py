@@ -148,6 +148,19 @@ def get_item(filename, traces, videos_dir):
     return video, labels
 
 
+def ensure_file_extension(filename):
+    if os.path.splitext(filename)[1] == "":
+        filename = filename + ".avi"
+    return filename
+
+
+def get_filenames(filelist_csv_file, split=None):
+    filelist_df = pd.read_csv(filelist_csv_file)
+    if split:
+        filelist_df = filelist_df[filelist_df["Split"] == split]
+    return [ensure_file_extension(filename) for filename in filelist_df["FileName"]]
+
+
 def get_generator(
     thread_pool_executor,
     volumetracings_csv_file,
@@ -157,18 +170,13 @@ def get_generator(
     buffer_maxsize=10,
 ):
     volumetracings_df = pd.read_csv(volumetracings_csv_file, index_col="FileName")
-    filelist_df = pd.read_csv(filelist_csv_file)
-    filelist_df = filelist_df[filelist_df["Split"] == split]
-    filenames = filelist_df["FileName"].tolist()
+    filenames = get_filenames(filelist_csv_file, split)
 
     def task_gen():
         while True:
             filename = random.choice(filenames)
-            if os.path.splitext(filename)[1] == "":
-                filename = filename + ".avi"  # Assume avi if no suffix
-
-            # Some traces are missing from the dataset and we must skip those.
             try:
+                # This may traise a KeyError when the file can not be found in the volumetracings!
                 traces = volumetracings_df.loc[filename]
                 yield lambda: get_item(filename, traces, videos_dir)
             except KeyError:
