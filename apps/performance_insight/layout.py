@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 from apps.performance_insight._layout.video import Video
 
+EVALUATION_CANVAS = "EVALUATION_CANVAS"
 VIDEO = "VIDEO"
 VIDEO_SELECTOR = "VIDEO_SELECTOR"
 VIDEO_SELECTOR_SORT_BY = (VIDEO_SELECTOR, "SORT_BY")
@@ -12,8 +13,7 @@ VIDEO_SELECTOR_LAST_BUTTON = (VIDEO_SELECTOR, "LAST_BUTTON")
 
 def get_layout(sort_options, video_selector_files_options):
     graph_timeline_layout = [
-        [sg.Text("There will be a graph here")],
-        [sg.Text("There will be a timeline here")],
+        [sg.Canvas(key=EVALUATION_CANVAS)],
     ]
 
     video_layout = [[Video(key=VIDEO)]]

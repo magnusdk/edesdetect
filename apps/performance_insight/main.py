@@ -2,10 +2,11 @@ import random
 
 import apps.performance_insight.layout as layout
 import edesdetectrl.dataloaders.echonet as echonet
-import pandas as pd
 import PySimpleGUI as sg
+from apps.performance_insight.evaluate import Evaluator
 from apps.performance_insight.events import dispatch_on, handle_event
 from apps.performance_insight.layout import (
+    EVALUATION_CANVAS,
     VIDEO,
     VIDEO_SELECTOR,
     VIDEO_SELECTOR_FIRST_BUTTON,
@@ -66,10 +67,35 @@ video_selector_file_options.sort(
     key=video_selector_file_options_sort_fn(sort_options[0].value)
 )
 
+# TODO: Clean up plotting code. Find better way?
+evaluator = Evaluator()
+
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+q_vals_fig, q_vals_ax = plt.subplots()
+q_vals_canvas_agg = None
+
+
+def draw_q_vals(canvas, figure):
+    global q_vals_canvas_agg
+    if q_vals_canvas_agg is None:
+        q_vals_canvas_agg = FigureCanvasTkAgg(figure, canvas)
+    q_vals_canvas_agg.draw()
+    q_vals_canvas_agg.get_tk_widget().pack(side="top", fill="both", expand=1)
+
 
 ## Miscellaneous handlers
 def handle_video_file_selected(selected_video, window):
-    window[VIDEO].set_video(seq, window, start_animation=True)
+    advantage, rewards = evaluator.evaluate(selected_video.filename)
+    q_vals_ax.cla()
+    q_vals_ax.plot(advantage)
+    q_vals_ax.plot(rewards)
+    q_vals_ax.legend(["Diastole", "Systole", "Reward"])
+    draw_q_vals(window[EVALUATION_CANVAS].TKCanvas, q_vals_fig)
+
+    # TODO: Separate seq/ground_truths from evaluator.
+    window[VIDEO].set_video(evaluator.seq, window, start_animation=True)
 
 
 ## Event dispatchers
@@ -117,7 +143,9 @@ def _(values, window):
 def _(values, window):
     video_selector = window[VIDEO_SELECTOR]
     last_video_index = len(video_selector_file_options) - 1
-    video_selector.update(set_to_index=last_video_index, scroll_to_index=last_video_index)
+    video_selector.update(
+        set_to_index=last_video_index, scroll_to_index=last_video_index
+    )
     (selected_video,) = video_selector.get()
     handle_video_file_selected(selected_video, window)
 
