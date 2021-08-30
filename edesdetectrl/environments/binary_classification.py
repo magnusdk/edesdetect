@@ -33,31 +33,22 @@ class EDESClassificationBase_v0(gym.Env):
 
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self, seq=None, ground_truth=None):
+    def __init__(self):
         super(EDESClassificationBase_v0, self).__init__()
         self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.float32
         )
-        self._set_seq_and_ground_truth(seq, ground_truth)
-        self.reset()
+        self._seq, self._ground_truth = None, None
 
-    def _set_seq_and_ground_truth(self, seq, ground_truth):
-        assert (
-            seq is not None and seq.shape[0] >= N_CHANNELS
-        ), f"Video must have more than {N_CHANNELS} frames."
-        assert (
-            ground_truth is not None and len(ground_truth) == seq.shape[0]
-        ), "Ground truth must have the same number of labels as there are frames in the seq."
-
-        self.seq = seq
-        self.ground_truth = ground_truth
-        self.num_frames = self.seq.shape[0]
+    def is_ready(self):
+        return self._seq is not None and self._ground_truth is not None
 
     def reset(self):
+        assert self.is_ready(), "seq and ground_truth must be set."
         self.current_frame = N_PREV_AND_NEXT_FRAMES
         self.predictions = []
-        observation = get_observation(self.seq, self.current_frame)
+        observation = get_observation(self._seq, self.current_frame)
         return observation
 
     def step(self, action):
@@ -65,12 +56,12 @@ class EDESClassificationBase_v0(gym.Env):
             raise ValueError(f"Invalid action: {action}.")
 
         self.predictions.append(action)
-        observation = get_observation(self.seq, self.current_frame + 1)
+        observation = get_observation(self._seq, self.current_frame + 1)
         reward = get_reward(
-            self.current_frame, action, self.predictions, self.ground_truth
+            self.current_frame, action, self.predictions, self._ground_truth
         )
-        done = self.current_frame == self.num_frames - N_PREV_AND_NEXT_FRAMES - 1
-        info = {"ground_truth_phase": self.ground_truth[self.current_frame]}
+        done = self.current_frame == self._seq.shape[0] - N_PREV_AND_NEXT_FRAMES - 1
+        info = {"ground_truth_phase": self._ground_truth[self.current_frame]}
 
         # Go to the next frame
         self.current_frame += 1
@@ -82,6 +73,22 @@ class EDESClassificationBase_v0(gym.Env):
     def close(self):
         pass
 
+    @property
+    def seq_and_labels(self):
+        return (self._seq, self._ground_truth)
+
+    @seq_and_labels.setter
+    def seq_and_labels(self, seq_and_labels):
+        seq, ground_truth = seq_and_labels
+        assert (
+            ground_truth is not None and len(ground_truth) == seq.shape[0]
+        ), "Ground truth must have the same number of labels as there are frames in the seq."
+        assert (
+            seq is not None and seq.shape[0] >= N_CHANNELS
+        ), f"Video must have more than {N_CHANNELS} frames."
+        self._seq = seq
+        self._ground_truth = ground_truth
+
 
 class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
     def __init__(self, seq_iterator):
@@ -91,15 +98,13 @@ class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
 
         # Let's filter out all seqs that have less frames than the number of channels.
         self.seq_iterator = filter(has_enough_frames, seq_iterator)
-        seq, ground_truth = next(self.seq_iterator)
-        super(EDESClassificationRandomVideos_v0, self).__init__(seq, ground_truth)
+        super(EDESClassificationRandomVideos_v0, self).__init__()
 
     def reset(self):
         # Get the next image sequence and ground_truth.
         # Every time we call reset() we use a different image sequence, determined by the next item in self.seq_iterator.
-        seq, ground_truth = next(self.seq_iterator)
         parent = super(EDESClassificationRandomVideos_v0, self)
-        parent._set_seq_and_ground_truth(seq, ground_truth)
+        parent.seq_and_labels = next(self.seq_iterator)
         return parent.reset()
 
 
