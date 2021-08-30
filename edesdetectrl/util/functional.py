@@ -6,7 +6,7 @@ def chainf(initial, *args):
 
     How this works is best understood by looking at examples. For examples see tests.
     """
-    return reduce(lambda v, f: f(v) if callable(f) else f[0](*f[1:], v), args, initial)
+    return reduce(lambda v, f: f(v) if callable(f) else f[0](v, *f[1:]), args, initial)
 
 
 def chainl(initial, *args):

@@ -6,11 +6,11 @@ def test_chainf_functions():
     # `chainf` is a more readable way of chaining multiple function calls.
     v = 1
     f1 = lambda x: x + 3
-    f2 = lambda x: x ** 2
+    f2 = lambda x: x ** 3
     f3 = lambda x: x / 2
     res = func.chainf(v, f1, f2, f3)
     # This is the same as writing `f3(f2(f1(v)))`.
-    assert res == 8.0
+    assert res == 32.0
 
 
 def test_chainf_sexprs():
@@ -19,11 +19,11 @@ def test_chainf_sexprs():
     # For inserting the values at the end instead (for example when chaining generators), see `chainl`.
     v = 1
     f1 = (op.add, 3)  # S-expressions can be tuples
-    f2 = [op.pow, 2]  # ...or lists.
+    f2 = [op.pow, 3]  # ...or lists.
     f3 = lambda x: x / 2  # But we can also mix in regular functions.
     res = func.chainf(v, f1, f2, f3)
     # This is the same as writing `f3(op.pow(op.add(v, 3), 2))`.
-    assert res == 8.0
+    assert res == 32.0
 
 
 def test_chainl_sexprs():
