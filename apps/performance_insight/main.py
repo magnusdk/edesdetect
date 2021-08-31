@@ -154,6 +154,10 @@ def _(values, window):
 
 
 def start_event_loop(window):
+    # Initialize stuff...
+    window.read(timeout=10)
+    handle_video_file_selected(video_selector_file_options[0], window)
+
     while True:
         # To make keyboard events work with this setup, check out https://www.gitmemory.com/issue/PySimpleGUI/PySimpleGUI/64/757099987
         event, values = window.read()
