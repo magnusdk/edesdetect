@@ -16,7 +16,7 @@ def get_layout(sort_options, video_selector_files_options):
         [sg.Canvas(key=EVALUATION_CANVAS)],
     ]
 
-    video_layout = [[Video(key=VIDEO)]]
+    video_layout = [[Video(key=VIDEO, size=(500, 500))]]
 
     video_selector = [
         [
