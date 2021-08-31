@@ -103,9 +103,8 @@ class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
     def reset(self):
         # Get the next image sequence and ground_truth.
         # Every time we call reset() we use a different image sequence, determined by the next item in self.seq_iterator.
-        parent = super(EDESClassificationRandomVideos_v0, self)
-        parent.seq_and_labels = next(self.seq_iterator)
-        return parent.reset()
+        self.seq_and_labels = next(self.seq_iterator)
+        return super(EDESClassificationRandomVideos_v0, self).reset()
 
 
 gym.register(
