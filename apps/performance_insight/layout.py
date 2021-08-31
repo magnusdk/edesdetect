@@ -42,7 +42,7 @@ def get_layout(sort_options, video_selector_files_options):
                 font=("Courier", sg.DEFAULT_FONT[1]),
                 default_values=[video_selector_files_options[0]],
                 expand_x=True,
-                size=(None, 5),
+                size=(None, 20),
                 enable_events=True,
             )
         ],
