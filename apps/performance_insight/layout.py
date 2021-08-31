@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+from apps.performance_insight._layout.plots import QPlot
 from apps.performance_insight._layout.video import Video
 
 EVALUATION_CANVAS = "EVALUATION_CANVAS"
@@ -13,7 +14,7 @@ VIDEO_SELECTOR_LAST_BUTTON = (VIDEO_SELECTOR, "LAST_BUTTON")
 
 def get_layout(sort_options, video_selector_files_options):
     graph_timeline_layout = [
-        [sg.Canvas(key=EVALUATION_CANVAS)],
+        [QPlot(key=EVALUATION_CANVAS)],
     ]
 
     video_layout = [[Video(key=VIDEO, size=(500, 500))]]
