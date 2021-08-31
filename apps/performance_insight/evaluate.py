@@ -1,10 +1,10 @@
 import coax
+import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.model as model
 import jax.numpy as jnp
 import pandas as pd
 from edesdetectrl.config import config
 from edesdetectrl.environments.binary_classification import EDESClassificationBase_v0
-import edesdetectrl.dataloaders.echonet as echonet
 
 
 class Evaluator:
