@@ -1,9 +1,9 @@
-import random
-
 import apps.performance_insight.layout as layout
+import apps.performance_insight.util as util
+import coax
 import edesdetectrl.dataloaders.echonet as echonet
+import edesdetectrl.model as model
 import PySimpleGUI as sg
-from apps.performance_insight.evaluate import Evaluator
 from apps.performance_insight.events import dispatch_on, handle_event
 from apps.performance_insight.layout import (
     EVALUATION_CANVAS,
@@ -16,6 +16,7 @@ from apps.performance_insight.layout import (
     VIDEO_SELECTOR_SORT_BY,
 )
 from edesdetectrl.config import config
+from edesdetectrl.environments.binary_classification import EDESClassificationBase_v0
 
 SORT_OPTION_FILENAME = "filename"
 SORT_OPTION_BEST = "best"
@@ -70,13 +71,20 @@ video_selector_file_options.sort(
     key=video_selector_file_options_sort_fn(sort_options[0].value)
 )
 
-evaluator = Evaluator()
+get_video = util.video_getter()
+env = EDESClassificationBase_v0()
+q = coax.Q(model.get_func_approx(env), env)
+q.params = coax.utils.load(config["data"]["trained_params_path"])
 
 ## Miscellaneous handlers
 def handle_video_file_selected(selected_video, window):
-    advantage, rewards = evaluator.evaluate(selected_video.filename)
-    window[EVALUATION_CANVAS].redraw_plot(advantage, rewards)
-    window[VIDEO].set_video(evaluator.seq, window, start_animation=True)
+    seq, labels = get_video(selected_video.filename)
+    env.seq_and_labels = seq, labels
+    trajectory = env.generate_trajectory_using_q(q)
+    advantages = list(map(util.calc_advantage, trajectory))
+    rewards = list(map(lambda item: item.r, trajectory))
+    window[EVALUATION_CANVAS].redraw_plot(advantages, rewards)
+    window[VIDEO].set_video(seq, window, start_animation=True)
 
 
 ## Event dispatchers
