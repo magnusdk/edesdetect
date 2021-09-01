@@ -1,4 +1,5 @@
 import apps.performance_insight.layout as layout
+import apps.performance_insight.scores_preprocessor as scores_preprocessor
 import apps.performance_insight.util as util
 import coax
 import edesdetectrl.dataloaders.echonet as echonet
@@ -63,9 +64,11 @@ sort_options = [
     DropDownOption(SORT_OPTION_FILENAME, "Filename"),
 ]
 
-filenames = echonet.get_filenames(config["data"]["filelist_path"])
+filenames = echonet.get_filenames(config["data"]["filelist_path"], split="TEST")
+pre_processed_scores = scores_preprocessor.get_pre_processed_scores()
 video_selector_file_options = [
-    VideoFileListItem(filename, random.random()) for filename in filenames
+    VideoFileListItem(filename, pre_processed_scores.get(filename, None))
+    for filename in filenames
 ]
 video_selector_file_options.sort(
     key=video_selector_file_options_sort_fn(sort_options[0].value)

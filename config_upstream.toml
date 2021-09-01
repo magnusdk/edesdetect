@@ -1,2 +1,5 @@
 [data]
 trained_params_path = "trained_params2.pkl.lz4"
+
+[apps.performance_insight]
+pre_processed_scores_path = "scores.txt"
