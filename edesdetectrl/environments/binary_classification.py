@@ -1,5 +1,6 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import edesdetectrl.environments.mixins as mixins
 import gym
 import numpy as np
 from gym import spaces
@@ -25,7 +26,7 @@ def get_observation(seq, frame):
     return seq[frame - N_PREV_AND_NEXT_FRAMES : frame + N_PREV_AND_NEXT_FRAMES + 1]
 
 
-class EDESClassificationBase_v0(gym.Env):
+class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
     """Base class for ED/ES Binary Classification environment.
 
     Constructor takes a single video and ground truth list.
