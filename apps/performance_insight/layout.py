@@ -14,7 +14,7 @@ VIDEO_SELECTOR_LAST_BUTTON = (VIDEO_SELECTOR, "LAST_BUTTON")
 
 def get_layout(sort_options, video_selector_files_options):
     graph_timeline_layout = [
-        [QPlot(key=EVALUATION_CANVAS)],
+        [QPlot(key=EVALUATION_CANVAS, size=(500, 500))],
     ]
 
     video_layout = [[Video(key=VIDEO, size=(500, 500))]]
