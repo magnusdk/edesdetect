@@ -27,9 +27,11 @@ def video_selector_file_options_sort_fn(sort_order):
         return lambda video: video.filename
     elif sort_order == SORT_OPTION_BEST:
         # Sort by negative perf, because lower perf should be sorted last
-        return lambda video: -video.perf
+        # Unevaluated videos are sorted last, hence infinity
+        return lambda video: -video.perf if video.perf is not None else float("inf")
     elif sort_order == SORT_OPTION_WORST:
-        return lambda video: video.perf
+        # Unevaluated videos are sorted last, hence infinity
+        return lambda video: video.perf if video.perf is not None else float("inf")
 
 
 class DropDownOption:
@@ -50,7 +52,8 @@ class VideoFileListItem:
         self.perf = perf
 
     def __str__(self) -> str:
-        return f"{self.filename} ({self.perf:.2f})"
+        perf = f"{self.perf:.2f}" if self.perf is not None else "unevaluated"
+        return f"{self.filename} ({perf})"
 
 
 sort_options = [
