@@ -44,7 +44,7 @@ class Video(sg.Image):
     """
 
     def __init__(self, *args, **kwargs):
-        self._timer = AnimationTimer(0.1)
+        self._timer = AnimationTimer(0.05)
         super().__init__(*args, **kwargs)
 
     def _get_current_imagetk(self):
