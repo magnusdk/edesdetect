@@ -60,7 +60,7 @@ class Video(sg.Image):
 
     def set_video(self, video, window, start_animation=False):
         self.video = video
-        self.num_frames = video.shape[0]
+        self.num_frames = len(video)
         self.imagetk_cache = np.repeat(None, self.num_frames)
         self.frame = 0
 

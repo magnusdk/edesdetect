@@ -18,6 +18,7 @@ from apps.performance_insight.layout import (
 )
 from edesdetectrl.config import config
 from edesdetectrl.environments.binary_classification import EDESClassificationBase_v0
+from edesdetectrl.util.functional import chainl
 
 SORT_OPTION_FILENAME = "filename"
 SORT_OPTION_BEST = "best"
@@ -81,11 +82,18 @@ q.params = coax.utils.load(config["data"]["trained_params_path"])
 
 ## Miscellaneous handlers
 def handle_video_file_selected(selected_video, window):
-    seq, labels = get_video(selected_video.filename)
-    env.seq_and_labels = seq, labels
+    env.seq_and_labels = get_video(selected_video.filename)
     trajectory = env.generate_trajectory_using_q(q)
     advantages = list(map(util.calc_advantage, trajectory))
     rewards = list(map(lambda item: item.r, trajectory))
+    seq = chainl(
+        trajectory,
+        # State is current frame plus N previous and N next frames
+        (map, lambda item: item.s),
+        # Get the middle channel (current image in video) from state
+        (map, lambda state: state[int(len(state) / 2)]),
+        list,
+    )
     window[EVALUATION_CANVAS].redraw_plot(advantages, rewards)
     window[VIDEO].set_video(seq, window, start_animation=True)
 
