@@ -77,6 +77,13 @@ class Video(sg.Image):
         super().update(data=imagetk)
         window.refresh()
 
+    def set_frame(self, new_frame, window):
+        self.stop_animation()
+        self.frame = new_frame
+        imagetk = self._get_current_imagetk()
+        super().update(data=imagetk)
+        window.refresh()
+
     def start_animation(self, window):
         self._timer.callback = lambda: self.next_frame(window)
         self._timer.start()
