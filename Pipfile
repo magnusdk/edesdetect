@@ -17,6 +17,7 @@ gym = "*"
 torch = "*"
 toml = "*"
 chex = "*"
+scikit-learn = "*"
 
 [dev-packages]
 ipykernel = "*"
