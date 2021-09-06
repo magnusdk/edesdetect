@@ -5,7 +5,8 @@ import sklearn.metrics as metrics
 
 TrajectoryItem = namedtuple("TrajectoryItem", ["s", "a", "r", "q_values", "env_info"])
 
-
+# TODO: This Trajectory class is very coupled with BinaryClassification + Q-learning.
+# We should probably think a bit more about how to decouple parts of it.
 class Trajectory(list):
     """A `Trajectory` is just a list of `TrajectoryItem`s.
 
