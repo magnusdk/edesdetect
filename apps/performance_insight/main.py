@@ -98,6 +98,10 @@ def handle_video_file_selected(selected_video, window):
     window[VIDEO].set_video(seq, window, start_animation=True)
 
 
+def handle_q_plot_mouseover_callback(selected_frame, window):
+    window[VIDEO].set_frame(selected_frame, window)
+
+
 ## Event dispatchers
 @dispatch_on(VIDEO_SELECTOR)
 def _(values, window):
@@ -191,7 +195,11 @@ def start_event_loop(window):
 
 window = sg.Window(
     "Performance insight",
-    layout.get_layout(sort_options, video_selector_file_options),
+    layout.get_layout(
+        sort_options, 
+        video_selector_file_options, 
+        lambda selected_frame: handle_q_plot_mouseover_callback(selected_frame, window)
+    ),
 )
 start_event_loop(window)
 window.close()
