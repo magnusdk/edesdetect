@@ -32,7 +32,7 @@ class Trajectory(list):
 
     def _labels_and_predictions(self):
         ground_truths = jnp.array(
-            [env_info.ground_truth_phase for env_info in self.env_info()]
+            [env_info["ground_truth_phase"] for env_info in self.env_info()]
         )
         actions = jnp.array(self.actions())
         return ground_truths, actions

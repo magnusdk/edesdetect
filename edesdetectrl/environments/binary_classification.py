@@ -1,4 +1,3 @@
-from collections import namedtuple
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import edesdetectrl.environments.mixins as mixins
@@ -11,8 +10,6 @@ HEIGHT = 112
 WIDTH = 112
 N_PREV_AND_NEXT_FRAMES = 3
 N_CHANNELS = 2 * N_PREV_AND_NEXT_FRAMES + 1
-
-EnvironmentInfo = namedtuple("EnvironmentInfo", ["ground_truth_phase"])
 
 
 def get_reward(current_frame, current_prediction, all_predictions, ground_truths):
@@ -65,7 +62,7 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
             self.current_frame, action, self.predictions, self._ground_truth
         )
         done = self.current_frame == self._seq.shape[0] - N_PREV_AND_NEXT_FRAMES - 1
-        info = EnvironmentInfo(self._ground_truth[self.current_frame])
+        info = {"ground_truth_phase": self._ground_truth[self.current_frame]}
 
         # Go to the next frame
         self.current_frame += 1
