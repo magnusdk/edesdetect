@@ -26,10 +26,13 @@ def pre_process_files(filenames):
             env = EDESClassificationBase_v0()
             env.seq_and_labels = get_video(filename)
             trajectory = env.generate_trajectory_using_q(q)
-
-            rewards = list(map(lambda item: item.r, trajectory))
-            average_reward = sum(rewards) / len(rewards)
-            scores[filename] = average_reward
+            scores[filename] = {
+                "accuracy": trajectory.accuracy(),
+                "balanced_accuracy": trajectory.balanced_accuracy(),
+                "recall": trajectory.recall(),
+                "precision": trajectory.precision(),
+                "f1": trajectory.f1(),
+            }
         except Exception as e:
             print(i, filename, e)
         finally:

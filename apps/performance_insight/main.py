@@ -18,23 +18,40 @@ from apps.performance_insight.layout import (
 )
 from edesdetectrl.config import config
 from edesdetectrl.environments.binary_classification import EDESClassificationBase_v0
-from edesdetectrl.util.functional import chainl
 
-SORT_OPTION_FILENAME = "filename"
-SORT_OPTION_BEST = "best"
-SORT_OPTION_WORST = "worst"
+SORT_OPTION_BALANCED_ACCURACY = "SORT_OPTION_BALANCED_ACCURACY"
+SORT_OPTION_ACCURACY = "SORT_OPTION_ACCURACY"
+SORT_OPTION_RECALL = "SORT_OPTION_RECALL"
+SORT_OPTION_PRECISION = "SORT_OPTION_PRECISION"
+SORT_OPTION_F1 = "SORT_OPTION_F1"
+SORT_OPTION_FILENAME = "SORT_OPTION_FILENAME"
 
 
 def video_selector_file_options_sort_fn(sort_order):
+    # Sorting by filename is simple.
     if sort_order == SORT_OPTION_FILENAME:
         return lambda video: video.filename
-    elif sort_order == SORT_OPTION_BEST:
-        # Sort by negative perf, because lower perf should be sorted last
-        # Unevaluated videos are sorted last, hence infinity
-        return lambda video: -video.perf if video.perf is not None else float("inf")
-    elif sort_order == SORT_OPTION_WORST:
-        # Unevaluated videos are sorted last, hence infinity
-        return lambda video: video.perf if video.perf is not None else float("inf")
+    # Sorting by one of the metric scores requires checking that the video has a score.
+    else:
+
+        def sort_fn(video):
+            # Unevaluated videos are sorted last, hence infinity.
+            if video.scores is None:
+                return float("inf")
+            else:
+                # Else, sort by the selected sort option, descending, hence the minus sign.
+                if sort_order == SORT_OPTION_BALANCED_ACCURACY:
+                    return -video.scores["balanced_accuracy"]
+                elif sort_order == SORT_OPTION_ACCURACY:
+                    return -video.scores["accuracy"]
+                elif sort_order == SORT_OPTION_RECALL:
+                    return -video.scores["recall"]
+                elif sort_order == SORT_OPTION_PRECISION:
+                    return -video.scores["precision"]
+                elif sort_order == SORT_OPTION_F1:
+                    return -video.scores["f1"]
+
+        return sort_fn
 
 
 class DropDownOption:
@@ -50,18 +67,31 @@ class DropDownOption:
 
 
 class VideoFileListItem:
-    def __init__(self, filename, perf) -> None:
+    def __init__(self, filename, scores) -> None:
         self.filename = filename
-        self.perf = perf
+        self.scores = scores
 
     def __str__(self) -> str:
-        perf = f"{self.perf:.2f}" if self.perf is not None else "unevaluated"
-        return f"{self.filename} ({perf})"
+        if self.scores is not None:
+            return (
+                # These strings are concatenated because of Python's implied line continuation inside parentheses
+                f"{self.filename}: "
+                f'{self.scores["balanced_accuracy"]:.2f}, '
+                f'{self.scores["accuracy"]:.2f}, '
+                f'{self.scores["recall"]:.2f}, '
+                f'{self.scores["precision"]:.2f}, '
+                f'{self.scores["f1"]:.2f}'
+            )
+        else:
+            return f"{self.filename}: unevaluated"
 
 
 sort_options = [
-    DropDownOption(SORT_OPTION_BEST, "Best"),
-    DropDownOption(SORT_OPTION_WORST, "Worst"),
+    DropDownOption(SORT_OPTION_BALANCED_ACCURACY, "Balanced Accuracy"),
+    DropDownOption(SORT_OPTION_ACCURACY, "Accuracy"),
+    DropDownOption(SORT_OPTION_RECALL, "Recall"),
+    DropDownOption(SORT_OPTION_PRECISION, "Precision"),
+    DropDownOption(SORT_OPTION_F1, "F1"),
     DropDownOption(SORT_OPTION_FILENAME, "Filename"),
 ]
 
@@ -86,7 +116,7 @@ def handle_video_file_selected(selected_video, window):
     trajectory = env.generate_trajectory_using_q(q)
     advantages = list(map(util.calc_advantage, trajectory))
     rewards = trajectory.rewards()
-        # Get the middle channel (current image in video) from state
+    # Get the middle channel (current image in video) from state
     seq = [state[int(len(state) / 2)] for state in trajectory.states()]
     window[EVALUATION_CANVAS].redraw_plot(advantages, rewards)
     window[VIDEO].set_video(seq, window, start_animation=True)
@@ -190,8 +220,8 @@ def start_event_loop(window):
 window = sg.Window(
     "Performance insight",
     layout.get_layout(
-        sort_options, 
-        video_selector_file_options, 
+        sort_options,
+        video_selector_file_options,
         lambda selected_frame: handle_q_plot_mouseover_callback(selected_frame, window),
     ),
 )
