@@ -32,7 +32,7 @@ def _get_mock_observation(env):
     if env._ground_truth[env.current_frame] == 0:
         return np.zeros((HEIGHT, WIDTH, N_CHANNELS))
     else:
-        return np.ones((HEIGHT, WIDTH, N_CHANNELS))
+        return np.ones((HEIGHT, WIDTH, N_CHANNELS))*255
 
 
 class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
