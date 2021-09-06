@@ -85,15 +85,9 @@ def handle_video_file_selected(selected_video, window):
     env.seq_and_labels = get_video(selected_video.filename)
     trajectory = env.generate_trajectory_using_q(q)
     advantages = list(map(util.calc_advantage, trajectory))
-    rewards = list(map(lambda item: item.r, trajectory))
-    seq = chainl(
-        trajectory,
-        # State is current frame plus N previous and N next frames
-        (map, lambda item: item.s),
+    rewards = trajectory.rewards()
         # Get the middle channel (current image in video) from state
-        (map, lambda state: state[int(len(state) / 2)]),
-        list,
-    )
+    seq = [state[int(len(state) / 2)] for state in trajectory.states()]
     window[EVALUATION_CANVAS].redraw_plot(advantages, rewards)
     window[VIDEO].set_video(seq, window, start_animation=True)
 
@@ -198,7 +192,7 @@ window = sg.Window(
     layout.get_layout(
         sort_options, 
         video_selector_file_options, 
-        lambda selected_frame: handle_q_plot_mouseover_callback(selected_frame, window)
+        lambda selected_frame: handle_q_plot_mouseover_callback(selected_frame, window),
     ),
 )
 start_event_loop(window)
