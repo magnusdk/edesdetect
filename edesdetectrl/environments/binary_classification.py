@@ -12,18 +12,27 @@ N_PREV_AND_NEXT_FRAMES = 3
 N_CHANNELS = 2 * N_PREV_AND_NEXT_FRAMES + 1
 
 
-def get_reward(current_frame, current_prediction, all_predictions, ground_truths):
+def _get_reward(env, current_prediction):
     # Is the current prediction correct?
-    r1 = 1 if current_prediction == ground_truths[current_frame] else 0
+    r1 = 1 if current_prediction == env._ground_truth[env.current_frame] else 0
 
     return r1
 
 
-def get_observation(seq, frame):
+def _get_observation(env):
+    frame = env.current_frame
+    seq = env._seq
     assert frame >= N_PREV_AND_NEXT_FRAMES
     assert frame <= seq.shape[0] - N_PREV_AND_NEXT_FRAMES
 
     return seq[frame - N_PREV_AND_NEXT_FRAMES : frame + N_PREV_AND_NEXT_FRAMES + 1]
+
+
+def _get_mock_observation(env):
+    if env._ground_truth[env.current_frame] == 0:
+        return np.zeros((HEIGHT, WIDTH, N_CHANNELS))
+    else:
+        return np.ones((HEIGHT, WIDTH, N_CHANNELS))
 
 
 class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
@@ -34,13 +43,15 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self):
+    def __init__(self, get_reward=_get_reward, get_observation=_get_observation):
         super(EDESClassificationBase_v0, self).__init__()
         self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
         self.observation_space = spaces.Box(
             low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.float32
         )
         self._seq, self._ground_truth = None, None
+        self.get_reward = get_reward
+        self.get_observation = get_observation
 
     def is_ready(self):
         return self._seq is not None and self._ground_truth is not None
@@ -49,7 +60,7 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
         assert self.is_ready(), "seq and ground_truth must be set."
         self.current_frame = N_PREV_AND_NEXT_FRAMES
         self.predictions = []
-        observation = get_observation(self._seq, self.current_frame)
+        observation = self.get_observation(self)
         return observation
 
     def step(self, action):
@@ -57,15 +68,14 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
             raise ValueError(f"Invalid action: {action}.")
 
         self.predictions.append(action)
-        observation = get_observation(self._seq, self.current_frame + 1)
-        reward = get_reward(
-            self.current_frame, action, self.predictions, self._ground_truth
-        )
+        reward = self.get_reward(self, action)
         done = self.current_frame == self._seq.shape[0] - N_PREV_AND_NEXT_FRAMES - 1
         info = {"ground_truth_phase": self._ground_truth[self.current_frame]}
 
         # Go to the next frame
         self.current_frame += 1
+        observation = self.get_observation(self)
+
         return observation, reward, done, info
 
     def render(self, mode="human"):
@@ -92,14 +102,21 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
 
 class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
-    def __init__(self, seq_iterator):
+    def __init__(
+        self,
+        seq_iterator,
+        get_reward=_get_reward,
+        get_observation=_get_observation,
+    ):
         def has_enough_frames(seq_and_labels):
             seq, labels = seq_and_labels
             return seq.shape[0] >= N_CHANNELS
 
         # Let's filter out all seqs that have less frames than the number of channels.
         self.seq_iterator = filter(has_enough_frames, seq_iterator)
-        super(EDESClassificationRandomVideos_v0, self).__init__()
+        super(EDESClassificationRandomVideos_v0, self).__init__(
+            get_reward, get_observation
+        )
 
     def reset(self):
         # Get the next image sequence and ground_truth.
