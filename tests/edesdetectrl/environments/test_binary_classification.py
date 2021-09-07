@@ -40,3 +40,8 @@ def test_get_dist_reward():
 
     ground_truth = [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1]
     assert [1, 1, 0, -1, -2, -1, 0, 1, 1, 1, 1, 0, -1] == gen_rewards(0, ground_truth)
+
+    ground_truth = []
+    assert [] == gen_rewards(
+        0, ground_truth
+    ), "Edge case: no ground truths doesn't crash :)"
