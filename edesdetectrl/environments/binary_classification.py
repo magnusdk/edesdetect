@@ -19,6 +19,40 @@ def _get_reward(env, current_prediction):
     return r1
 
 
+def _get_dist_reward_impl(prediction, frame, ground_truth):
+    # Find the frame difference between the current frame and the first ground truth that 
+    # matches the prediction to the left of the frame.
+    closest_left = 0
+    while ground_truth[frame - closest_left] != prediction:
+        closest_left += 1
+        if frame - closest_left < 0:
+            closest_left = None
+            break
+
+    # Find the frame difference between the current frame and the first ground truth that 
+    # matches the prediction to the right of the frame.
+    closest_right = 0
+    while ground_truth[frame + closest_right] != prediction:
+        closest_right += 1
+        if frame + closest_right >= len(ground_truth):
+            closest_right = None
+            break
+
+    # Return the lowest frame difference.
+    if closest_left is not None and closest_right is not None:
+        return 1 - min(closest_left, closest_right)
+    elif closest_left is not None:
+        return 1 - closest_left
+    elif closest_right is not None:
+        return 1 - closest_right
+    else:  # There are no ground truth for the prediction in this sequence — give big penalty.
+        return -len(ground_truth)
+
+
+def _get_dist_reward(env, prediction):
+    return _get_dist_reward_impl(prediction, env.current_frame, env._ground_truth)
+
+
 def _get_observation(env):
     frame = env.current_frame
     seq = env._seq
@@ -32,7 +66,7 @@ def _get_mock_observation(env):
     if env._ground_truth[env.current_frame] == 0:
         return np.zeros((HEIGHT, WIDTH, N_CHANNELS))
     else:
-        return np.ones((HEIGHT, WIDTH, N_CHANNELS))*255
+        return np.ones((HEIGHT, WIDTH, N_CHANNELS)) * 255
 
 
 class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
