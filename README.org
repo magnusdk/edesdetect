@@ -16,7 +16,7 @@ volumetracings_path = "/some/dirs/data/EchoNet-Dynamic/VolumeTracings.csv"
 To run the code on UiO's Ml-nodes you need [[https://www.uio.no/tjenester/it/forskning/kompetansehuber/uio-ai-hub-node-project/it-resources/ml-nodes/index.html#toc3][access to them]].
 
 ** Run Jupyter-Lab
-Starting a Jupyter Lab server and creating an SSH tunnel that let's you connect to it locally is done with this command:
+Run this command to start a Jupyter Lab server and an SSH tunnel that let's you connect to it locally:
 #+BEGIN_SRC bash
 ssh -L 8888:localhost:8888 USERNAME@ML_NODE -t "cd path/to/edesdetect; ./scripts/start_jupyter_lab_server.sh"
 #+END_SRC
