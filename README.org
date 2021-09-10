@@ -15,6 +15,9 @@ volumetracings_path = "/some/dirs/data/EchoNet-Dynamic/VolumeTracings.csv"
 * Run on UiO's Ml-nodes
 To run the code on UiO's Ml-nodes you need [[https://www.uio.no/tjenester/it/forskning/kompetansehuber/uio-ai-hub-node-project/it-resources/ml-nodes/index.html#toc3][access to them]].
 
+** Open project remotely in VSCode
+Simply [[https://code.visualstudio.com/docs/remote/ssh-tutorial][install the =Remote - SSH= VSCode extension]].
+
 ** Run Jupyter-Lab
 Run this command to start a Jupyter Lab server and an SSH tunnel that let's you connect to it locally:
 #+BEGIN_SRC bash
