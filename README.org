@@ -16,7 +16,15 @@ volumetracings_path = "/some/dirs/data/EchoNet-Dynamic/VolumeTracings.csv"
 To run the code on UiO's Ml-nodes you need [[https://www.uio.no/tjenester/it/forskning/kompetansehuber/uio-ai-hub-node-project/it-resources/ml-nodes/index.html#toc3][access to them]].
 
 ** Open project remotely in VSCode
-Simply [[https://code.visualstudio.com/docs/remote/ssh-tutorial][install the =Remote - SSH= VSCode extension]].
+Because UiO's Ml-nodes uses the =lmod= modules system and the required python version (3.8) isn't loaded by default we have to add a hack to make it work.
+1. Create an SSH-key on the local machine.
+2. Add the public SSH-key of the local machine to the remote machine's =.ssh/authorized_keys=. This step also removes the need to type your password on every connect! :)
+3. Prepend the added =authorized_keys= row such that it looks like this:
+  #+BEGIN_SRC
+  command=". /path/to/repo/edesdetect/scripts/ssh_load_python3.8_on_start.sh" ssh-ed25519 ...rest of SSH public key...
+  #+END_SRC
+4. Verify that you can still log in to the remote server using SSH. Once logged in you should see Python3.8 being loaded (as well some other modules) if you type =module list=.
+5. [[https://code.visualstudio.com/docs/remote/ssh-tutorial][Install the =Remote - SSH= VSCode extension]] and follow the steps in the tutorial.
 
 ** Run Jupyter-Lab
 Run this command to start a Jupyter Lab server and an SSH tunnel that let's you connect to it locally:
