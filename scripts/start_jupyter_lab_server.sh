@@ -5,9 +5,8 @@
 # $ pipenv install --dev
 
 # Load needed modules
-module load Python/3.8.6-GCCcore-10.2.0
-module load JupyterLab/2.2.8-GCCcore-10.2.0
-module load CUDAcore/11.3.1
+CURRENT_DIR=${0%/*}
+. "$CURRENT_DIR/load_modules.sh"
 
 # Start Jupyter Lab server in virtual environment
 pipenv run python3 -m ipykernel install --user --name=pipenv-venv
