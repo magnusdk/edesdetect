@@ -5,7 +5,7 @@ import gym
 import numpy as np
 from gym import spaces
 
-N_DISCRETE_ACTIONS = 2
+N_ACTIONS = 2
 HEIGHT = 112
 WIDTH = 112
 N_PREV_AND_NEXT_FRAMES = 3
@@ -14,13 +14,13 @@ N_CHANNELS = 2 * N_PREV_AND_NEXT_FRAMES + 1
 
 def _get_reward(env, current_prediction):
     # Is the current prediction correct?
-    r1 = 1 if current_prediction == env._ground_truth[env.current_frame] else 0
+    r1 = 1.0 if current_prediction == env._ground_truth[env.current_frame] else 0.0
 
     return r1
 
 
 def _get_dist_reward_impl(prediction, frame, ground_truth):
-    # Find the frame difference between the current frame and the first ground truth that 
+    # Find the frame difference between the current frame and the first ground truth that
     # matches the prediction to the left of the frame.
     closest_left = 0
     while ground_truth[frame - closest_left] != prediction:
@@ -29,7 +29,7 @@ def _get_dist_reward_impl(prediction, frame, ground_truth):
             closest_left = None
             break
 
-    # Find the frame difference between the current frame and the first ground truth that 
+    # Find the frame difference between the current frame and the first ground truth that
     # matches the prediction to the right of the frame.
     closest_right = 0
     while ground_truth[frame + closest_right] != prediction:
@@ -40,13 +40,13 @@ def _get_dist_reward_impl(prediction, frame, ground_truth):
 
     # Return the lowest frame difference.
     if closest_left is not None and closest_right is not None:
-        return 1 - min(closest_left, closest_right)
+        return float(1 - min(closest_left, closest_right))
     elif closest_left is not None:
-        return 1 - closest_left
+        return float(1 - closest_left)
     elif closest_right is not None:
-        return 1 - closest_right
+        return float(1 - closest_right)
     else:  # There are no ground truth for the prediction in this sequence — give big penalty.
-        return -len(ground_truth)
+        return float(-len(ground_truth))
 
 
 def _get_dist_reward(env, prediction):
@@ -57,16 +57,19 @@ def _get_observation(env):
     frame = env.current_frame
     seq = env._seq
     assert frame >= N_PREV_AND_NEXT_FRAMES
-    assert frame <= seq.shape[0] - N_PREV_AND_NEXT_FRAMES
+    assert frame + N_PREV_AND_NEXT_FRAMES < seq.shape[0]
 
-    return seq[frame - N_PREV_AND_NEXT_FRAMES : frame + N_PREV_AND_NEXT_FRAMES + 1]
+    observation = seq[
+        frame - N_PREV_AND_NEXT_FRAMES : frame + N_PREV_AND_NEXT_FRAMES + 1
+    ]
+    return observation.astype("float32")
 
 
 def _get_mock_observation(env):
     if env._ground_truth[env.current_frame] == 0:
-        return np.zeros((HEIGHT, WIDTH, N_CHANNELS))
+        return np.zeros((N_CHANNELS, HEIGHT, WIDTH), dtype="float32")
     else:
-        return np.ones((HEIGHT, WIDTH, N_CHANNELS)) * 255
+        return np.ones((N_CHANNELS, HEIGHT, WIDTH), dtype="float32")
 
 
 class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
@@ -79,9 +82,10 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
     def __init__(self, get_reward=_get_reward, get_observation=_get_observation):
         super(EDESClassificationBase_v0, self).__init__()
-        self.action_space = spaces.Discrete(N_DISCRETE_ACTIONS)
+        self.action_space = spaces.Discrete(N_ACTIONS)
+        self.action_space.dtype = np.int32
         self.observation_space = spaces.Box(
-            low=0, high=255, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype=np.float32
+            low=0, high=1, shape=(N_CHANNELS, HEIGHT, WIDTH), dtype="float32"
         )
         self._seq, self._ground_truth = None, None
         self.get_reward = get_reward
@@ -103,11 +107,11 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
         self.predictions.append(action)
         reward = self.get_reward(self, action)
-        done = self.current_frame == self._seq.shape[0] - N_PREV_AND_NEXT_FRAMES - 1
         info = {"ground_truth_phase": self._ground_truth[self.current_frame]}
 
         # Go to the next frame
         self.current_frame += 1
+        done = self.current_frame + N_PREV_AND_NEXT_FRAMES >= self._seq.shape[0] - 1
         observation = self.get_observation(self)
 
         return observation, reward, done, info
