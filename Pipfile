@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 jax = "*"
 simpleitk = "*"
-matplotlib = "*"
 ed-es-detection-rl = {editable = true, path = "."}
 pandas = "*"
 opencv-python = "*"
@@ -18,13 +17,13 @@ torch = "*"
 toml = "*"
 chex = "*"
 scikit-learn = "*"
+dm-acme = {extras = ["jax"], version = "*"}
 
 [dev-packages]
-ipykernel = "*"
 black = "*"
-ipympl = "*"
 pytest = "*"
 pysimplegui = "*"
+matplotlib = "*"
 
 [requires]
 python_version = "3.8"
