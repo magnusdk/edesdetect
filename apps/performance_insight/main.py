@@ -1,7 +1,7 @@
 import apps.performance_insight.layout as layout
 import apps.performance_insight.scores_preprocessor as scores_preprocessor
 import apps.performance_insight.util as util
-import coax
+import coax # TODO: Remove references to coax.
 import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.model as model
 import PySimpleGUI as sg
