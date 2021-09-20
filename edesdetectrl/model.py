@@ -12,8 +12,11 @@ def pre_process_frames(frames, dtype="float32"):
     return coax.utils.diff_transform(frames, dtype)
 
 
-def get_func_approx(env):
-    def func_approx(S, is_training):
+def get_func_approx(num_actions):
+    def w_init(shape, dtype=None):
+        return jnp.zeros(shape, dtype="float32")
+
+    def func_approx(S):
         f = hk.Sequential(
             [
                 # TODO: Fix pre-processing and re-add it here.
@@ -25,7 +28,7 @@ def get_func_approx(env):
                 hk.Flatten(),
                 hk.Linear(256),
                 jax.nn.relu,
-                hk.Linear(env.action_space.n, w_init=jnp.zeros),
+                hk.Linear(num_actions, w_init=w_init),
             ]
         )
         return f(S)  # Output shape: (batch_size, num_actions=2)
