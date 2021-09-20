@@ -1,7 +1,13 @@
 import queue
+from concurrent.futures._base import Executor
+from typing import Any, Callable, Generator
 
 
-def async_buffered(task_executor, buffer_maxsize, task_gen):
+def async_buffered(
+    task_executor: Executor,
+    buffer_maxsize: int,
+    task_gen: Generator[Callable[[], Any], None, None],
+):
     """Return a generator that is backed asynchronously by a buffer (queue).
 
     Guarantees well-behaved (deterministic) random number generation (assuming seed is set).
