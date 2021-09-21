@@ -64,7 +64,6 @@ class Trajectory(list):
 
 class GenerateTrajectoryMixin:
     def generate_trajectory_using_q(self, q):
-        # TODO: Coax has been removed and q is based on its interface.
         current_state = self.reset()
         done = False
 

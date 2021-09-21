@@ -1,12 +1,15 @@
+import pickle
 import queue
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import apps.performance_insight.util as util
-import coax # TODO: Remove references to coax.
 import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.model as model
+import haiku as hk
+import jax
 from edesdetectrl.config import config
 from edesdetectrl.environments.binary_classification import EDESClassificationBase_v0
+from edesdetectrl.util import functional
 
 
 def pre_process_files(filenames):
@@ -14,8 +17,15 @@ def pre_process_files(filenames):
 
     get_video = util.video_getter()
     env = EDESClassificationBase_v0()
-    q = coax.Q(model.get_func_approx(env), env)
-    q.params = coax.utils.load(config["data"]["trained_params_path"])
+    network = functional.chainf(
+        model.get_func_approx(env.action_space.n),
+        hk.transform,
+        hk.without_apply_rng,
+    )
+    with open(config["data"]["trained_params_path"], "rb") as f:
+        trained_params = pickle.load(f)
+    q = jax.jit(lambda s: network.apply(trained_params, s)[0])
+
     del env
 
     scores = {}
