@@ -20,7 +20,10 @@ chex = "^0.0.8"
 scikit-learn = "^0.24.2"
 tensorflow = "^2.6.0"
 dm-acme = {version = "^0.2.2", extras = ["jax"]}
-tensorflow-probability = "^0.13.0"
+# There's a requirement for tensorflow >= 2.7.0 (which is unreleased 
+# btw) in the newest version of tensorflow-probability (which is the 
+# same as tfp-nightly). We have to depend on an earlier version.
+tfp-nightly = "^0.14.0.dev20210915"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
