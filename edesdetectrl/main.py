@@ -29,7 +29,6 @@ from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
 from edesdetectrl.util import functional, timer
 
-
 CHECKPOINTS_DIR = "_checkpoints"
 CHECKPOINTS_DIR_REVERB = CHECKPOINTS_DIR + "/reverb"
 
@@ -149,6 +148,10 @@ def main():
     checkpointer = CheckPointer(agent, reverb_replay, CHECKPOINTS_DIR, 0.5)
     # Run training loop
     train_loop(env, agent, 10000, checkpointer)
+
+    with open(config["data"]["trained_params_path"], "wb") as f:
+        network_params = agent.get_variables()
+        pickle.dump(network_params, f)
 
 
 if __name__ == "__main__":

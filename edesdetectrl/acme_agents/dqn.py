@@ -1,8 +1,9 @@
-from typing import Iterator
+from typing import Iterator, List
 
 import acme
 import jax
 import jax.numpy as jnp
+import numpy as np
 import optax
 import reverb
 import rlax
@@ -191,6 +192,10 @@ class DQN(agent.Agent, core.Saveable):
         # Example: SAMPLES_PER_INSERT=0.5 means that two batch-sizes worth of transitions must be submitted before a learner step will be performed.
         observations_per_step = BATCH_SIZE / SAMPLES_PER_INSERT
         super().__init__(actor, learner, min_observations, observations_per_step)
+
+    def get_variables(self, names=[""]) -> List[List[np.ndarray]]:
+        # Names arg is unused, so [""] doesn't mean anything
+        return super().get_variables(names)[0]
 
     def save(self):
         return self._learner.save()
