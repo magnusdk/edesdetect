@@ -29,7 +29,7 @@ from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
 from edesdetectrl.util import functional, timer
 
-CHECKPOINTS_DIR = "_checkpoints"
+CHECKPOINTS_DIR = "/scratch/users/magnukva/_checkpoints"
 CHECKPOINTS_DIR_REVERB = CHECKPOINTS_DIR + "/reverb"
 
 
