@@ -22,7 +22,7 @@ EPSILON: float = 0.05  # Action selection via epsilon-greedy policy.
 SEED: int = 1  # Random seed.
 
 # Learning rule
-LEARNING_RATE: float = 1e-2  # 1e-3  # Learning rate for Adam optimizer.
+LEARNING_RATE: float = 1e-3  # Learning rate for Adam optimizer.
 DISCOUNT: float = 0.99  # Discount rate applied to value per timestep.
 N_STEP: int = 5  # N-step TD learning.
 TARGET_UPDATE_PERIOD: int = 100  # Update target network every period.
@@ -31,8 +31,8 @@ MAX_ABS_REWARD: float = 1  # TODO: Check this out!
 HUBER_LOSS_PARAMETER: float = 1  # TODO: Check this out!
 
 # Replay options
-BATCH_SIZE: int = 100  # 256  # Number of transitions per batch.
-MIN_REPLAY_SIZE: int = 100  # 1_000  # Minimum replay size.
+BATCH_SIZE: int = 256  # Number of transitions per batch.
+MIN_REPLAY_SIZE: int = 1_000  # Minimum replay size.
 MAX_REPLAY_SIZE: int = 1_000_000  # Maximum replay size.
 replay_table_name: str = adders_reverb.DEFAULT_PRIORITY_TABLE
 IMPORTANCE_SAMPLING_EXPONENT: float = 0.2  # Importance sampling for replay.
