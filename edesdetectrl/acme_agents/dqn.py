@@ -33,7 +33,7 @@ HUBER_LOSS_PARAMETER: float = 1  # TODO: Check this out!
 # Replay options
 BATCH_SIZE: int = 256  # Number of transitions per batch.
 MIN_REPLAY_SIZE: int = 1_000  # Minimum replay size.
-MAX_REPLAY_SIZE: int = 1_000_000  # Maximum replay size.
+MAX_REPLAY_SIZE: int = 500_000  # 1_000_000  # Maximum replay size.
 replay_table_name: str = adders_reverb.DEFAULT_PRIORITY_TABLE
 IMPORTANCE_SAMPLING_EXPONENT: float = 0.2  # Importance sampling for replay.
 PRIORITY_EXPONENT: float = 0.6  # Priority exponent for replay.
