@@ -68,6 +68,14 @@ class CheckPointer:
                 pickle.dump(learner_state, f)
             self._checkpoint_timer.reset()
 
+    def _last_checkpointed_episode(self):
+        # TODO: Rethink how to do this. Maybe the checkpointer should hold a reference to a training loop object and restore it?
+        client = self._reverb_replay.server.in_process_client()
+        server_info = client.server_info()
+        num_episodes = server_info["priority_table"].num_episodes
+        print(f"Last episode in checkpoint was {num_episodes}")
+        return num_episodes
+
 
 def train_episode(
     env: dm_env.Environment,
@@ -88,9 +96,9 @@ def train_loop(
     num_episodes: int,
     checkpointer: CheckPointer,
 ):
-    for episode in range(num_episodes):
+    for episode in range(checkpointer._last_checkpointed_episode(), num_episodes):
         if episode % 100 == 0:
-            logging.info(f"Episode: {episode}")
+            logging.info(f"  Episode {episode}/{num_episodes}")
         train_episode(env, actor)
 
         checkpointer.step()
