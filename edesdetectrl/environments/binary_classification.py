@@ -107,7 +107,7 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
         self.predictions.append(action)
         reward = self.get_reward(self, action)
-        info = {"ground_truth_phase": self._ground_truth[self.current_frame]}
+        info = {"ground_truth": self._ground_truth[self.current_frame]}
 
         # Go to the next frame
         self.current_frame += 1

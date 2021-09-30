@@ -18,15 +18,17 @@ import acme
 import dm_env
 import gym
 import haiku as hk
-from acme import core, wrappers
+from acme import core
 from acme.agents import replay
 from acme.jax import networks as networks_lib
 
 import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.environments.binary_classification as bc
 import edesdetectrl.model as model
+import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
+from edesdetectrl.evaluator import Evaluator
 from edesdetectrl.util import functional, timer
 
 CHECKPOINTS_DIR = "/scratch/users/magnukva/_checkpoints"
@@ -73,7 +75,6 @@ class CheckPointer:
         client = self._reverb_replay.server.in_process_client()
         server_info = client.server_info()
         num_episodes = server_info["priority_table"].num_episodes
-        print(f"Last episode in checkpoint was {num_episodes}")
         return num_episodes
 
 
@@ -91,43 +92,43 @@ def train_episode(
 
 
 def train_loop(
-    env: dm_env.Environment,
+    training_env: dm_env.Environment,
+    evaluator: Evaluator,
     actor: core.Actor,
     num_episodes: int,
     checkpointer: CheckPointer,
 ):
     for episode in range(checkpointer._last_checkpointed_episode(), num_episodes):
         if episode % 100 == 0:
+            # TODO: Use logging object.
             logging.info(f"  Episode {episode}/{num_episodes}")
-        train_episode(env, actor)
-
+        train_episode(training_env, actor)
+        evaluator.step()
         checkpointer.step()
 
 
-def main():
-    # Get dataloader
-    volumetracings_csv_file = config["data"]["volumetracings_path"]
-    filelist_csv_file = config["data"]["filelist_path"]
-    videos_dir = config["data"]["videos_path"]
-    split = "TRAIN"
-    thread_pool_executor = ThreadPoolExecutor()
+def get_env(thread_pool_executor, split):
     seq_iterator = echonet.get_generator(
         thread_pool_executor,
-        volumetracings_csv_file,
-        filelist_csv_file,
-        videos_dir,
-        split,
+        volumetracings_csv_file=config["data"]["volumetracings_path"],
+        filelist_csv_file=config["data"]["filelist_path"],
+        videos_dir=config["data"]["videos_path"],
+        split=split,
         buffer_maxsize=5,
     )
-
-    # Create environment
     env = gym.make(
         "EDESClassification-v0",
         seq_iterator=seq_iterator,
         get_reward=bc._get_dist_reward,
     )
-    env = wrappers.GymWrapper(env)
-    env_spec = acme.make_environment_spec(env)
+    return util_dm_env.GymWrapper(env)
+
+
+def main():
+    thread_pool_executor = ThreadPoolExecutor()
+    training_env = get_env(thread_pool_executor, "TRAIN")
+    validation_env = get_env(thread_pool_executor, "VAL")
+    env_spec = acme.make_environment_spec(training_env)
 
     # Create network
     network_hk = functional.chainf(
@@ -153,9 +154,17 @@ def main():
     print()
 
     agent = dqn.DQN(network, reverb_replay)
-    checkpointer = CheckPointer(agent, reverb_replay, CHECKPOINTS_DIR, 0.5)
+    checkpointer = CheckPointer(agent, reverb_replay, CHECKPOINTS_DIR, 30)
+
+    evaluator = Evaluator(
+        validation_env,
+        agent,
+        n_trajectories=200,
+        delta_episodes=1000,
+        start_episode=checkpointer._last_checkpointed_episode(),
+    )
     # Run training loop
-    train_loop(env, agent, 10000, checkpointer)
+    train_loop(training_env, evaluator, agent, 10000, checkpointer)
 
     with open(config["data"]["trained_params_path"], "wb") as f:
         network_params = agent.get_variables()

@@ -76,35 +76,41 @@ class Trajectory(list):
         }
 
 
-class GenerateTrajectoryMixin:
-    def generate_trajectory_using_q(self, q) -> Trajectory:
-        current_state = self.reset()
-        done = False
+def generate_trajectory_using_q(env, q) -> Trajectory:
+    current_state = env.reset()
+    done = False
 
-        trajectory = Trajectory()
-        while not done:
-            qs = q(current_state)
-            a = jnp.argmax(qs)
-            next_state, r, done, info = self.step(a)
+    trajectory = Trajectory()
+    while not done:
+        qs = q(current_state)
+        a = jnp.argmax(qs)
+        next_state, r, done, info = env.step(a)
 
-            trajectory.append(TrajectoryItem(current_state, a, r, qs, info))
-            current_state = next_state
+        trajectory.append(TrajectoryItem(current_state, a, r, qs, info))
+        current_state = next_state
 
-        return trajectory
+    return trajectory
 
-    def generate_trajectory_using_actor(self, actor: acme.core.Actor) -> Trajectory:
-        timestep = self.reset()
-        actor.observe_first(timestep)
-        trajectory = Trajectory()
-        while not timestep.last():
-            action = actor.select_action(timestep.observation)
-            trajectory.append(
-                TrajectoryItem(
-                    timestep.observation, action, timestep.reward, None, timestep.info
-                )
+
+def generate_trajectory_using_actor(env, actor: acme.core.Actor) -> Trajectory:
+    timestep = env.reset()
+    actor.observe_first(timestep)
+    trajectory = Trajectory()
+    while not timestep.last():
+        action = actor.select_action(timestep.observation)
+        next_timestep = env.step(action)
+        actor.observe(action, next_timestep=next_timestep)
+        actor.update()
+
+        trajectory.append(
+            TrajectoryItem(
+                timestep.observation,
+                action,
+                next_timestep.reward,
+                None,
+                next_timestep.info,
             )
-            timestep = self.step(action)
-            actor.observe(action, next_timestep=timestep)
-            actor.update()
+        )
+        timestep = next_timestep
 
-        return trajectory
+    return trajectory

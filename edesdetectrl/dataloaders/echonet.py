@@ -174,6 +174,7 @@ def get_generator(
 
     def task_gen():
         while True:
+            # TODO: Switch to using JAX RNG
             filename = random.choice(filenames)
             try:
                 # This may traise a KeyError when the file can not be found in the volumetracings!
