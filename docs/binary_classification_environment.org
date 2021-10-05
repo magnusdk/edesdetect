@@ -1,0 +1,49 @@
+* TODO Introduction
+A very simple formulation was chosen to act as a baseline. ...
+
+
+* Explain how it works
+The environment is a video with labels on which cardiac phase each frame is in. For every step, the agent is shown the current frame plus the three previous and the three next frames, and it must make a prediction on which cardiac phase the current frame is in. The agent thus have two possible actions: mark the current frame as Diastole or Systole. After each prediction, the current frame is moved one frame forwards, and the episode ends once the current frame is the last frame of the video.
+
+The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them. A frame that the agent predicted to be Diastole, followed by a frame predicted to be Systole, is considered an ED frame, and vice-versa. This may cause there to be more or fewer predicted events than there are ground truth events, but as the agent becomes better at classifying the phase, ED and ES will converge towards the ground truth.
+
+Because the job of the agent is to classify each frame as either Diastole or Systole, we name this formulation "Binary Classification Environment".
+
+
+* TODO Reward functions
+Two reward functions have been explored: binary and distance-based.
+
+The binary reward scheme gives a reward of 1 after each correct prediction by the agent and a reward of 0 after each incorrect prediction.
+
+The distance-based reward scheme also gives a reward of 1 after each correct prediction, but penalizes incorrect predictions based on how far away from the nearest predicted phase the current frame is. This means that for example a prediction of Diastole for a frame that is in the middle of the Systole phase would give a greater penalty (negative reward) than if the frame was closer to the predicted phase Diastole.
+
+TODO: plot reward functions together.
+
+
+* TODO Similarities to SOTA, regression
+Earlier work on detecting ED and ES frames have used a supervised learning approach, formulating the problem as a regression task[TODO: citations from essay]. The line being regressed encodes the phase such that is increasing while in Diastolic phase and decreasing while in Systolic phase. This is in contrast to simply treating the problem as a classification task, using the classes "ED", "ES", and "Trivial", which would result in a class imbalance because the "Trivial" class is greatly over-represented.
+
+Our Binary Classification Environment also gets around the imbalance problem by predicting only the current phase, either Diastole or Systole. There is still a natural class imbalance however, in that there generally are more Diastole frames than Systole, but it is now in a more reasonable range.
+
+We selected a simple DQN[TODO: citation] agent to train as a baseline. DQN uses Q-learning, which uses a state-action value function for selecting actions. In practice, the state-action value function is a neural network that takes the current state as input and outputs the predicted value of taking each action. A greedy policy may then select the action that has the highest predicted value. Because the agent doesn't affect the environment in any way by choosing one action over another, we could just as well have trained the Q-value function directly in a supervised learning manner. This means that under the hood, the agent is really just solving a regression problem, though with a moving ground truth. The function being fitted is two lines representing the value of taking the Diastole action and the Systole action. The shape of the lines depend on the reward function and the return hyper-parameters (such as discount factor and N-step bootstrapping parameter).
+
+TODO: Try to visualize how the regression line looks for the two reward schemes?
+
+For this reason, we don't think that the Binary Classification Environment formulation will perform better than the curent state-of-the-art supervised learning approaches, unless there is some fundamental advantage to regressing on two lines instead of one. It is however a good baseline that we can build upon.
+
+
+* Metrics, accuracy just like in a (binary) classification task
+The standard for measuring performance in the ED-/ES-frame detection task is the /average absolute frame difference (aaFD)/. aaFD is defined as
+\[aaFD=\frac{1}{N}\sum_{t=1}^N|y_t-\hat{y}_t|\]
+where N is the number of ED/ES events, $y_t$ is the ground truth event at time $t$ (of $N$), and $\hat{y}_t$ is the predicted event at time $t$.
+
+Because of our formulation's close relation to a binary classification task we are also able to use metrics such as accuracy, precision, and recall (etc). These are more useful metrics while the agent is training because they have stronger definitions for when the performance is poor. aaFD is not well defined when there are not an equal number of predicted events as there are ground truth events.
+
+For comparing the results of our method against the current SOTA we will use aaFD.
+
+
+* The network, hyper-parameters, algorithm, etc.
+Our network is based on the original Atari DQN network. It consists of a convolutional layer with 16 8x8 kernels and a stride of 4, followed by a ReLU activation layer, then another convolutional layer with 32 4x4 kernels and a stride of 2, also followed by a ReLU activation layer. This is then flattened and passed through a fully connected layer with 256 outputs, which is then passed through yet another ReLU layer, before finally being passed through a fully connected with two outputs representing the value of each of the two possible actions.
+
+The agent uses a discount factor of 0.99 and 5-step bootstrapping.
+
