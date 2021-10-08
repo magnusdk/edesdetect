@@ -1,5 +1,6 @@
 import tensorflow as tf
 from jax.lib import xla_bridge as xb
+from mlflow.utils.logging_utils import MLFLOW_LOGGING_STREAM
 
 # A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
 # It is believed that it caused by some weird caching of XLA (Jax low-level code) backends.
@@ -18,6 +19,7 @@ import acme
 import dm_env
 import gym
 import haiku as hk
+import mlflow
 from acme import core
 from acme.agents import replay
 from acme.jax import networks as networks_lib
@@ -26,6 +28,7 @@ import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.environments.binary_classification as bc
 import edesdetectrl.model as model
 import edesdetectrl.util.dm_env as util_dm_env
+from edesdetectrl import tracking
 from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
 from edesdetectrl.evaluator import Evaluator
@@ -41,6 +44,7 @@ class CheckPointer:
         self,
         agent: core.Saveable,
         reverb_replay: replay.ReverbReplay,
+        mlflow_initializer: tracking.MLflowInitializer,
         checkpoints_dir: str,
         time_delta_minutes: float,
     ) -> None:
@@ -49,6 +53,7 @@ class CheckPointer:
 
         os.makedirs(checkpoints_dir, exist_ok=True)
         self._checkpoints_learner_path = checkpoints_dir + "/learner"
+        self._checkpoints_misc_path = checkpoints_dir + "/misc"
 
         # Restore learner state from checkpoint
         try:
@@ -59,15 +64,42 @@ class CheckPointer:
             # #EAFP (https://devblogs.microsoft.com/python/idiomatic-python-eafp-versus-lbyl/)
             pass
 
+        # Restore mlflow state
+        try:
+            with open(self._checkpoints_misc_path, "rb") as f:
+                misc = pickle.load(f)
+                mlflow_initializer.set_run_id(misc["mlflow_run_id"])
+        except FileNotFoundError:
+            pass
+
         self._checkpoint_timer = timer.Timer(time_delta_minutes * 60)
+
+    def set_run_id(self, run_id):
+        """Set the MLflow run_id so that the run can be restored."""
+        misc = {}
+        # Try to update from disk
+        try:
+            with open(self._checkpoints_misc_path, "rb") as f:
+                misc_from_disk = pickle.load(f)
+                misc.update(misc_from_disk)
+        except FileNotFoundError:
+            pass
+
+        # Set the run_id and write to disk
+        misc["mlflow_run_id"] = run_id
+        with open(self._checkpoints_misc_path, "wb") as f:
+            pickle.dump(misc, f)
 
     def step(self):
         if self._checkpoint_timer.check():
+            # Checkpoint reverb replay
             self._reverb_replay.server.in_process_client().checkpoint()
-            # Learner state is the only thing we need to save.
+
+            # Save learner state
             learner_state = self._agent.save()
             with open(self._checkpoints_learner_path, "wb") as f:
                 pickle.dump(learner_state, f)
+
             self._checkpoint_timer.reset()
 
     def _last_checkpointed_episode(self):
@@ -103,7 +135,8 @@ def train_loop(
             # TODO: Use logging object.
             logging.info(f"  Episode {episode}/{num_episodes}")
         train_episode(training_env, actor)
-        evaluator.step()
+        if metrics := evaluator.step():
+            mlflow.log_metrics(metrics, step=episode)
         checkpointer.step()
 
 
@@ -153,22 +186,38 @@ def main():
     print("-----")
     print()
 
+    # mlflow tracking set up
+    mlflow_initializer = tracking.MLflowInitializer(
+        "binary_classification_environment",
+        "Distance-based reward 2",
+    )
     agent = dqn.DQN(network, reverb_replay)
-    checkpointer = CheckPointer(agent, reverb_replay, CHECKPOINTS_DIR, 30)
+    checkpointer = CheckPointer(
+        agent,
+        reverb_replay,
+        mlflow_initializer,
+        CHECKPOINTS_DIR,
+        30,
+    )
 
     evaluator = Evaluator(
         validation_env,
         agent,
         n_trajectories=200,
-        delta_episodes=1000,
+        delta_episodes=100,
         start_episode=checkpointer._last_checkpointed_episode(),
     )
     # Run training loop
-    train_loop(training_env, evaluator, agent, 10000, checkpointer)
+    run_id = mlflow_initializer.start_run()
+    checkpointer.set_run_id(run_id)
+    train_loop(training_env, evaluator, agent, 100000, checkpointer)
 
     with open(config["data"]["trained_params_path"], "wb") as f:
         network_params = agent.get_variables()
         pickle.dump(network_params, f)
+
+    mlflow.log_artifact(config["data"]["trained_params_path"])
+    mlflow_initializer.end_run()
 
 
 if __name__ == "__main__":
