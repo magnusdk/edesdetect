@@ -1,6 +1,7 @@
+import math
 from collections import namedtuple
-import acme.core
 
+import acme.core
 import jax.numpy as jnp
 import sklearn.metrics as metrics
 
@@ -47,7 +48,11 @@ class Trajectory(list):
 
     def balanced_accuracy(self):
         ground_truths, actions = self._labels_and_predictions()
-        return metrics.balanced_accuracy_score(ground_truths, actions, adjusted=True)
+        bas = metrics.balanced_accuracy_score(ground_truths, actions, adjusted=True)
+        if math.isinf(bas) or math.isnan(bas):
+            return -1
+        else:
+            return bas
 
     def recall(self):
         ground_truths, actions = self._labels_and_predictions()
