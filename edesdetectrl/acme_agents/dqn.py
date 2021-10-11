@@ -48,6 +48,23 @@ samples_per_insert_tolerance_rate: float = 0.1
 NUM_SGD_STEPS_PER_STEP: int = 1
 
 
+class FixedParams(variable_utils.VariableClient):
+    """Implementation of VariableClient but with unchanging parameters."""
+
+    def __init__(self, params):
+        self._params = params
+
+    def update(self, _):
+        pass
+
+    def update_and_wait(self):
+        pass
+
+    @property
+    def params(self):
+        return self._params
+
+
 def get_reverb_replay(
     environment_spec: specs.EnvironmentSpec,
     checkpoints_dir: str,
@@ -226,7 +243,7 @@ class DQN(agent.Agent, core.Saveable, extensions.Evaluatable):
         actor = actors.FeedForwardActor(
             policy=policy,
             random_key=self._key_eval_actor,
-            variable_client=variable_utils.VariableClient(self._learner, ""),
+            variable_client=FixedParams(self.get_variables()),
             adder=self._reverb_replay.adder,
         )
 
