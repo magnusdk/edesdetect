@@ -7,6 +7,22 @@ import sklearn.metrics as metrics
 
 TrajectoryItem = namedtuple("TrajectoryItem", ["s", "a", "r", "q_values", "env_info"])
 
+
+def all_equal(xs):
+    for x in xs[1:]:
+        if x != xs[0]:
+            return False
+    return True
+
+def safe_balanced_accuracy(ground_truths, actions):
+    if all_equal(ground_truths):
+        # Balanced accuracy is only defined when ground truth contains all possible elements.
+        # If that's not true, then use regular accuracy (adjusted: x*2-1).
+        return metrics.accuracy_score(ground_truths, actions) * 2 - 1
+    else:
+        return metrics.balanced_accuracy_score(ground_truths, actions, adjusted=True)
+
+
 # TODO: This Trajectory class is very coupled with BinaryClassification + Q-learning.
 # We should probably think a bit more about how to decouple parts of it.
 class Trajectory(list):
@@ -48,11 +64,7 @@ class Trajectory(list):
 
     def balanced_accuracy(self):
         ground_truths, actions = self._labels_and_predictions()
-        bas = metrics.balanced_accuracy_score(ground_truths, actions, adjusted=True)
-        if math.isinf(bas) or math.isnan(bas):
-            return -1
-        else:
-            return bas
+        return safe_balanced_accuracy(ground_truths, actions)
 
     def recall(self):
         ground_truths, actions = self._labels_and_predictions()
