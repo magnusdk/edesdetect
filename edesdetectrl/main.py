@@ -1,5 +1,5 @@
 import tensorflow as tf
-from jax.lib import xla_bridge as xb
+from jax._src.lib import xla_bridge as xb
 from mlflow.utils.logging_utils import MLFLOW_LOGGING_STREAM
 
 # A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
@@ -93,7 +93,7 @@ class CheckPointer:
     def step(self):
         if self._checkpoint_timer.check():
             # Checkpoint reverb replay
-            self._reverb_replay.server.in_process_client().checkpoint()
+            self._reverb_replay.server.localhost_client().checkpoint()
 
             # Save learner state
             learner_state = self._agent.save()
@@ -104,7 +104,7 @@ class CheckPointer:
 
     def _last_checkpointed_episode(self):
         # TODO: Rethink how to do this. Maybe the checkpointer should hold a reference to a training loop object and restore it?
-        client = self._reverb_replay.server.in_process_client()
+        client = self._reverb_replay.server.localhost_client()
         server_info = client.server_info()
         num_episodes = server_info["priority_table"].num_episodes
         return num_episodes
@@ -180,11 +180,6 @@ def main():
 
     # Create agent
     reverb_replay = dqn.get_reverb_replay(env_spec, CHECKPOINTS_DIR_REVERB)
-    print()
-    print("-----")
-    print(reverb_replay.server.in_process_client().server_info())
-    print("-----")
-    print()
 
     # mlflow tracking set up
     mlflow_initializer = tracking.MLflowInitializer(
