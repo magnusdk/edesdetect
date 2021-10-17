@@ -154,6 +154,8 @@ def get_env(split, rng_key, thread_pool_executor):
 
 
 def main():
+    dqn_config = dqn.DQNConfig(discount=0)
+
     thread_pool_executor = ThreadPoolExecutor()
     training_dataloader_rng_key, validation_dataloader_rng_key = jax.random.split(
         jax.random.PRNGKey(dqn_config.seed), num=2
@@ -178,14 +180,14 @@ def main():
     logging.basicConfig(level=logging.INFO, force=True)
 
     # Create agent
-    reverb_replay = dqn.get_reverb_replay(env_spec, CHECKPOINTS_DIR_REVERB)
+    reverb_replay = dqn.get_reverb_replay(env_spec, CHECKPOINTS_DIR_REVERB, dqn_config)
 
     # mlflow tracking set up
     mlflow_initializer = tracking.MLflowInitializer(
         "binary_classification_environment",
         "Distance-based reward 2",
     )
-    agent = dqn.DQN(network, reverb_replay)
+    agent = dqn.DQN(network, reverb_replay, dqn_config)
     checkpointer = CheckPointer(
         agent,
         reverb_replay,
