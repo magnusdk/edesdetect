@@ -1,11 +1,10 @@
 import os
-import random
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import cv2
-import edesdetectrl.util.generators as generators
 import numpy as np
 import pandas as pd
+from edesdetectrl import dataloaders
+from edesdetectrl.config import config
 from scipy.ndimage.filters import gaussian_filter
 
 
@@ -119,90 +118,47 @@ def label_frames(x, ed_i, es_i, weight=0.75):
         return (frames, labels)
 
 
-def get_item(filename, traces, videos_dir):
-    # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
-    # Largest (diastolic) frame is first
-    ed = int(traces.iloc[0]["Frame"])
-    # Smallest (systolic) frame is last
-    es = int(traces.iloc[-1]["Frame"])
-
-    video = loadvideo(videos_dir + filename)
-    # Labels are either 0 or 1.
-    # 0 means diastole and 1 means systole.
-    frames, labels = label_frames(video, ed, es)
-    video = video[frames]
-
-    # Cut the video length down and start from a random point in time.
-    # This is such that the agent won't learn that diastole always comes first,
-    # which I think it does in the training data.
-    # video_length_fraction = 1 / 3
-    # num_frames = len(labels)
-    # actual_num_frames = int(num_frames * video_length_fraction)
-    # random_start_t = random.randint(0, num_frames - actual_num_frames - 1)
-    #
-    # video, labels = (
-    #    video[random_start_t : random_start_t + actual_num_frames],
-    #    labels[random_start_t : random_start_t + actual_num_frames],
-    # )
-
-    return video, labels
-
-
-def ensure_file_extension(filename):
+def _ensure_file_extension(filename):
     if os.path.splitext(filename)[1] == "":
         filename = filename + ".avi"
     return filename
 
 
-def get_filenames(filelist_csv_file, split=None):
+def _get_filenames(filelist_csv_file, split=None):
     filelist_df = pd.read_csv(filelist_csv_file)
     if split:
         filelist_df = filelist_df[filelist_df["Split"] == split]
-    return [ensure_file_extension(filename) for filename in filelist_df["FileName"]]
+    return [_ensure_file_extension(filename) for filename in filelist_df["FileName"]]
 
 
-def get_generator(
-    thread_pool_executor,
-    volumetracings_csv_file,
-    filelist_csv_file,
-    videos_dir,
-    split,
-    buffer_maxsize=10,
-):
-    volumetracings_df = pd.read_csv(volumetracings_csv_file, index_col="FileName")
-    filenames = get_filenames(filelist_csv_file, split)
-
-    def task_gen():
-        while True:
-            # TODO: Switch to using JAX RNG
-            filename = random.choice(filenames)
-            try:
-                # This may traise a KeyError when the file can not be found in the volumetracings!
-                traces = volumetracings_df.loc[filename]
-                yield lambda: get_item(filename, traces, videos_dir)
-            except KeyError:
-                continue  # Try another random filename.
-
-    # Let's optimize the code a bit by making it multi-threaded and storing videos and labels in a buffer, ready for use.
-    return generators.async_buffered(thread_pool_executor, buffer_maxsize, task_gen())
-
-
-def example():
-    from edesdetectrl.config import config
-
-    volumetracings_csv_file = config["data"]["volumetracings_path"]
-    filelist_csv_file = config["data"]["filelist_path"]
-    videos_dir = config["data"]["videos_path"]
-    split = "TRAIN"
-
-    with ThreadPoolExecutor(max_workers=2) as thread_pool_executor:
-        gen = get_generator(
-            thread_pool_executor,
-            volumetracings_csv_file,
-            filelist_csv_file,
-            videos_dir,
-            split,
+class Echonet(dataloaders.DataLoader):
+    def __init__(self, split):
+        self.filelist_csv_file = config["data"]["filelist_path"]
+        self.volumetracings_df = pd.read_csv(
+            config["data"]["volumetracings_path"], index_col="FileName"
         )
+        self.videos_dir = config["data"]["videos_path"]
 
-        for _ in range(5):
-            video, labels = next(gen)
+        self.filenames = _get_filenames(self.filelist_csv_file, split)
+
+    @property
+    def keys(self):
+        return self.filenames
+
+    def __getitem__(self, key):
+        filename = key if isinstance(key, str) else self.keys[key]
+        traces = self.volumetracings_df.loc[filename]
+
+        # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
+        # Largest (diastolic) frame is first
+        ed = int(traces.iloc[0]["Frame"])
+        # Smallest (systolic) frame is last
+        es = int(traces.iloc[-1]["Frame"])
+
+        video = loadvideo(self.videos_dir + filename)
+        # Labels are either 0 or 1.
+        # 0 means diastole and 1 means systole.
+        frames, labels = label_frames(video, ed, es)
+        video = video[frames]
+
+        return video, labels

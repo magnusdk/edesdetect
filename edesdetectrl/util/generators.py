@@ -1,6 +1,8 @@
 import queue
-from concurrent.futures._base import Executor
+from concurrent.futures import Executor
 from typing import Any, Callable, Generator
+
+SKIP_ITEM = "__SKIP_ITEM__"
 
 
 def async_buffered(
@@ -38,6 +40,10 @@ def async_buffered(
         # Get the next item from the buffer.
         # Items are wrapped as Futures and we must block using future.result() to get the value.
         item = buffer.get().result()
+
+        # Skip items marked for skipping.
+        while item == SKIP_ITEM:
+            item = buffer.get().result()
 
         # Every time an item is retrieved from the buffer, add a new one asynchronously.
         async_put_next()

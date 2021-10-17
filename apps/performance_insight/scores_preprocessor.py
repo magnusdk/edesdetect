@@ -3,7 +3,7 @@ import queue
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import apps.performance_insight.util as util
-import edesdetectrl.dataloaders.echonet as echonet
+from edesdetectrl.dataloaders.echonet import Echonet
 import edesdetectrl.model as model
 import haiku as hk
 import jax
@@ -12,10 +12,9 @@ from edesdetectrl.environments.binary_classification import EDESClassificationBa
 from edesdetectrl.util import functional
 
 
-def pre_process_files(filenames):
-    print_progress_mod = int(len(filenames) / 10)
+def pre_process_files(echonet):
+    print_progress_mod = int(len(echonet.filenames) / 10)
 
-    get_video = util.video_getter()
     env = EDESClassificationBase_v0()
     network = functional.chainf(
         model.get_func_approx(env.action_space.n),
@@ -34,7 +33,7 @@ def pre_process_files(filenames):
         try:
             i, filename = filename_enumeration
             env = EDESClassificationBase_v0()
-            env.seq_and_labels = get_video(filename)
+            env.seq_and_labels = echonet[filename]
             trajectory = env.generate_trajectory_using_q(q)
             scores[filename] = {
                 "accuracy": trajectory.accuracy(),
@@ -47,11 +46,11 @@ def pre_process_files(filenames):
             print(i, filename, e)
         finally:
             if i % print_progress_mod == 0 and i != 0:
-                print(f"{i}/{len(filenames)}")
+                print(f"{i}/{len(echonet.filenames)}")
 
     video_queue = queue.Queue()
     with ThreadPoolExecutor() as e:
-        for i, filename in enumerate(filenames):
+        for i, filename in enumerate(echonet.filenames):
             video_queue.put_nowait((i, filename))
             e.submit(lambda: evaluate_average_reward(video_queue.get()))
 
@@ -69,8 +68,8 @@ def get_pre_processed_scores():
 
 if __name__ == "__main__":
     # We only bother to pre-process the TEST part of the dataset.
-    filenames = echonet.get_filenames(config["data"]["filelist_path"], split="TEST")
-    scores = pre_process_files(filenames)
+    echonet = Echonet("TEST")
+    scores = pre_process_files(echonet)
     path = config["apps"]["performance_insight"]["pre_processed_scores_path"]
     with open(path, "w") as f:
         f.write(str(scores))

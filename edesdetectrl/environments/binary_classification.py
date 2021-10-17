@@ -171,28 +171,16 @@ gym.register(
 
 
 def timeit_test():
-    import random
+    from jax import random
     import timeit
 
-    import edesdetectrl.dataloaders.echonet as echonet
-    from edesdetectrl.config import config
+    from edesdetectrl.dataloaders.echonet import Echonet
     from numpy.core.fromnumeric import mean
 
     print("Time reseting the environment and stepping through it until done:")
-    random.seed(1337)
-    volumetracings_csv_file = config["data"]["volumetracings_path"]
-    filelist_csv_file = config["data"]["filelist_path"]
-    videos_dir = config["data"]["videos_path"]
-    split = "TRAIN"
     with ThreadPoolExecutor() as thread_pool_executor:
-        seq_iterator = echonet.get_generator(
-            thread_pool_executor,
-            volumetracings_csv_file,
-            filelist_csv_file,
-            videos_dir,
-            split,
-            buffer_maxsize=50,
-        )
+        echonet = Echonet("TRAIN")
+        seq_iterator = echonet.get_random_generator(random.PRNGKey(42), thread_pool_executor, 50)
         env = EDESClassificationRandomVideos_v0(seq_iterator)
 
         def thunk():

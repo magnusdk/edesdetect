@@ -19,18 +19,19 @@ import acme
 import dm_env
 import gym
 import haiku as hk
+import jax
 import mlflow
 from acme import core
 from acme.agents import replay
 from acme.jax import networks as networks_lib
 
-import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.environments.binary_classification as bc
 import edesdetectrl.model as model
 import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl import tracking
 from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
+from edesdetectrl.dataloaders.echonet import Echonet
 from edesdetectrl.evaluator import Evaluator
 from edesdetectrl.util import functional, timer
 
@@ -140,14 +141,10 @@ def train_loop(
         checkpointer.step()
 
 
-def get_env(thread_pool_executor, split):
-    seq_iterator = echonet.get_generator(
-        thread_pool_executor,
-        volumetracings_csv_file=config["data"]["volumetracings_path"],
-        filelist_csv_file=config["data"]["filelist_path"],
-        videos_dir=config["data"]["videos_path"],
-        split=split,
-        buffer_maxsize=5,
+def get_env(split, rng_key, thread_pool_executor):
+    echonet = Echonet(split)
+    seq_iterator = echonet.get_random_generator(
+        rng_key, thread_pool_executor, prefetch=5
     )
     env = gym.make(
         "EDESClassification-v0",
@@ -159,8 +156,11 @@ def get_env(thread_pool_executor, split):
 
 def main():
     thread_pool_executor = ThreadPoolExecutor()
-    training_env = get_env(thread_pool_executor, "TRAIN")
-    validation_env = get_env(thread_pool_executor, "VAL")
+    training_dataloader_rng_key, validation_dataloader_rng_key = jax.random.split(
+        jax.random.PRNGKey(dqn_config.seed), num=2
+    )
+    training_env = get_env("TRAIN", training_dataloader_rng_key, thread_pool_executor)
+    validation_env = get_env("VAL", validation_dataloader_rng_key, thread_pool_executor)
     env_spec = acme.make_environment_spec(training_env)
 
     # Create network

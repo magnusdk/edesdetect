@@ -1,23 +1,7 @@
 from datetime import datetime, timedelta
 from functools import wraps
 
-import edesdetectrl.dataloaders.echonet as echonet
 import edesdetectrl.environments.mixins as mixins
-import pandas as pd
-from edesdetectrl.config import config
-
-
-def video_getter():
-    videos_dir = config["data"]["videos_path"]
-    volumetracings_df = pd.read_csv(
-        config["data"]["volumetracings_path"], index_col="FileName"
-    )
-
-    def get_video(filename):
-        traces = volumetracings_df.loc[filename]
-        return echonet.get_item(filename, traces, videos_dir)
-
-    return get_video
 
 
 def calc_advantage(trajectory_item: mixins.TrajectoryItem):

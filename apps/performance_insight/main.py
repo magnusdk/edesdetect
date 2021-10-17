@@ -3,7 +3,7 @@ import pickle
 import apps.performance_insight.layout as layout
 import apps.performance_insight.scores_preprocessor as scores_preprocessor
 import apps.performance_insight.util as util
-import edesdetectrl.dataloaders.echonet as echonet
+from edesdetectrl.dataloaders.echonet import Echonet
 import edesdetectrl.model as model
 import haiku as hk
 import jax
@@ -99,7 +99,9 @@ sort_options = [
     DropDownOption(SORT_OPTION_FILENAME, "Filename"),
 ]
 
-filenames = echonet.get_filenames(config["data"]["filelist_path"], split="TEST")
+echonet = Echonet("TEST")
+
+filenames = echonet.filenames
 pre_processed_scores = scores_preprocessor.get_pre_processed_scores()
 video_selector_file_options = [
     VideoFileListItem(filename, pre_processed_scores.get(filename, None))
@@ -109,7 +111,6 @@ video_selector_file_options.sort(
     key=video_selector_file_options_sort_fn(sort_options[0].value)
 )
 
-get_video = util.video_getter()
 env = EDESClassificationBase_v0()
 
 network = functional.chainf(
@@ -125,7 +126,7 @@ q = jax.jit(lambda s: network.apply(trained_params, s)[0])
 
 ## Miscellaneous handlers
 def handle_video_file_selected(selected_video, window):
-    env.seq_and_labels = get_video(selected_video.filename)
+    env.seq_and_labels = echonet[selected_video.filename]
     trajectory = env.generate_trajectory_using_q(q)
     advantages = list(map(util.calc_advantage, trajectory))
     rewards = trajectory.rewards()
