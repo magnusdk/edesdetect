@@ -207,7 +207,7 @@ def main():
     # Run training loop
     run_id = mlflow_initializer.start_run()
     checkpointer.set_run_id(run_id)
-    train_loop(training_env, evaluator, agent, 100000, checkpointer)
+    train_loop(training_env, evaluator, agent, dqn_config.num_episodes, checkpointer)
 
     with open(config["data"]["trained_params_path"], "wb") as f:
         network_params = agent.get_variables()
