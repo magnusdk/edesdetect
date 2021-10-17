@@ -1,7 +1,7 @@
-import math
 from collections import namedtuple
 
 import acme.core
+import dm_env
 import jax.numpy as jnp
 import sklearn.metrics as metrics
 
@@ -13,6 +13,7 @@ def all_equal(xs):
         if x != xs[0]:
             return False
     return True
+
 
 def safe_balanced_accuracy(ground_truths, actions):
     if all_equal(ground_truths):
@@ -109,7 +110,10 @@ def generate_trajectory_using_q(env, q) -> Trajectory:
     return trajectory
 
 
-def generate_trajectory_using_actor(env, actor: acme.core.Actor) -> Trajectory:
+def generate_trajectory_using_actor(
+    env: dm_env.Environment,
+    actor: acme.core.Actor,
+) -> Trajectory:
     timestep = env.reset()
     actor.observe_first(timestep)
     trajectory = Trajectory()
