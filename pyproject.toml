@@ -1,7 +1,7 @@
 [tool.poetry]
 authors = ["Magnus Dalen Kvalevåg <magnus.kvalevag@gmail.com>"]
 description = ""
-name = "edesdetect"
+name = "edesdetectrl"
 version = "0.1.0"
 
 [tool.poetry.dependencies]
