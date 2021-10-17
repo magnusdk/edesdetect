@@ -24,7 +24,6 @@ from acme import core
 from acme.agents import replay
 from acme.jax import networks as networks_lib
 
-import edesdetectrl.environments.binary_classification as bc
 import edesdetectrl.model as model
 import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl import tracking
@@ -140,7 +139,7 @@ def train_loop(
         checkpointer.step()
 
 
-def get_env(split, rng_key, thread_pool_executor):
+def get_env(reward_spec, split, rng_key, thread_pool_executor):
     echonet = Echonet(split)
     seq_iterator = echonet.get_random_generator(
         rng_key, thread_pool_executor, prefetch=5
@@ -148,7 +147,7 @@ def get_env(split, rng_key, thread_pool_executor):
     env = gym.make(
         "EDESClassification-v0",
         seq_iterator=seq_iterator,
-        get_reward=bc._get_dist_reward,
+        reward=reward_spec,
     )
     return util_dm_env.GymWrapper(env)
 
@@ -160,8 +159,12 @@ def main():
     training_dataloader_rng_key, validation_dataloader_rng_key = jax.random.split(
         jax.random.PRNGKey(dqn_config.seed), num=2
     )
-    training_env = get_env("TRAIN", training_dataloader_rng_key, thread_pool_executor)
-    validation_env = get_env("VAL", validation_dataloader_rng_key, thread_pool_executor)
+    training_env = get_env(
+        dqn_config.reward_spec, "TRAIN", training_dataloader_rng_key, thread_pool_executor
+    )
+    validation_env = get_env(
+        dqn_config.reward_spec, "VAL", validation_dataloader_rng_key, thread_pool_executor
+    )
     env_spec = acme.make_environment_spec(training_env)
 
     # Create network

@@ -68,7 +68,11 @@ class DQNConfig:
     num_sgd_steps_per_step: int = 1
 
     # Training loop
-    num_episodes: int = 5000 # Not much improvement has been observed after 2000 episodes.
+    # Not much improvement has been observed after 2000 episodes.
+    num_episodes: int = 5000
+
+    # Environment
+    reward_spec: str = "distance"
 
     def as_dict(self):
         return dataclasses.asdict(self)

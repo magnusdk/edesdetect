@@ -12,7 +12,7 @@ N_PREV_AND_NEXT_FRAMES = 3
 N_CHANNELS = 2 * N_PREV_AND_NEXT_FRAMES + 1
 
 
-def _get_reward(env, current_prediction):
+def _get_simple_reward(env, current_prediction):
     # Is the current prediction correct?
     r1 = 1.0 if current_prediction == env._ground_truth[env.current_frame] else 0.0
 
@@ -80,7 +80,7 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
 
     metadata = {"render.modes": ["human"]}
 
-    def __init__(self, get_reward=_get_reward, get_observation=_get_observation):
+    def __init__(self, reward="simple"):
         super(EDESClassificationBase_v0, self).__init__()
         self.action_space = spaces.Discrete(N_ACTIONS)
         self.action_space.dtype = np.int32
@@ -88,8 +88,15 @@ class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
             low=0, high=1, shape=(N_CHANNELS, HEIGHT, WIDTH), dtype="float32"
         )
         self._seq, self._ground_truth = None, None
-        self.get_reward = get_reward
-        self.get_observation = get_observation
+
+        if reward == "simple":
+            self.get_reward = _get_simple_reward
+        elif reward == "distance":
+            self.get_reward = _get_dist_reward
+        else:
+            raise ValueError(f'Reward spec "{reward}" is invalid.')
+
+        self.get_observation = _get_observation
 
     def is_ready(self):
         return self._seq is not None and self._ground_truth is not None
@@ -143,8 +150,7 @@ class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
     def __init__(
         self,
         seq_iterator,
-        get_reward=_get_reward,
-        get_observation=_get_observation,
+        reward="simple",
     ):
         def has_enough_frames(seq_and_labels):
             seq, labels = seq_and_labels
@@ -152,9 +158,7 @@ class EDESClassificationRandomVideos_v0(EDESClassificationBase_v0):
 
         # Let's filter out all seqs that have less frames than the number of channels.
         self.seq_iterator = filter(has_enough_frames, seq_iterator)
-        super(EDESClassificationRandomVideos_v0, self).__init__(
-            get_reward, get_observation
-        )
+        super(EDESClassificationRandomVideos_v0, self).__init__(reward)
 
     def reset(self):
         # Get the next image sequence and ground_truth.
@@ -180,7 +184,9 @@ def timeit_test():
     print("Time reseting the environment and stepping through it until done:")
     with ThreadPoolExecutor() as thread_pool_executor:
         echonet = Echonet("TRAIN")
-        seq_iterator = echonet.get_random_generator(random.PRNGKey(42), thread_pool_executor, 50)
+        seq_iterator = echonet.get_random_generator(
+            random.PRNGKey(42), thread_pool_executor, 50
+        )
         env = EDESClassificationRandomVideos_v0(seq_iterator)
 
         def thunk():
