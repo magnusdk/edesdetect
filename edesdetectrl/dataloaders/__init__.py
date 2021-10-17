@@ -1,6 +1,8 @@
-from jax import random
-import edesdetectrl.util.generators as generators
 from concurrent.futures import Executor
+from itertools import count
+
+import edesdetectrl.util.generators as generators
+from jax import random
 
 
 def _safe_get_item(items, index):
@@ -45,10 +47,13 @@ class DataLoader:
         executor: Executor,
         prefetch: int = 10,
     ):
-        """Return a generator that generates all items from dataloader, ordered by index."""
+        """Return a generator that generates all items from dataloader, ordered by index.
+
+        The generator will generate indefinitely, cycling back to the start after all items have been generated."""
 
         def task_gen():
-            for index in range(len(self)):
+            for n in count():
+                index = n % len(self)
                 yield lambda: _safe_get_item(self, index)
 
         generator = task_gen()

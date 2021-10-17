@@ -1,6 +1,5 @@
 import tensorflow as tf
 from jax.lib import xla_bridge as xb
-from mlflow.utils.logging_utils import MLFLOW_LOGGING_STREAM
 
 # A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
 # It is believed that it caused by some weird caching of XLA (Jax low-level code) backends.
@@ -17,13 +16,12 @@ from concurrent.futures.thread import ThreadPoolExecutor
 import acme
 import dm_env
 import gym
-import haiku as hk
 import jax
 import mlflow
 from acme import core
 from acme.agents import replay
-from acme.jax import networks as networks_lib
 
+import edesdetectrl.environments.binary_classification
 import edesdetectrl.model as model
 import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl import tracking
@@ -31,7 +29,7 @@ from edesdetectrl.acme_agents import dqn
 from edesdetectrl.config import config
 from edesdetectrl.dataloaders.echonet import Echonet
 from edesdetectrl.evaluator import Evaluator
-from edesdetectrl.util import functional, timer
+from edesdetectrl.util import timer
 
 CHECKPOINTS_DIR = "/scratch/users/magnukva/_checkpoints"
 CHECKPOINTS_DIR_REVERB = CHECKPOINTS_DIR + "/reverb"
@@ -153,30 +151,25 @@ def get_env(reward_spec, split, rng_key, thread_pool_executor):
 
 
 def main():
-    dqn_config = dqn.DQNConfig(discount=0)
+    dqn_config = dqn.DQNConfig(discount=0, reward_spec="simple", min_replay_size=1)
 
-    thread_pool_executor = ThreadPoolExecutor()
-    training_dataloader_rng_key, validation_dataloader_rng_key = jax.random.split(
-        jax.random.PRNGKey(dqn_config.seed), num=2
-    )
-    training_env = get_env(
-        dqn_config.reward_spec, "TRAIN", training_dataloader_rng_key, thread_pool_executor
-    )
-    validation_env = get_env(
-        dqn_config.reward_spec, "VAL", validation_dataloader_rng_key, thread_pool_executor
+    thread_pool_executor = ThreadPoolExecutor(max_workers=5)
+    echonet = Echonet("TRAIN")
+    rng_key = jax.random.PRNGKey(dqn_config.seed)
+    training_env = util_dm_env.GymWrapper(
+        gym.make(
+            "EDESClassification-v0",
+            seq_iterator=echonet.get_random_generator(
+                rng_key, thread_pool_executor, prefetch=5
+            ),
+            reward=dqn_config.reward_spec,
+        )
     )
     env_spec = acme.make_environment_spec(training_env)
 
     # Create network
-    network_hk = functional.chainf(
-        model.get_func_approx(env_spec.actions.num_values),
-        hk.transform,
-        hk.without_apply_rng,
-    )
-    dummy_obs = env_spec.observations.generate_value()
-    network = networks_lib.FeedForwardNetwork(
-        init=lambda rng: network_hk.init(rng, dummy_obs),
-        apply=network_hk.apply,
+    network = model.as_feed_forward_network(
+        model.get_func_approx(env_spec.actions.num_values), env_spec
     )
 
     # Set logging level so that we can see training logs
@@ -188,7 +181,7 @@ def main():
     # mlflow tracking set up
     mlflow_initializer = tracking.MLflowInitializer(
         "binary_classification_environment",
-        "Distance-based reward 2",
+        "Simple reward 3",
         dqn_config.as_dict(),
     )
     agent = dqn.DQN(network, reverb_replay, dqn_config)
@@ -201,9 +194,8 @@ def main():
     )
 
     evaluator = Evaluator(
-        validation_env,
         agent,
-        n_trajectories=200,
+        dqn_config,
         delta_episodes=100,
         start_episode=checkpointer._last_checkpointed_episode(),
     )

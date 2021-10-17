@@ -1,6 +1,7 @@
 import haiku as hk
 import jax
 import jax.numpy as jnp
+from acme.jax import networks as networks_lib
 
 
 def get_func_approx(num_actions):
@@ -25,3 +26,13 @@ def get_func_approx(num_actions):
         return f(S)  # Output shape: (batch_size, num_actions=2)
 
     return func_approx
+
+
+def as_feed_forward_network(hk_fn, env_spec) -> networks_lib.FeedForwardNetwork:
+    network_hk = hk.without_apply_rng(hk.transform(hk_fn))
+    dummy_obs = env_spec.observations.generate_value()
+    network = networks_lib.FeedForwardNetwork(
+        init=lambda rng: network_hk.init(rng, dummy_obs),
+        apply=network_hk.apply,
+    )
+    return network

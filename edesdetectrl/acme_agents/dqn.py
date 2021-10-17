@@ -13,7 +13,7 @@ from acme import adders, core, datasets, specs, types
 from acme.adders import reverb as adders_reverb
 from acme.agents import agent, replay
 from acme.agents.jax import actors
-from acme.agents.jax.dqn import config, learning_lib, losses
+from acme.agents.jax.dqn import learning_lib, losses
 from acme.jax import networks as networks_lib
 from acme.jax import variable_utils
 from reverb.platform.checkpointers_lib import DefaultCheckpointer
@@ -72,7 +72,7 @@ class DQNConfig:
     num_episodes: int = 5000
 
     # Environment
-    reward_spec: str = "distance"
+    reward_spec: str = "simple"
 
     def as_dict(self):
         return dataclasses.asdict(self)
@@ -255,6 +255,7 @@ class DQN(agent.Agent, core.Saveable, extensions.Evaluatable):
         super().__init__(actor, learner, min_observations, observations_per_step)
 
     def get_variables(self, names=[""]) -> List[List[np.ndarray]]:
+        """Return the current network parameters. Returned params are immutable."""
         # Names arg is unused, so [""] doesn't mean anything
         return super().get_variables(names)[0]
 
@@ -279,8 +280,26 @@ class DQN(agent.Agent, core.Saveable, extensions.Evaluatable):
             policy=policy,
             random_key=self._key_eval_actor,
             variable_client=FixedParams(self.get_variables()),
-            adder=self._reverb_replay.adder,
         )
 
         (self._key_eval_actor,) = jax.random.split(self._key_eval_actor, num=1)
         return actor
+
+
+def get_evaluation_actor(network: networks_lib.FeedForwardNetwork, params):
+    """Return an actor that uses a greedy policy."""
+
+    def policy(
+        params: networks_lib.Params,
+        key: jnp.ndarray,
+        observation: jnp.ndarray,
+    ) -> jnp.ndarray:
+        action_values = network.apply(params, observation)
+        return rlax.greedy().sample(key, action_values)
+
+    actor = actors.FeedForwardActor(
+        policy=policy,
+        random_key=jax.random.PRNGKey(42),  # Not used, but required.
+        variable_client=FixedParams(params),
+    )
+    return actor
