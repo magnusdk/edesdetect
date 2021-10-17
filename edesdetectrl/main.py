@@ -1,5 +1,5 @@
 import tensorflow as tf
-from jax._src.lib import xla_bridge as xb
+from jax.lib import xla_bridge as xb
 from mlflow.utils.logging_utils import MLFLOW_LOGGING_STREAM
 
 # A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
@@ -9,7 +9,6 @@ xb.backends()
 # Another bug(?) causes both Jaxlib and TensorFlow to pre-allocate the memory on a GPU. Let's stop one of them
 # (TensorFlow) from doing this.
 tf.config.experimental.set_visible_devices([], "GPU")
-
 import logging
 import os
 import pickle
