@@ -10,7 +10,7 @@ chex = "^0.0.8"
 dm-acme = {version = "^0.2.2", extras = ["jax"]}
 dm-haiku = "^0.0.4"
 gym = "^0.20.0"
-jax = "^0.2.20"
+jax = "0.2.20"
 jaxlib = {url = "https://storage.googleapis.com/jax-releases/cuda111/jaxlib-0.1.71+cuda111-cp38-none-manylinux2010_x86_64.whl"}
 opencv-python = "^4.5.1"
 optax = "^0.0.9"
@@ -20,10 +20,7 @@ scikit-learn = "^0.24.2"
 tensorflow = "^2.6.0"
 toml = "^0.10.2"
 torch = "^1.9.0"
-# There's a requirement for tensorflow >= 2.7.0 (which is unreleased 
-# btw) in the newest version of tensorflow-probability (which is the 
-# same as tfp-nightly). We have to depend on an earlier version.
-tfp-nightly = "^0.14.0.dev20210915"
+tensorflow-probability = "^0.14.1"
 mlflow = "^1.20.2"
 
 [tool.poetry.dev-dependencies]
