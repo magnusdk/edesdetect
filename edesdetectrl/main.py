@@ -186,6 +186,7 @@ def main():
     mlflow_initializer = tracking.MLflowInitializer(
         "binary_classification_environment",
         "Distance-based reward 2",
+        dqn_config.as_dict(),
     )
     agent = dqn.DQN(network, reverb_replay, dqn_config)
     checkpointer = CheckPointer(
