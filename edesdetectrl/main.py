@@ -1,3 +1,6 @@
+# export XLA_PYTHON_CLIENT_PREALLOCATE=false
+# export CUDA_VISIBLE_DEVICES=2
+
 import tensorflow as tf
 from jax.lib import xla_bridge as xb
 
@@ -132,8 +135,7 @@ def train_loop(
             # TODO: Use logging object.
             logging.info(f"  Episode {episode}/{num_episodes}")
         train_episode(training_env, actor)
-        if metrics := evaluator.step():
-            mlflow.log_metrics(metrics, step=episode)
+        evaluator.step()
         checkpointer.step()
 
 
@@ -151,7 +153,13 @@ def get_env(reward_spec, split, rng_key, thread_pool_executor):
 
 
 def main():
-    dqn_config = dqn.DQNConfig(discount=0, reward_spec="simple", min_replay_size=1)
+    dqn_config = dqn.DQNConfig(
+        discount=0,
+        reward_spec="simple",
+        min_replay_size=1,
+        num_episodes=10000,
+        batch_size=256,
+    )
 
     thread_pool_executor = ThreadPoolExecutor(max_workers=5)
     echonet = Echonet("TRAIN")
@@ -208,6 +216,7 @@ def main():
         network_params = agent.get_variables()
         pickle.dump(network_params, f)
 
+    evaluator.shutdown()
     mlflow.log_artifact(config["data"]["trained_params_path"])
     mlflow_initializer.end_run()
 
