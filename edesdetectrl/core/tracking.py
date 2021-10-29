@@ -21,6 +21,3 @@ class MLflowInitializer:
         )
         mlflow.log_params(self._parameters)
         return run.info.run_id
-
-    def end_run(self):
-        pass

@@ -1,5 +1,5 @@
-import edesdetectrl.metrics as metrics
-from edesdetectrl.metrics import Event
+import edesdetectrl.core.metrics as metrics
+from edesdetectrl.core.metrics import Event
 
 
 def test_pairs():

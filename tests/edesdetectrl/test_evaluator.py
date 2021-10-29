@@ -1,7 +1,4 @@
-from tests.mocks import agents, environments
-
-import edesdetectrl.evaluator as evaluator
-import edesdetectrl.util.dm_env as util_dm_env
+import edesdetectrl.core.evaluator as evaluator
 
 
 def test_avg_metrics():
@@ -13,51 +10,39 @@ def test_avg_metrics():
     )
 
 
-na = None  # "Not Applicable". Also, Batman.
-
-
 def test_evaluator_steps():
     class MockedEvaluation:
         num_evaluations = 0
 
-        def mock_evaluate(self):
+        def mock_evaluate(self, params, config):
+            assert params == "PARAMS"
+            assert config == "CONFIG"
             self.num_evaluations += 1
+            return {}
+
+    class MockedVariableSource:
+        def get_variables(self):
+            return "PARAMS"
 
     delta_episodes = 3
-    e = evaluator.Evaluator(na, na, na, delta_episodes=delta_episodes)
-    mocked_evaluation = MockedEvaluation()
-    e.evaluate = mocked_evaluation.mock_evaluate
-
-    for _ in range(delta_episodes):
-        assert 0 == mocked_evaluation.num_evaluations
-        e.step()
-
-    for _ in range(delta_episodes):
-        assert 1 == mocked_evaluation.num_evaluations
-        e.step()
-
-    assert 2 == mocked_evaluation.num_evaluations
-
-
-def test_evaluator_evaluate():
-    env = util_dm_env.GymWrapper(environments.SlidingState([0, 1, 0]))
-    evaluatable = agents.AlwaysPicksActionEvaluatable(action=0)
-    n_trajectories = 100
     e = evaluator.Evaluator(
-        env,
-        evaluatable,
-        n_trajectories,
-        delta_episodes=na,
-        start_episode=na,
+        MockedVariableSource(),
+        "CONFIG",
+        delta_episodes=delta_episodes,
+        metrics_logger=lambda _metrics, _episode: None,
+        use_multiprocessing=False,
     )
 
-    result = e.evaluate()
+    mocked_evaluation = MockedEvaluation()
+    evaluator.evaluate = mocked_evaluation.mock_evaluate
 
-    assert result == {
-        "sum_rewards": 1.0,
-        "accuracy": 0.5,
-        "balanced_accuracy": 0.0,
-        "recall": 0.5,
-        "precision": 0.5,
-        "f1": 0.5,
-    }
+    for episode in range(1, delta_episodes + 1):
+        print(episode, mocked_evaluation.num_evaluations)
+        assert 0 == mocked_evaluation.num_evaluations
+        e.step(episode, episode)
+
+    for episode in range(delta_episodes + 1, 2 * delta_episodes + 1):
+        assert 1 == mocked_evaluation.num_evaluations
+        e.step(episode, episode)
+
+    assert 2 == mocked_evaluation.num_evaluations

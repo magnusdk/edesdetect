@@ -1,9 +1,8 @@
 import gym
-from edesdetectrl.environments import mixins
 from gym import spaces
 
 
-class SlidingState(gym.Env, mixins.GenerateTrajectoryMixin):
+class SlidingState(gym.Env):
     """A mock-environment that has a list of pre-defined states that are
     iterated (slided) through after each step. The goal is to pick the
     action that equals the state at a given point."""

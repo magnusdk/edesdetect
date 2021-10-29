@@ -1,13 +1,13 @@
 import haiku as hk
 import jax
 import jax.numpy as jnp
+from acme import specs
 from acme.jax import networks as networks_lib
 
 
-def get_func_approx(num_actions):
-    def w_init(shape, dtype=None):
-        return jnp.zeros(shape, dtype="float32")
-
+def simple_dqn_network(
+    env_spec: specs.EnvironmentSpec,
+) -> networks_lib.FeedForwardNetwork:
     def func_approx(S):
         f = hk.Sequential(
             [
@@ -20,16 +20,12 @@ def get_func_approx(num_actions):
                 hk.Flatten(),
                 hk.Linear(256),
                 jax.nn.relu,
-                hk.Linear(num_actions, w_init=w_init),
+                hk.Linear(env_spec.actions.num_values, w_init=jnp.zeros),
             ]
         )
         return f(S)  # Output shape: (batch_size, num_actions=2)
 
-    return func_approx
-
-
-def as_feed_forward_network(hk_fn, env_spec) -> networks_lib.FeedForwardNetwork:
-    network_hk = hk.without_apply_rng(hk.transform(hk_fn))
+    network_hk = hk.without_apply_rng(hk.transform(func_approx))
     dummy_obs = env_spec.observations.generate_value()
     network = networks_lib.FeedForwardNetwork(
         init=lambda rng: network_hk.init(rng, dummy_obs),

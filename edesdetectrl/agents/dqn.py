@@ -2,7 +2,6 @@ import dataclasses
 from typing import Iterator, List
 
 import acme
-import edesdetectrl.acme_agents.extensions as extensions
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -211,7 +210,7 @@ def get_actor(
     return actor
 
 
-class DQN(agent.Agent, core.Saveable, extensions.Evaluatable):
+class DQN(agent.Agent, core.Saveable):
     def __init__(
         self,
         network: networks_lib.FeedForwardNetwork,
@@ -264,26 +263,6 @@ class DQN(agent.Agent, core.Saveable, extensions.Evaluatable):
 
     def restore(self, state):
         return self._learner.restore(state)
-
-    def get_evaluation_actor(self):
-        """Return an actor that uses a greedy policy."""
-
-        def policy(
-            params: networks_lib.Params,
-            key: jnp.ndarray,
-            observation: jnp.ndarray,
-        ) -> jnp.ndarray:
-            action_values = self._network.apply(params, observation)
-            return rlax.greedy().sample(key, action_values)
-
-        actor = actors.FeedForwardActor(
-            policy=policy,
-            random_key=self._key_eval_actor,
-            variable_client=FixedParams(self.get_variables()),
-        )
-
-        (self._key_eval_actor,) = jax.random.split(self._key_eval_actor, num=1)
-        return actor
 
 
 def get_evaluation_actor(network: networks_lib.FeedForwardNetwork, params):

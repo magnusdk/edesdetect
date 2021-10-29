@@ -1,6 +1,5 @@
 from concurrent.futures.thread import ThreadPoolExecutor
 
-import edesdetectrl.environments.mixins as mixins
 import gym
 import numpy as np
 from gym import spaces
@@ -72,7 +71,7 @@ def _get_mock_observation(env):
         return np.ones((N_CHANNELS, HEIGHT, WIDTH), dtype="float32")
 
 
-class EDESClassificationBase_v0(gym.Env, mixins.GenerateTrajectoryMixin):
+class EDESClassificationBase_v0(gym.Env):
     """Base class for ED/ES Binary Classification environment.
 
     Constructor takes a single video and ground truth list.
@@ -175,10 +174,10 @@ gym.register(
 
 
 def timeit_test():
-    from jax import random
     import timeit
 
     from edesdetectrl.dataloaders.echonet import Echonet
+    from jax import random
     from numpy.core.fromnumeric import mean
 
     print("Time reseting the environment and stepping through it until done:")

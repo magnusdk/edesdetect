@@ -1,9 +1,9 @@
 from acme import core
-import edesdetectrl.acme_agents.extensions as extensions
 
 
 class AlwaysPicksActionActor(core.Actor):
     """An Actor that only ever picks the given action."""
+
     def __init__(self, action):
         self.action = action
         super().__init__()
@@ -21,7 +21,7 @@ class AlwaysPicksActionActor(core.Actor):
         pass
 
 
-class AlwaysPicksActionEvaluatable(extensions.Evaluatable):
+class AlwaysPicksActionEvaluatable:
     def __init__(self, action):
         self.action = action
         super().__init__()
