@@ -1,11 +1,12 @@
 * TODO Introduction
-A very simple formulation was chosen to act as a baseline. ...
+A simple formulation was chosen to act as a baseline. The environment is an ultrasound video of the heart with labels on which cardiac phase each frame is in. For every step, the agent is shown the current frame plus the three previous and the three next frames, and makes a prediction on which cardiac phase the current frame is in. The agent thus have two possible actions: mark the current frame as Diastole or mark it as Systole. After each prediction, the current frame is moved one frame forwards, and the episode ends once the current frame is the last frame of the video.
 
+#+CAPTION: Visualization of the Binary Classification Environment loop. An agent sees the observation from the current frame and takes an action, either marking it as Diastole or as Systole, and gets back the reward and the observation for the next frame from the environment.
+[[./img/binary_classification_environment_loop.png]]
 
-* Explain how it works
-The environment is a video with labels on which cardiac phase each frame is in. For every step, the agent is shown the current frame plus the three previous and the three next frames, and it must make a prediction on which cardiac phase the current frame is in. The agent thus have two possible actions: mark the current frame as Diastole or Systole. After each prediction, the current frame is moved one frame forwards, and the episode ends once the current frame is the last frame of the video.
+The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them. A frame that the agent predicted to be Diastole, followed by a frame predicted to be Systole, is considered an ED frame, and vice-versa. This may cause there to be more or fewer predicted events than there are ground truth events, but as the agent becomes better at classifying the phase, the inferred ED and ES frames will converge towards the ground truth.
 
-The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them. A frame that the agent predicted to be Diastole, followed by a frame predicted to be Systole, is considered an ED frame, and vice-versa. This may cause there to be more or fewer predicted events than there are ground truth events, but as the agent becomes better at classifying the phase, ED and ES will converge towards the ground truth.
+TODO: Image showing how to infer ED/ES from classification
 
 Because the job of the agent is to classify each frame as either Diastole or Systole, we name this formulation "Binary Classification Environment".
 
@@ -13,7 +14,7 @@ Because the job of the agent is to classify each frame as either Diastole or Sys
 * TODO Reward functions
 Two reward functions have been explored: binary and distance-based.
 
-The binary reward scheme gives a reward of 1 after each correct prediction by the agent and a reward of 0 after each incorrect prediction.
+The binary reward function gives a reward of 1 after each correct prediction by the agent and a reward of 0 after each incorrect prediction.
 
 The distance-based reward scheme also gives a reward of 1 after each correct prediction, but penalizes incorrect predictions based on how far away from the nearest predicted phase the current frame is. This means that for example a prediction of Diastole for a frame that is in the middle of the Systole phase would give a greater penalty (negative reward) than if the frame was closer to the predicted phase Diastole.
 
@@ -25,7 +26,7 @@ Earlier work on detecting ED and ES frames have used a supervised learning appro
 
 Our Binary Classification Environment also gets around the imbalance problem by predicting only the current phase, either Diastole or Systole. There is still a natural class imbalance however, in that there generally are more Diastole frames than Systole, but it is now in a more reasonable range.
 
-We selected a simple DQN[TODO: citation] agent to train as a baseline. DQN uses Q-learning, which uses a state-action value function for selecting actions. In practice, the state-action value function is a neural network that takes the current state as input and outputs the predicted value of taking each action. A greedy policy may then select the action that has the highest predicted value. Because the agent doesn't affect the environment in any way by choosing one action over another, we could just as well have trained the Q-value function directly in a supervised learning manner. This means that under the hood, the agent is really just solving a regression problem, though with a moving ground truth. The function being fitted is two lines representing the value of taking the Diastole action and the Systole action. The shape of the lines depend on the reward function and the return hyper-parameters (such as discount factor and N-step bootstrapping parameter).
+We selected a simple DQN[TODO: citation] agent to train as a baseline. DQN uses Q-learning, which uses a state-action value function for selecting actions. In practice, the state-action value function is a neural network that takes the current state as input and outputs the predicted value of taking each action. A greedy policy may then select the action that has the highest predicted value. Because the agent doesn't affect the environment in any way by choosing one action over another, we could just as well have trained the Q-value function directly in a supervised learning manner. This means that under the hood, the agent is really just solving a regression problem, though with a moving ground truth. The function being fitted is two lines representing the value of taking the Diastole action and the Systole action. The shape of the lines depend on the reward function and the discount factor.
 
 TODO: Try to visualize how the regression line looks for the two reward schemes?
 
