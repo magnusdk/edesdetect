@@ -5,6 +5,7 @@ import acme
 import jax
 import jax.numpy as jnp
 import numpy as np
+from numpy.core import numeric
 import optax
 import reverb
 import rlax
@@ -37,7 +38,7 @@ class DQNConfig:
     # limitations under the License.
 
     """Configuration options for DQN agent."""
-    epsilon: float = 0.05  # Action selection via epsilon-greedy policy.
+    epsilon: float = 0.5  # Action selection via epsilon-greedy policy.
     # TODO(b/191706065): update all clients and remove this field.
     seed: int = 1  # Random seed.
 
@@ -52,7 +53,7 @@ class DQNConfig:
 
     # Replay options
     batch_size: int = 256  # Number of transitions per batch.
-    min_replay_size: int = 1_000  # Minimum replay size.
+    min_replay_size: int = 100_000  # Minimum replay size.
     max_replay_size: int = 500_000  # Maximum replay size.
     replay_table_name: str = adders_reverb.DEFAULT_PRIORITY_TABLE
     importance_sampling_exponent: float = 0.2  # Importance sampling for replay.
@@ -118,7 +119,7 @@ def get_reverb_replay(
         sampler=sampler,
         remover=reverb.selectors.Fifo(),
         max_size=config.max_replay_size,
-        rate_limiter=reverb.rate_limiters.MinSize(config.min_replay_size),
+        rate_limiter=reverb.rate_limiters.MinSize(1),
         signature=adders_reverb.NStepTransitionAdder.signature(
             environment_spec, extra_spec
         ),
@@ -146,6 +147,16 @@ def get_reverb_replay(
         prefetch_size=prefetch_size,
     ).as_numpy_iterator()
     return replay.ReverbReplay(server, adder, data_iterator, client=client)
+
+
+def parse_learning_rate(learning_rate):
+    if type(learning_rate) in (float, int):
+        return learning_rate
+    else:
+        "May be an S-expr."
+        f = learning_rate[0]
+        args = learning_rate[1:]
+        return f(*args)
 
 
 def get_learner(
