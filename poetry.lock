@@ -81,6 +81,19 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "bayesian-optimization"
+version = "1.2.0"
+description = "Bayesian Optimization package"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+numpy = ">=1.9.0"
+scikit-learn = ">=0.18.0"
+scipy = ">=0.14.0"
+
+[[package]]
 name = "black"
 version = "20.8b1"
 description = "The uncompromising code formatter."
@@ -182,6 +195,14 @@ description = "Extended pickling support for Python objects"
 category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "cma"
+version = "3.1.0"
+description = "CMA-ES, Covariance Matrix Adaptation Evolution Strategy for non-linear numerical optimization in Python"
+category = "main"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "colorama"
@@ -886,6 +907,25 @@ description = "Patch asyncio to allow nested event loops"
 category = "dev"
 optional = false
 python-versions = ">=3.5"
+
+[[package]]
+name = "nevergrad"
+version = "0.4.3.post8"
+description = "A Python toolbox for performing gradient-free optimization"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+bayesian-optimization = ">=1.2.0"
+cma = ">=2.6.0"
+numpy = ">=1.15.0"
+typing-extensions = ">=3.6.6"
+
+[package.extras]
+all = ["black (==20.8b1)", "mypy (>=0.800)", "pytest (>=4.3.0)", "pytest-cov (>=2.6.1)", "pylint (>=2.4.4)", "wheel (>=0.33.6)", "setuptools (>=41.2.0)", "sphinx (>=3.3.0)", "sphinx-rtd-theme (>=0.4.3)", "recommonmark (>=0.5.0)", "twine (>=3.1.1)", "autodocsumm (>=0.1.11)", "pandas (>=0.23.4)", "requests (>=2.21.0)", "xlwt (>=1.3.0)", "xlrd (>=1.2.0)", "lpips (==0.1.3)", "opencv-python (>=4.1.2.30)", "matplotlib (>=2.2.3)", "gym (>=0.12.1)", "gym-anm (>=1.0.1)", "torch (>=1.7.0)", "hiplot", "fcmaes (>=1.2.7)", "openpyxl (>=3.0.0)", "pyproj (>=2.6.1)", "pillow", "tqdm", "torchvision", "pyomo (>=5.7)", "mixsimulator (>=0.3.3)", "hyperopt (>=0.2.5)", "IOHexperimenter (>=0.2.8.7)", "cdt (>=0.5.23)", "koncept (>=0.2.2)", "tensorflow-estimator (>=2.3.0)", "scikit-learn (>=0.24)", "tensorflow (>=2.5.0)", "image-quality (>=1.2.7)", "keras (>=2.4.3)", "pymoo (>=0.4.2.2)", "bayes-optim (>=0.2.5.5)", "compiler-gym (>=0.1.8)"]
+benchmark = ["requests (>=2.21.0)", "xlwt (>=1.3.0)", "xlrd (>=1.2.0)", "lpips (==0.1.3)", "opencv-python (>=4.1.2.30)", "matplotlib (>=2.2.3)", "gym (>=0.12.1)", "gym-anm (>=1.0.1)", "torch (>=1.7.0)", "hiplot", "fcmaes (>=1.2.7)", "pandas (>=0.23.4)", "openpyxl (>=3.0.0)", "pyproj (>=2.6.1)", "pillow", "tqdm", "torchvision", "pyomo (>=5.7)", "mixsimulator (>=0.3.3)", "hyperopt (>=0.2.5)", "IOHexperimenter (>=0.2.8.7)", "cdt (>=0.5.23)", "koncept (>=0.2.2)", "tensorflow-estimator (>=2.3.0)", "scikit-learn (>=0.24)", "tensorflow (>=2.5.0)", "image-quality (>=1.2.7)", "keras (>=2.4.3)", "pymoo (>=0.4.2.2)", "bayes-optim (>=0.2.5.5)", "compiler-gym (>=0.1.8)"]
+dev = ["black (==20.8b1)", "mypy (>=0.800)", "pytest (>=4.3.0)", "pytest-cov (>=2.6.1)", "pylint (>=2.4.4)", "wheel (>=0.33.6)", "setuptools (>=41.2.0)", "sphinx (>=3.3.0)", "sphinx-rtd-theme (>=0.4.3)", "recommonmark (>=0.5.0)", "twine (>=3.1.1)", "autodocsumm (>=0.1.11)", "pandas (>=0.23.4)"]
 
 [[package]]
 name = "numpy"
@@ -1704,7 +1744,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "fee61098f72889ba6a1f419fb1b73345333d665a11b745f3dcfc5d3e8df9543c"
+content-hash = "2588c6b576ca7870976196bbc60c3d595e43644ff389507dae786151cbb359a1"
 
 [metadata.files]
 absl-py = [
@@ -1737,6 +1777,9 @@ attrs = [
 backcall = [
     {file = "backcall-0.2.0-py2.py3-none-any.whl", hash = "sha256:fbbce6a29f263178a1f7915c1940bde0ec2b2a967566fe1c65c1dfb7422bd255"},
     {file = "backcall-0.2.0.tar.gz", hash = "sha256:5cbdbf27be5e7cfadb448baf0aa95508f91f2bbc6c6437cd9cd06e2a4c215e1e"},
+]
+bayesian-optimization = [
+    {file = "bayesian-optimization-1.2.0.tar.gz", hash = "sha256:c2fd3af4b6cc24ee1c145295b2a900ffb9b455cad924e8185a8d5784712bc935"},
 ]
 black = [
     {file = "black-20.8b1.tar.gz", hash = "sha256:1c02557aa099101b9d21496f8a914e9ed2222ef70336404eeeac8edba836fbea"},
@@ -1820,6 +1863,10 @@ click = [
 cloudpickle = [
     {file = "cloudpickle-2.0.0-py3-none-any.whl", hash = "sha256:6b2df9741d06f43839a3275c4e6632f7df6487a1f181f5f46a052d3c917c3d11"},
     {file = "cloudpickle-2.0.0.tar.gz", hash = "sha256:5cd02f3b417a783ba84a4ec3e290ff7929009fe51f6405423cfccfadd43ba4a4"},
+]
+cma = [
+    {file = "cma-3.1.0-py2.py3-none-any.whl", hash = "sha256:415b6044b4f6b3b052f30e4697940c05532d1369a9ffd2a110c3f1ed88b3ea18"},
+    {file = "cma-3.1.0.tar.gz", hash = "sha256:3b83077fe3a52be1d8c82d61a22f600401c772b1add6ed5dd8152e1a2d15e3c6"},
 ]
 colorama = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
@@ -2267,6 +2314,10 @@ mypy-extensions = [
 nest-asyncio = [
     {file = "nest_asyncio-1.5.1-py3-none-any.whl", hash = "sha256:76d6e972265063fe92a90b9cc4fb82616e07d586b346ed9d2c89a4187acea39c"},
     {file = "nest_asyncio-1.5.1.tar.gz", hash = "sha256:afc5a1c515210a23c461932765691ad39e8eba6551c055ac8d5546e69250d0aa"},
+]
+nevergrad = [
+    {file = "nevergrad-0.4.3.post8-py3-none-any.whl", hash = "sha256:794a3a5b0bcf2a483dd15b2303c7c09034f9e8cff09b6820f7c52b07083ac62d"},
+    {file = "nevergrad-0.4.3.post8.tar.gz", hash = "sha256:be1476c638625cef4c80493458418f84cd8ffb0d1bfa5acb83d1864ff27b2997"},
 ]
 numpy = [
     {file = "numpy-1.19.5-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:cc6bd4fd593cb261332568485e20a0712883cf631f6f5e8e86a52caa8b2b50ff"},

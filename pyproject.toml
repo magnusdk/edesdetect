@@ -23,6 +23,7 @@ torch = "^1.9.0"
 mlflow = "^1.20.2"
 pip = "^21.3"
 tensorflow-probability = "^0.14.1"
+nevergrad = "^0.4.3"
 
 [tool.poetry.dev-dependencies]
 PySimpleGUI = "^4.47.0"
