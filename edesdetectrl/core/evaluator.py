@@ -15,7 +15,6 @@ from edesdetectrl import environments
 from edesdetectrl.agents import dqn
 from edesdetectrl.core import stepper
 from edesdetectrl.dataloaders.echonet import Echonet
-from mlflow.exceptions import MlflowException
 
 
 def avg_metrics(all_metrics: dict) -> dict:
@@ -49,20 +48,7 @@ class MLFlowLogger(Logger):
 
     def get_best_score(self, metric_name):
         active_run_id = mlflow.active_run().info.run_id
-        client = mlflow.tracking.MlflowClient()
-        try:
-            # client.get_metric_history(...) raises an exception if the emtric has not been logged before.
-            # See issue: https://github.com/mlflow/mlflow/issues/4973
-            metric_history = client.get_metric_history(active_run_id, metric_name)
-        except MlflowException:
-            metric_history = []
-
-        return (
-            max(map(lambda x: x.value, metric_history))
-            if metric_history
-            # If metric_history is an empty list return a really low number.
-            else float("-inf")
-        )
+        return util_mlflow.best_score(active_run_id, metric_name)
 
 
 def log_metrics(
@@ -94,24 +80,26 @@ class Evaluator(stepper.Stepper):
         variable_source: acme.VariableSource,
         config: dqn.DQNConfig,
         delta_episodes: int,
+        min_steps: int,
         logger: Logger = _ml_flow_logger,
         use_multiprocessing: bool = True,
     ):
         self._variable_source = variable_source
         self._config = config
         self._delta_episodes = delta_episodes
+        self._min_steps = min_steps
         self._logger = logger
         self._use_multiprocessing = use_multiprocessing
         if use_multiprocessing:
             self._process_pool_executor = ProcessPoolExecutor(
-                max_workers=5,
+                max_workers=10,
                 # We must use "spawn" mp-context, otherwise the program crashes.
                 # Default "fork" mp-context doesn't play well with multi-threaded programs, with JAX is.
                 mp_context=multiprocessing.get_context("spawn"),
             )
 
-    def step(self, episode, _):
-        if episode % self._delta_episodes == 0:
+    def step(self, episode, steps):
+        if episode % self._delta_episodes == 0 and steps >= self._min_steps:
             if self._use_multiprocessing:
                 evaluate_and_log_metrics(
                     self._variable_source.get_variables(),

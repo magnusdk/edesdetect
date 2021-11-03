@@ -37,7 +37,7 @@ def save_variables(variables):
     mlflow.log_artifact(path)
 
 
-def main(dqn_config: dqn.DQNConfig):
+def main(dqn_config: dqn.DQNConfig, experiment="default", run_name=None):
     # Initialize random keys
     initial_key = jax.random.PRNGKey(dqn_config.seed)
     (env_rng_key,) = jax.random.split(initial_key, num=1)
@@ -62,9 +62,7 @@ def main(dqn_config: dqn.DQNConfig):
     )
     # Checkpointing
     mlflow_initializer = tracking.MLflowInitializer(
-        "binary_classification_environment",
-        "Simple reward 3",
-        dqn_config.as_dict(),
+        experiment, run_name, dqn_config.as_dict()
     )
     checkpointer = CheckPointer(
         agent,
