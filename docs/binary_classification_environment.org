@@ -1,12 +1,15 @@
-* TODO Introduction
+* Introduction
 A simple formulation was chosen to act as a baseline. The environment is an ultrasound video of the heart with labels on which cardiac phase each frame is in. For every step, the agent is shown the current frame plus the three previous and the three next frames, and makes a prediction on which cardiac phase the current frame is in. The agent thus have two possible actions: mark the current frame as Diastole or mark it as Systole. After each prediction, the current frame is moved one frame forwards, and the episode ends once the current frame is the last frame of the video.
 
 #+CAPTION: Visualization of the Binary Classification Environment loop. An agent sees the observation from the current frame and takes an action, either marking it as Diastole or as Systole, and gets back the reward and the observation for the next frame from the environment.
+#+NAME: fig:bce_loop
 [[./img/binary_classification_environment_loop.png]]
 
-The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them. A frame that the agent predicted to be Diastole, followed by a frame predicted to be Systole, is considered an ED frame, and vice-versa. This may cause there to be more or fewer predicted events than there are ground truth events, but as the agent becomes better at classifying the phase, the inferred ED and ES frames will converge towards the ground truth.
+The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them by looking at the transitions from predicted Diastolic to predicted Systolic.
 
-TODO: Image showing how to infer ED/ES from classification
+#+CAPTION: How to find the End-Diastolic (ED) and End-Systolic (ES) from predicted phase. Upper section: good predictions. Lower section: noisy predictions. The noisier the predictions are, the more ED and ES events are incorrectly predicted.
+#+NAME: fig:bce_predicted_events
+[[./img/ed_es_from_predictions.png]]
 
 Because the job of the agent is to classify each frame as either Diastole or Systole, we name this formulation "Binary Classification Environment".
 
@@ -33,14 +36,13 @@ TODO: Try to visualize how the regression line looks for the two reward schemes?
 For this reason, we don't think that the Binary Classification Environment formulation will perform better than the curent state-of-the-art supervised learning approaches, unless there is some fundamental advantage to regressing on two lines instead of one. It is however a good baseline that we can build upon.
 
 
-* Metrics, accuracy just like in a (binary) classification task
-The standard for measuring performance in the ED-/ES-frame detection task is the /average absolute frame difference (aaFD)/. aaFD is defined as
+* TODO Evaluation metrics
+The standard for measuring performance in the ED-/​ES-frame detection task is the /average absolute frame difference (aaFD)/. aaFD is defined as
 \[aaFD=\frac{1}{N}\sum_{t=1}^N|y_t-\hat{y}_t|\]
 where N is the number of ED/ES events, $y_t$ is the ground truth event at time $t$ (of $N$), and $\hat{y}_t$ is the predicted event at time $t$.
 
-Because of our formulation's close relation to a binary classification task we are also able to use metrics such as accuracy, precision, and recall (etc). These are more useful metrics while the agent is training because they have stronger definitions for when the performance is poor. aaFD is not well defined when there are not an equal number of predicted events as there are ground truth events.
+But as can be seen in figure [[fig:bce_predicted_events]], when the predictions are noisy and imperfect there will be more predicted events than there are in the ground truth. The above definition of aaFD requires there to be an equal number of predicted events as there are in the ground truth. But since the binary classification environment formulation is so similar to just a regular classification problem it lends itself to classification metrics, such as accuracy, precision, recall etc.
 
-For comparing the results of our method against the current SOTA we will use aaFD.
 
 
 * The network, hyper-parameters, algorithm, etc.
