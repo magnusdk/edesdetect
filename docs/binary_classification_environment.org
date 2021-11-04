@@ -15,13 +15,63 @@ Because the job of the agent is to classify each frame as either Diastole or Sys
 
 
 * TODO Reward functions
-Two reward functions have been explored: binary and distance-based.
+The reward function is one of the most important things to consider when designing a RL formulation. It is what guides the agent and must therefore represent our goals for the algorithm. 
 
-The binary reward function gives a reward of 1 after each correct prediction by the agent and a reward of 0 after each incorrect prediction.
+The standard for measuring performance in the ED-/​ES-frame detection task is the /average absolute frame difference (aaFD)/. aaFD is defined as
+\[aaFD=\frac{1}{N}\sum_{t=1}^N|y_t-\hat{y}_t|\]
+where N is the number of ED/ES events, $y_t$ is the ground truth event at time $t$ (of $N$), and $\hat{y}_t$ is the predicted event at time $t$.
 
-The distance-based reward scheme also gives a reward of 1 after each correct prediction, but penalizes incorrect predictions based on how far away from the nearest predicted phase the current frame is. This means that for example a prediction of Diastole for a frame that is in the middle of the Systole phase would give a greater penalty (negative reward) than if the frame was closer to the predicted phase Diastole.
+aaFD is the key metric that we want to optimize (minimize), and should therefore be considered for the reward function. There are a couple of problems with using aaFD as a reward signal, however: 
+1. aaFD is calculated on a whole sequence of frames, meaning that we can't give the agent a reward until it has made a prediction for each frame. This happens at the end of the episode, which is usually tens of frames long in the training dataset. Giving a reward too infrequently makes the agent harder to train and is called the /sparse reward problem/ [TODO: citation?].
+2. aaFD is not well defined for when there is an unequal number of predicted events as there are ground truth events, which there invariably will be during training (see lower section of figure [[fig:bce_predicted_events]]).
+
+We could instead continue to treat it as a binary classification problem and give positive rewards for correct predictions, and negative rewards for incorrect ones. Then we would be able to give a reward after every step, making the reward signal no longer sparse.
+
+We must still decide how much reward will be given for correct predictions and how much penalty will be given for incorrect ones. A simple reward function is to give a reward of 1 for correct ones and 0 for incorrect ones:
+
+\begin{equation}
+  R_1(s, a) \triangleq
+    \left\{
+	    \begin{array}{ll}
+		    1 & \mbox{if } s=a \\
+  	  	0 & \mbox{if } s\neq a
+	    \end{array}
+    \right
+\end{equation}
+
+We could also do the same, but penalize incorrect predictions more:
+
+\begin{equation}
+  R_2(s, a) \triangleq
+    \left\{
+	    \begin{array}{ll}
+		    1 & \mbox{if } s=a \\
+  	  	-1 & \mbox{if } s\neq a
+	    \end{array}
+    \right
+\end{equation}
+
+We could also penalize incorrect predictions according to how wrong they were:
+
+\begin{equation}
+  R_3(s, a) \triangleq 1-d(s, a)
+\end{equation}
+
+where $\d(s,a)$ is the number of frames to the closest frame with the predicted phase. This gives a reward of 1 for correct predictions, 0 for a one-off incorrect prediction, and a penalty proportional to how off it was.
+
 
 TODO: plot reward functions together.
+
+
+
+
+TODO: Note to self:
+- Things to try out:
+  - Defining a robust aaFD
+  - Try to use it as a reward signal at the end of an episode (or balanced accuracy if can't make robust aaFD).
+  - Give higher penalties for incorrect predictions that are close to transitions instead of the opposite (as in distance-based).
+
+
 
 
 * TODO Similarities to SOTA, regression
@@ -49,4 +99,25 @@ But as can be seen in figure [[fig:bce_predicted_events]], when the predictions 
 Our network is based on the original Atari DQN network. It consists of a convolutional layer with 16 8x8 kernels and a stride of 4, followed by a ReLU activation layer, then another convolutional layer with 32 4x4 kernels and a stride of 2, also followed by a ReLU activation layer. This is then flattened and passed through a fully connected layer with 256 outputs, which is then passed through yet another ReLU layer, before finally being passed through a fully connected with two outputs representing the value of each of the two possible actions.
 
 The agent uses a discount factor of 0.99 and 5-step bootstrapping.
+
+
+
+* TODO Choice of frameworks
+- JAX
+  - Haiku
+  - Optax
+- Acme
+  - Rlax
+  - Distributed algorithms with Launchpad
+  - Reverb
+
+* TODO Performance insight app
+- Redo in browser with ClojureScript
+- Log metrics for each video over time and show in PerfIn
+
+
+* TODO Describe dataset (Echonet)
+
+
+
 
