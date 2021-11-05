@@ -6,24 +6,29 @@ version = "0.1.0"
 
 [tool.poetry.dependencies]
 SimpleITK = "^2.1.1"
+absl-py = "0.12.0"
 chex = "^0.0.8"
-dm-acme = {version = "^0.2.2", extras = ["jax"]}
+dm-acme = {git = "ssh://git@github.com/deepmind/acme.git"}
 dm-haiku = "^0.0.4"
+dm-launchpad-nightly = "0.3.0.dev20210818"
+dm-reverb = "0.4.0"
+dm-sonnet = "^2.0.0"
 gym = "^0.20.0"
 jax = "0.2.20"
 jaxlib = {url = "https://storage.googleapis.com/jax-releases/cuda111/jaxlib-0.1.71+cuda111-cp38-none-manylinux2010_x86_64.whl"}
+mlflow = "^1.20.2"
+nevergrad = "^0.4.3"
 opencv-python = "^4.5.1"
 optax = "^0.0.9"
 pandas = "^1.3.3"
+pip = "^21.3"
 python = "^3.8"
+rlax = "^0.0.4"
 scikit-learn = "^0.24.2"
 tensorflow = "^2.6.0"
+tfp-nightly = "0.14.0.dev20210818"
 toml = "^0.10.2"
 torch = "^1.9.0"
-mlflow = "^1.20.2"
-pip = "^21.3"
-tensorflow-probability = "^0.14.1"
-nevergrad = "^0.4.3"
 
 [tool.poetry.dev-dependencies]
 PySimpleGUI = "^4.47.0"

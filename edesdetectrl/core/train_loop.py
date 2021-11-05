@@ -27,7 +27,11 @@ def train_loop(
     start_episode: int = 0,
     episode_stepper: Stepper = None,
 ):
-    for episode in range(start_episode+1, num_episodes+1):
+    total_steps = 0
+    for episode in range(start_episode + 1, num_episodes + 1):
         num_steps = train_episode(training_env, actor)
+        total_steps += num_steps
+        if episode % 50 == 0:
+            print(f"Episode: {episode}, Steps: {total_steps}")
         if episode_stepper:
-            episode_stepper.step(episode, num_steps)
+            episode_stepper.step(episode, total_steps)

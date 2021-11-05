@@ -18,6 +18,7 @@ import pickle
 import acme
 import jax
 import mlflow
+import optax
 
 import edesdetectrl.core as core
 from edesdetectrl.agents import dqn
@@ -58,37 +59,42 @@ def main(dqn_config: dqn.DQNConfig, experiment="default", run_name=None):
     evaluator = Evaluator(
         agent,
         dqn_config,
-        delta_episodes=100,
+        delta_episodes=20000,
+        min_steps=dqn_config.min_replay_size,
     )
     # Checkpointing
     mlflow_initializer = tracking.MLflowInitializer(
         experiment, run_name, dqn_config.as_dict()
     )
-    checkpointer = CheckPointer(
-        agent,
-        reverb_replay,
-        mlflow_initializer,
-        config["checkpoints"]["checkpoints_dir"],
-        30,
-    )
+    # checkpointer = CheckPointer(
+    #    agent,
+    #    reverb_replay,
+    #    mlflow_initializer,
+    #    config["checkpoints"]["checkpoints_dir"],
+    #    30,
+    # )
     run_id = mlflow_initializer.start_run()
-    checkpointer.set_run_id(run_id)
-    episode_stepper = stepper.Combined(checkpointer, evaluator)
+    # checkpointer.set_run_id(run_id)
+    episode_stepper = evaluator  # stepper.Combined(checkpointer, evaluator)
 
     # Train the agent
     train_loop.train_loop(
         env,
         agent,
         dqn_config.num_episodes,
-        start_episode=checkpointer._last_checkpointed_episode(),
+        # start_episode=checkpointer._last_checkpointed_episode(),
         episode_stepper=episode_stepper,
     )
 
     # Save variables and shut down
     save_variables(agent.get_variables())
+    del reverb_replay, agent
     evaluator.shutdown()
-    checkpointer.shutdown()
+    # checkpointer.shutdown()
     shutdown_env()
+    mlflow.end_run()
+
+    return run_id
 
 
 if __name__ == "__main__":
@@ -96,10 +102,22 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, force=True)
 
     dqn_config = dqn.DQNConfig(
+        seed=4239814,
         discount=0,
         reward_spec="simple",
-        min_replay_size=1,
-        num_episodes=500,
-        batch_size=256,
+        # min_replay_size=1,
+        batch_size=512,
+        num_episodes=8000,
+        learning_rate=1e-3
+        # [
+        #    optax.piecewise_constant_schedule,
+        #    1e-1,
+        #    {
+        #        50: 1e-2,
+        #        100: 1e-3,
+        #        200: 1e-4,
+        #        300: 1e-5,
+        #    },
+        # ],
     )
     main(dqn_config)
