@@ -5,7 +5,7 @@ A simple formulation was chosen to act as a baseline. The environment is an ultr
 #+NAME: fig:bce_loop
 [[./img/binary_classification_environment_loop.png]]
 
-The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them by looking at the transitions from predicted Diastolic to predicted Systolic.
+The agent doesn't directly predict which frames are ED and which frames are ES, but after an agent has made predictions for every frame we can easily find them by looking at the transitions from predicted Diastolic to predicted Systolic frames.
 
 #+CAPTION: How to find the End-Diastolic (ED) and End-Systolic (ES) from predicted phase. Upper section: good predictions. Lower section: noisy predictions. The noisier the predictions are, the more ED and ES events are incorrectly predicted.
 #+NAME: fig:bce_predicted_events
@@ -21,7 +21,7 @@ The standard for measuring performance in the ED-/​ES-frame detection task is 
 \[aaFD=\frac{1}{N}\sum_{t=1}^N|y_t-\hat{y}_t|\]
 where N is the number of ED/ES events, $y_t$ is the ground truth event at time $t$ (of $N$), and $\hat{y}_t$ is the predicted event at time $t$.
 
-aaFD is the key metric that we want to optimize (minimize), and should therefore be considered for the reward function. There are a couple of problems with using aaFD as a reward signal, however: 
+aaFD is the key metric that we want to optimize (minimize), and should therefore be considered for the reward function[fn::Of course, since we want to minimize aaFD, the reward should be lower the higher the aaFD is, and vice-versa.]. There are a couple of problems with using aaFD as a reward signal, however: 
 1. aaFD is calculated on a whole sequence of frames, meaning that we can't give the agent a reward until it has made a prediction for each frame. This happens at the end of the episode, which is usually tens of frames long in the training dataset. Giving a reward too infrequently makes the agent harder to train and is called the /sparse reward problem/ [TODO: citation?].
 2. aaFD is not well defined for when there is an unequal number of predicted events as there are ground truth events, which there invariably will be during training (see lower section of figure [[fig:bce_predicted_events]]).
 
@@ -57,7 +57,7 @@ We could also penalize incorrect predictions according to how wrong they were:
   R_3(s, a) \triangleq 1-d(s, a)
 \end{equation}
 
-where $\d(s,a)$ is the number of frames to the closest frame with the predicted phase. This gives a reward of 1 for correct predictions, 0 for a one-off incorrect prediction, and a penalty proportional to how off it was.
+where $d(s,a)$ is the number of frames to the closest frame with the predicted phase. This gives a reward of 1 for correct predictions, 0 for a one-off incorrect prediction, and otherwise a penalty proportional to how off it was.
 
 
 TODO: plot reward functions together.
@@ -74,14 +74,14 @@ TODO: Note to self:
 
 
 
-* TODO Similarities to SOTA, regression
+* TODO Similarities to SOTA, regression (discussion)
 Earlier work on detecting ED and ES frames have used a supervised learning approach, formulating the problem as a regression task[TODO: citations from essay]. The line being regressed encodes the phase such that is increasing while in Diastolic phase and decreasing while in Systolic phase. This is in contrast to simply treating the problem as a classification task, using the classes "ED", "ES", and "Trivial", which would result in a class imbalance because the "Trivial" class is greatly over-represented.
 
 Our Binary Classification Environment also gets around the imbalance problem by predicting only the current phase, either Diastole or Systole. There is still a natural class imbalance however, in that there generally are more Diastole frames than Systole, but it is now in a more reasonable range.
 
-We selected a simple DQN[TODO: citation] agent to train as a baseline. DQN uses Q-learning, which uses a state-action value function for selecting actions. In practice, the state-action value function is a neural network that takes the current state as input and outputs the predicted value of taking each action. A greedy policy may then select the action that has the highest predicted value. Because the agent doesn't affect the environment in any way by choosing one action over another, we could just as well have trained the Q-value function directly in a supervised learning manner. This means that under the hood, the agent is really just solving a regression problem, though with a moving ground truth. The function being fitted is two lines representing the value of taking the Diastole action and the Systole action. The shape of the lines depend on the reward function and the discount factor.
+Our choice of using DQN as the RL algorithm means that we are also treating the problem as a regression task under the hood. This is because the DQN tries to learn the Q-function, i.e. the expected future return of taking a specific action in a given state. The output of the Q-function applied to each frame in a sequence is two curves, one for each action, and once we have a trained agent agent we select the action with the highest value for each frame. This is the same as in the work by [TODO: cite Lane et al 2021] although they are regressing a single line while we are regressing two, and their ground truth is a hand-crafted curve while ours depends only on the rewards given.
 
-TODO: Try to visualize how the regression line looks for the two reward schemes?
+TODO: Include "true" Q-function plots here for different rewards.
 
 For this reason, we don't think that the Binary Classification Environment formulation will perform better than the curent state-of-the-art supervised learning approaches, unless there is some fundamental advantage to regressing on two lines instead of one. It is however a good baseline that we can build upon.
 
@@ -111,13 +111,30 @@ The agent uses a discount factor of 0.99 and 5-step bootstrapping.
   - Distributed algorithms with Launchpad
   - Reverb
 
+
+** Reverb
+An important component of many RL algorithms is the Replay Buffer. In it, the agent stores previous experiences which it can sample from in order to learn about how to better act in the environment in the future. In offline RL there is a natural distinction between acting in the environment and learning from past experiences. The acting process performs actions according to some policy, while the learning process updates the policy with respect to previous experiences. These processes can run independently of each other, as seen in figure [[fig:sep_actor_learner_reverb]]. This allows us the run the algorithm distributedly, with multiple actors generating experience, and possibly multiple learners updating the actors.
+
+#+CAPTION: The separation of actor and learner. Actor and learner are only connected via the replay buffer (except when the actor periodically retrieves the updated policy from the learner).
+#+NAME: fig:sep_actor_learner_reverb
+[[./img/sep_actor_learner_reverb.png]]
+
+Reverb[TODO: Citation] is a database developed by DeepMind that facilitates training agents distributedly by acting as a replay buffer. There are four main components to a Reverb table:
+- The maximum size, which is how many items the table can hold in total.
+- The sampler, which determines the strategy for how to sample items from the table.
+- The remover, which determines the strategy for how to remove items, for example when the table has reached a maximum size of items.
+- And the rate limiter, which can be used to ensure that there is a balance between how often items are inserted and how often they are sampled.
+
+If we want to sample items from the table uniformly (randomly), then we could use a uniform sampler. If we want to remove the oldest items first when the table is full, then we could use a First-In-First-Out (FIFO) remover. If we want to make sure that the actors don't insert items too quickly for the learner, and that the learner doesn't sample items faster than the actors can insert them, we could use a sample-to-insert-ratio rate limiter. The rate limiter will block insertion- or sample-calls to the table until the other component has caught up.
+
+
+
 * TODO Performance insight app
 - Redo in browser with ClojureScript
 - Log metrics for each video over time and show in PerfIn
 
 
 * TODO Describe dataset (Echonet)
-
 
 
 
