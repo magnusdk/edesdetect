@@ -1,123 +1,123 @@
-import os
+# python3
+# Copyright 2018 DeepMind Technologies Limited. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
 
-import tensorflow as tf
-from jax.lib import xla_bridge as xb
+import dataclasses
+from concurrent.futures.thread import ThreadPoolExecutor
 
-# A bug(?) causes the program to crash because it can not find the tpu_driver when running on the UiO servers.
-# It is believed that it caused by some weird caching of XLA (Jax low-level code) backends.
-# Calling xb.backends() is a workaround.
-xb.backends()
-# Another bug(?) causes both Jaxlib and TensorFlow to pre-allocate the memory on a GPU. Let's stop one of them
-# (TensorFlow) from doing this.
-tf.config.experimental.set_visible_devices([], "GPU")
-import logging
-import pickle
-
-import acme
+import gym
 import jax
+import launchpad as lp
+from acme import specs
+
+import edesdetectrl.agents.dqn.config as dqn_config
+import edesdetectrl.util.dm_env as util_dm_env
+from edesdetectrl.agents.dqn import agent
+from edesdetectrl.dataloaders.echonet import Echonet
+from edesdetectrl.nets import simple_dqn_network, mobilenet
+
+
+def get_environment_factory(rng_key):
+    def environment_factory(is_eval: bool, split="TRAIN"):
+        import edesdetectrl.environments.binary_classification
+
+        thread_pool_executor = ThreadPoolExecutor(max_workers=5)
+        if is_eval:
+            if split == "VAL":
+                seq_iterator = Echonet("VAL").get_generator(
+                    thread_pool_executor, prefetch=5
+                )
+                env = gym.make(
+                    "EDESClassification-v0",
+                    seq_iterator=seq_iterator,
+                    reward="simple",
+                )
+            elif split == "TRAIN":
+                seq_iterator = Echonet("TRAIN").get_random_generator(
+                    rng_key, thread_pool_executor, prefetch=5
+                )
+                env = gym.make(
+                    "EDESClassification-v0",
+                    seq_iterator=seq_iterator,
+                    reward="simple",
+                )
+
+            return {
+                "num_samples": len(Echonet("VAL")),
+                "env": util_dm_env.GymWrapper(env),
+                "split": split,
+            }
+
+        else:
+            seq_iterator = Echonet(split).get_random_generator(
+                rng_key, thread_pool_executor, prefetch=5
+            )
+            env = gym.make(
+                "EDESClassification-v0",
+                seq_iterator=seq_iterator,
+                reward="simple",
+            )
+            return util_dm_env.GymWrapper(env)
+
+    return environment_factory
+
+
+def network_factory(env_spec: specs.EnvironmentSpec):
+    return mobilenet(env_spec)
+    #return simple_dqn_network(env_spec)
+
+
 import mlflow
-import optax
 
-import edesdetectrl.core as core
-from edesdetectrl.agents import dqn
-from edesdetectrl.config import config
-from edesdetectrl.core import stepper, tracking, train_loop
-from edesdetectrl.core.checkpointer import CheckPointer
-from edesdetectrl.core.evaluator import Evaluator
+import edesdetectrl.config as general_config
 
 
-def save_variables(variables):
-    dir = config["data"]["trained_params_path"]
-    os.makedirs(dir, exist_ok=True)
-    path = dir + "variables.pkl.lz4"
-    with open(path, "wb") as f:
-        pickle.dump(variables, f)
+def main():
+    mlflow.set_tracking_uri(general_config.config["mlflow"]["tracking_uri"])
+    mlflow.set_experiment("dqn_distributed")
+    with mlflow.start_run() as run:
+        run_id = run.info.run_id
+        tracking_id = general_config.config["mlflow"]["tracking_uri"]
+        experiment = "dqn_distributed"
 
-    mlflow.log_artifact(path)
+        seed = 42
+        config = dqn_config.DQNConfig(
+            epsilon=1,
+            learning_rate=1e-4,
+            discount=0,
+            n_step=1,
+            num_sgd_steps_per_step=8,
+            seed=seed,
+        )
+        mlflow.log_params(dataclasses.asdict(config))
+        environment_factory = get_environment_factory(jax.random.PRNGKey(seed + 1))
+        program = agent.DistributedDQN(
+            environment_factory=environment_factory,
+            network_factory=network_factory,
+            config=config,
+            seed=seed,
+            num_actors=6,
+            tracking_uri=tracking_id,
+            experiment=experiment,
+            run_id=run_id,
+            max_number_of_steps=4_000_000,
+        ).build()
 
-
-def main(dqn_config: dqn.DQNConfig, experiment="default", run_name=None):
-    # Initialize random keys
-    initial_key = jax.random.PRNGKey(dqn_config.seed)
-    (env_rng_key,) = jax.random.split(initial_key, num=1)
-
-    # Set up environment
-    env, shutdown_env = core.get_env(dqn_config, env_rng_key)
-    env_spec = acme.make_environment_spec(env)
-
-    # Set up agent
-    reverb_replay = dqn.get_reverb_replay(
-        env_spec,
-        config["checkpoints"]["checkpoints_dir"] + "/reverb",
-        dqn_config,
-    )
-    agent = core.get_agent(dqn_config, reverb_replay, env_spec)
-
-    # Set up training-loop related stuff
-    evaluator = Evaluator(
-        agent,
-        dqn_config,
-        delta_episodes=20000,
-        min_steps=dqn_config.min_replay_size,
-    )
-    # Checkpointing
-    mlflow_initializer = tracking.MLflowInitializer(
-        experiment, run_name, dqn_config.as_dict()
-    )
-    # checkpointer = CheckPointer(
-    #    agent,
-    #    reverb_replay,
-    #    mlflow_initializer,
-    #    config["checkpoints"]["checkpoints_dir"],
-    #    30,
-    # )
-    run_id = mlflow_initializer.start_run()
-    # checkpointer.set_run_id(run_id)
-    episode_stepper = evaluator  # stepper.Combined(checkpointer, evaluator)
-
-    # Train the agent
-    train_loop.train_loop(
-        env,
-        agent,
-        dqn_config.num_episodes,
-        # start_episode=checkpointer._last_checkpointed_episode(),
-        episode_stepper=episode_stepper,
-    )
-
-    # Save variables and shut down
-    save_variables(agent.get_variables())
-    del reverb_replay, agent
-    evaluator.shutdown()
-    # checkpointer.shutdown()
-    shutdown_env()
-    mlflow.end_run()
-
-    return run_id
+        # Launch experiment.
+        lp.launch(program, lp.LaunchType.LOCAL_MULTI_PROCESSING)
 
 
 if __name__ == "__main__":
-    # Set logging level so that we can see training logs
-    logging.basicConfig(level=logging.INFO, force=True)
-
-    dqn_config = dqn.DQNConfig(
-        seed=4239814,
-        discount=0,
-        reward_spec="simple",
-        # min_replay_size=1,
-        batch_size=512,
-        num_episodes=8000,
-        learning_rate=1e-3
-        # [
-        #    optax.piecewise_constant_schedule,
-        #    1e-1,
-        #    {
-        #        50: 1e-2,
-        #        100: 1e-3,
-        #        200: 1e-4,
-        #        300: 1e-5,
-        #    },
-        # ],
-    )
-    main(dqn_config)
+    main()

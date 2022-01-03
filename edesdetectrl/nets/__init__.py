@@ -8,7 +8,7 @@ from acme.jax import networks as networks_lib
 def simple_dqn_network(
     env_spec: specs.EnvironmentSpec,
 ) -> networks_lib.FeedForwardNetwork:
-    def func_approx(S):
+    def feed_forward(S, is_training=None):
         f = hk.Sequential(
             [
                 # TODO: Fix pre-processing and re-add it here.
@@ -25,10 +25,29 @@ def simple_dqn_network(
         )
         return f(S)  # Output shape: (batch_size, num_actions=2)
 
-    network_hk = hk.without_apply_rng(hk.transform(func_approx))
+    network_hk = hk.without_apply_rng(hk.transform_with_state(feed_forward))
     dummy_obs = env_spec.observations.generate_value()
+    batched_dummy_obs = jnp.expand_dims(dummy_obs, 0)
     network = networks_lib.FeedForwardNetwork(
-        init=lambda rng: network_hk.init(rng, dummy_obs),
+        init=lambda rng: network_hk.init(rng, batched_dummy_obs),
+        apply=network_hk.apply,
+    )
+    return network
+
+
+def mobilenet(
+    env_spec: specs.EnvironmentSpec,
+) -> networks_lib.FeedForwardNetwork:
+    def feed_forward(S, is_training=True):
+        f = hk.nets.MobileNetV1(num_classes=2)
+        return f(S, is_training)
+
+    network_hk = hk.transform_with_state(feed_forward)
+    dummy_obs = env_spec.observations.generate_value()
+    batched_dummy_obs = jnp.expand_dims(dummy_obs, 0)
+    #print("DTYPE:", batched_dummy_obs.dtype)
+    network = networks_lib.FeedForwardNetwork(
+        init=lambda rng: network_hk.init(rng, batched_dummy_obs),
         apply=network_hk.apply,
     )
     return network

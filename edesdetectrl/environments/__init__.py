@@ -121,7 +121,6 @@ def generate_trajectory_using_actor(
         action = actor.select_action(timestep.observation)
         next_timestep = env.step(action)
         actor.observe(action, next_timestep=next_timestep)
-        actor.update()
 
         trajectory.append(
             TrajectoryItem(

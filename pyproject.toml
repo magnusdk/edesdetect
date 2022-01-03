@@ -9,7 +9,7 @@ SimpleITK = "^2.1.1"
 absl-py = "0.12.0"
 chex = "^0.0.8"
 dm-acme = {git = "ssh://git@github.com/deepmind/acme.git"}
-dm-haiku = "^0.0.4"
+dm-haiku = "^0.0.5"
 dm-launchpad-nightly = "0.3.0.dev20210818"
 dm-reverb = "0.4.0"
 dm-sonnet = "^2.0.0"
