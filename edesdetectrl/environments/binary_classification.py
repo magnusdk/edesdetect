@@ -176,6 +176,7 @@ gym.register(
 def timeit_test():
     import timeit
 
+    import edesdetectrl.util.generators as generators
     from edesdetectrl.dataloaders.echonet import Echonet
     from jax import random
     from numpy.core.fromnumeric import mean
@@ -183,10 +184,12 @@ def timeit_test():
     print("Time reseting the environment and stepping through it until done:")
     with ThreadPoolExecutor() as thread_pool_executor:
         echonet = Echonet("TRAIN")
-        seq_iterator = echonet.get_random_generator(
-            random.PRNGKey(42), thread_pool_executor, 50
+        data_iterator = generators.async_buffered(
+            echonet.get_random_generator(random.PRNGKey(42)),
+            thread_pool_executor,
+            50,
         )
-        env = EDESClassificationRandomVideos_v0(seq_iterator)
+        env = EDESClassificationRandomVideos_v0(data_iterator)
 
         def thunk():
             env.reset()

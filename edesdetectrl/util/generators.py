@@ -6,9 +6,9 @@ SKIP_ITEM = "__SKIP_ITEM__"
 
 
 def async_buffered(
+    task_gen: Generator[Callable[[], Any], None, None],
     task_executor: Executor,
     buffer_maxsize: int,
-    task_gen: Generator[Callable[[], Any], None, None],
 ):
     """Return a generator that is backed asynchronously by a buffer (queue).
 
@@ -16,12 +16,12 @@ def async_buffered(
 
     Parameters
     ----------
+    task_gen : A function-returning generator
+        A generator that returns a function (task) that will be run asynchronously. `next` is called synchronously on the generator, ensuring that no race conditions can occur.
     task_executor : concurrent.futures.Executor
         The task executor, for example an ThreadPoolExecutor. Don't call next on the generator after shutting down/exiting the Executor.
     buffer_maxsize : int
         Maximum size of the buffer. Duh.
-    task_gen : A function-returning generator
-        A generator that returns a function (task) that will be run asynchronously. `next` is called synchronously on the generator, ensuring that no race conditions can occur.
     """
     # Using a Queue of blocking Futures for a buffer ensures that items are retrieved in the same order that they are inserted.
     buffer = queue.Queue(maxsize=buffer_maxsize)

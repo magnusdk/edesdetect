@@ -29,7 +29,7 @@ def test_evaluator_steps():
         MockedVariableSource(),
         "CONFIG",
         delta_episodes=delta_episodes,
-        metrics_logger=lambda _metrics, _episode: None,
+        min_steps=0,
         use_multiprocessing=False,
     )
 

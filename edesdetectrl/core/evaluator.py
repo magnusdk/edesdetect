@@ -8,6 +8,7 @@ import acme
 import edesdetectrl.environments.binary_classification
 import edesdetectrl.nets as nets
 import edesdetectrl.util.dm_env as util_dm_env
+import edesdetectrl.util.generators as generators
 import edesdetectrl.util.mlflow as util_mlflow
 import gym
 import mlflow
@@ -140,7 +141,9 @@ def evaluate(params, config: dqn.DQNConfig):
         env = util_dm_env.GymWrapper(
             gym.make(
                 "EDESClassification-v0",
-                seq_iterator=echonet.get_generator(executor),
+                seq_iterator=generators.async_buffered(
+                    echonet.get_generator(), executor, 5
+                ),
                 reward=config.reward_spec,
             )
         )

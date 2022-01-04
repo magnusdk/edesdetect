@@ -26,7 +26,7 @@ def test_async_buffered_no_race_conditions():
     task_gen = (return_after_random_sleep_task(i) for i in range(100))
 
     with ThreadPoolExecutor(max_workers=5) as thread_pool_executor:
-        bg = gen.async_buffered(thread_pool_executor, 5, task_gen)
+        bg = gen.async_buffered(task_gen, thread_pool_executor, 5)
         # Taking 10 from this generator should be the same as range(10).
         assert [next(bg) for _ in range(10)] == list(range(10))
 
@@ -41,7 +41,7 @@ def test_async_buffered_runs_concurrently():
     task_gen = (return_after_sleep_task(i, sleep_for) for i in range(100))
 
     with ThreadPoolExecutor(max_workers=num_workers) as thread_pool_executor:
-        bg = gen.async_buffered(thread_pool_executor, 5, task_gen)
+        bg = gen.async_buffered(task_gen, thread_pool_executor, 5)
         t_before = time.time()
         res = [next(bg) for _ in range(num_tasks_run)]
         t_after = time.time()

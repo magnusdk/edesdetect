@@ -24,9 +24,10 @@ from acme import specs
 
 import edesdetectrl.agents.dqn.config as dqn_config
 import edesdetectrl.util.dm_env as util_dm_env
+import edesdetectrl.util.generators as generators
 from edesdetectrl.agents.dqn import agent
 from edesdetectrl.dataloaders.echonet import Echonet
-from edesdetectrl.nets import simple_dqn_network, mobilenet
+from edesdetectrl.nets import mobilenet, simple_dqn_network
 
 
 def get_environment_factory(rng_key):
@@ -36,21 +37,25 @@ def get_environment_factory(rng_key):
         thread_pool_executor = ThreadPoolExecutor(max_workers=5)
         if is_eval:
             if split == "VAL":
-                seq_iterator = Echonet("VAL").get_generator(
-                    thread_pool_executor, prefetch=5
+                data_iterator = generators.async_buffered(
+                    Echonet("VAL").get_generator(),
+                    thread_pool_executor,
+                    5,
                 )
                 env = gym.make(
                     "EDESClassification-v0",
-                    seq_iterator=seq_iterator,
+                    seq_iterator=data_iterator,
                     reward="simple",
                 )
             elif split == "TRAIN":
-                seq_iterator = Echonet("TRAIN").get_random_generator(
-                    rng_key, thread_pool_executor, prefetch=5
+                data_iterator = generators.async_buffered(
+                    Echonet("TRAIN").get_random_generator(rng_key),
+                    thread_pool_executor,
+                    5,
                 )
                 env = gym.make(
                     "EDESClassification-v0",
-                    seq_iterator=seq_iterator,
+                    seq_iterator=data_iterator,
                     reward="simple",
                 )
 
@@ -61,12 +66,14 @@ def get_environment_factory(rng_key):
             }
 
         else:
-            seq_iterator = Echonet(split).get_random_generator(
-                rng_key, thread_pool_executor, prefetch=5
+            data_iterator = generators.async_buffered(
+                Echonet(split).get_random_generator(rng_key),
+                thread_pool_executor,
+                5,
             )
             env = gym.make(
                 "EDESClassification-v0",
-                seq_iterator=seq_iterator,
+                seq_iterator=data_iterator,
                 reward="simple",
             )
             return util_dm_env.GymWrapper(env)
