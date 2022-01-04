@@ -1,0 +1,7 @@
+* How to run
+1. Make sure that the environment has been registered in =gym= (=gym.register(id=..., entry_point=...)=).
+2. Run in terminal: =python apps/environment_visualizer/main.py my.env.module MyRegisteredEnv-v0=
+3. Open =http://localhost:5001/= in your browser.
+
+* Hot-reloading
+Run using =jurigged= instead of =python= to get hot-reloading of code.

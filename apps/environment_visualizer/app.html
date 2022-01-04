@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Renver</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="section">
+            <h1 id="title" class="title has-text-centered">Hello, World!</h1>
+            <div class="block">
+                <img id="rendered_env" class="image is-fullwidth">
+            </div>
+            <div id="action_buttons" method="post" class="buttons"></div>
+            <button id="reset_button" class="button is-danger">Reset</button>
+        </div>
+    </div>
+    <script>
+        var data = __data__; // This is replaced in the request handler
+
+        function render() {
+            title = document.getElementById("title");
+            if (data["reward"] != null) {
+                title.innerHTML = "Reward: " + data["reward"];
+            } else {
+                title.innerHTML = "Press an action button";
+            }
+            img = document.getElementById("rendered_env");
+            img.setAttribute('src', 'data:image/jpeg;base64,' + data["image_base64"]);
+        }
+
+        function takeAction(action) {
+            httpRequest = new XMLHttpRequest();
+            httpRequest.onload = () => {
+                data = JSON.parse(httpRequest.responseText);
+                render();
+            };
+            httpRequest.open('POST', '/step/' + action, true);
+            httpRequest.send();
+        }
+
+        function resetEnv() {
+            httpRequest = new XMLHttpRequest();
+            httpRequest.onload = () => {
+                data = JSON.parse(httpRequest.responseText);
+                render();
+            };
+            httpRequest.open('POST', '/reset', true);
+            httpRequest.send();
+        }
+
+        render()
+
+        reset_button.addEventListener("click", e => {
+            resetEnv();
+        });
+        actionButtons = document.getElementById("action_buttons");
+        actions = data["actions"];
+        for (actionName in actions) {
+            button = document.createElement("button");
+            button.innerHTML = actionName;
+            button.value = actions[actionName];
+            button.classList.add("button", "is-primary")
+            button.addEventListener("click", e => {
+                takeAction(e.target.value);
+            });
+            actionButtons.appendChild(button);
+        }
+    </script>
+</body>
+
+</html>
