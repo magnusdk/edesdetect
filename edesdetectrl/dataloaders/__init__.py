@@ -22,19 +22,29 @@ class DataLoader:
     def __len__(self):
         return len(self.keys)
 
-    def get_random_generator(self, rng_key):
-        """Return a generator that generates all items from dataloader in random order."""
+    def get_random_generator(self, rng_key, as_task=True):
+        """Return a generator that generates all items from dataloader in random order.
+
+        If as_task is True, then generated values are 0-arity functions that can be
+        called to get the actual value. This is useful when wrapping the generator in
+        an asynchronous generator."""
         key1 = rng_key
         while True:
             key1, key2 = random.split(key1)
-            yield lambda: _safe_get_item(
+            task = lambda: _safe_get_item(
                 self, random.randint(key2, (1,), 0, len(self))[0]
             )
+            yield task if as_task else task()
 
-    def get_generator(self):
+    def get_generator(self, as_task=True):
         """Return a generator that generates all items from dataloader, ordered by index.
 
-        The generator will generate indefinitely, cycling back to the start after all items have been generated."""
+        The generator will generate indefinitely, cycling back to the start after all items have been generated.
+
+        If as_task is True, then generated values are 0-arity functions that can be
+        called to get the actual value. This is useful when wrapping the generator in
+        an asynchronous generator."""
         for n in count():
             index = n % len(self)
-            yield lambda: _safe_get_item(self, index)
+            task = lambda: _safe_get_item(self, index)
+            yield task if as_task else task()
