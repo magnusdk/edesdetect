@@ -7,8 +7,8 @@ import sys
 from io import BytesIO
 
 import gym
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 PORT = 5001
 
@@ -94,13 +94,14 @@ def get_request_handler(env: gym.Env):
     return RequestHandler
 
 
-def main(args):
-    importlib.import_module(args[0])
-    env = gym.make(args[1])
+def main(module_name, env_name, kwargs):
+    importlib.import_module(module_name)
+    env = gym.make(env_name, **kwargs)
     with socketserver.TCPServer(("", PORT), get_request_handler(env)) as httpd:
         print("serving at port", PORT)
         httpd.serve_forever()
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    kwargs = dict(zip(sys.argv[3::2], sys.argv[4::2]))
+    main(sys.argv[1], sys.argv[2], kwargs)
