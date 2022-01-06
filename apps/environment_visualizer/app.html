@@ -33,7 +33,7 @@
         }
 
         function takeAction(action) {
-            httpRequest = new XMLHttpRequest();
+            let httpRequest = new XMLHttpRequest();
             httpRequest.onload = () => {
                 data = JSON.parse(httpRequest.responseText);
                 render();
@@ -43,7 +43,7 @@
         }
 
         function resetEnv() {
-            httpRequest = new XMLHttpRequest();
+            let httpRequest = new XMLHttpRequest();
             httpRequest.onload = () => {
                 data = JSON.parse(httpRequest.responseText);
                 render();
