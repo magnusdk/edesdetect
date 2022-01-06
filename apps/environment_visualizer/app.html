@@ -59,16 +59,24 @@
         });
         actionButtons = document.getElementById("action_buttons");
         actions = data["actions"];
+        actionIndex = 0
         for (actionName in actions) {
             button = document.createElement("button");
-            button.innerHTML = actionName;
+            button.innerHTML = `${actionName} (${actionIndex})`;
             button.value = actions[actionName];
             button.classList.add("button", "is-primary")
             button.addEventListener("click", e => {
                 takeAction(e.target.value);
             });
             actionButtons.appendChild(button);
+            actionIndex++
         }
+        // Warning: does not check if the action is valid
+        document.addEventListener("keydown", e => {
+            if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+                takeAction(String.fromCharCode(e.keyCode));
+            }
+        });
     </script>
 </body>
 
