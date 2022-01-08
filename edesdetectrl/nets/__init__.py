@@ -25,7 +25,7 @@ def simple_dqn_network(
         )
         return f(S)  # Output shape: (batch_size, num_actions=2)
 
-    network_hk = hk.without_apply_rng(hk.transform_with_state(feed_forward))
+    network_hk = hk.transform_with_state(feed_forward)
     dummy_obs = env_spec.observations.generate_value()
     batched_dummy_obs = jnp.expand_dims(dummy_obs, 0)
     network = networks_lib.FeedForwardNetwork(
