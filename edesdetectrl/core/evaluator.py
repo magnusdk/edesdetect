@@ -1,14 +1,13 @@
 import abc
 import multiprocessing
 from concurrent import futures
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 
 import acme
-import edesdetectrl.environments.binary_classification
+import edesdetectrl.environments.vanilla_binary_classification
 import edesdetectrl.nets as nets
 import edesdetectrl.util.dm_env as util_dm_env
-import edesdetectrl.util.generators as generators
 import edesdetectrl.util.mlflow as util_mlflow
 import gym
 import mlflow
@@ -136,24 +135,21 @@ def evaluate_and_log_metrics(
 
 
 def evaluate(params, config: dqn.DQNConfig):
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        echonet = Echonet("VAL")
-        env = util_dm_env.GymWrapper(
-            gym.make(
-                "EDESClassification-v0",
-                seq_iterator=generators.async_buffered(
-                    echonet.get_generator(), executor, 5
-                ),
-                reward=config.reward_spec,
-            )
+    echonet = Echonet("VAL")
+    env = util_dm_env.GymWrapper(
+        env=gym.make(
+            "VanillaBinaryClassification-v0",
+            dataloader=echonet,
+            get_reward=config.reward_spec,
         )
-        env_spec = acme.make_environment_spec(env)
-        network = nets.simple_dqn_network(env_spec)
-        actor = dqn.get_evaluation_actor(network, params)
+    )
+    env_spec = acme.make_environment_spec(env)
+    network = nets.simple_dqn_network(env_spec)
+    actor = dqn.get_evaluation_actor(network, params)
 
-        metrics = []
-        for _ in range(len(echonet)):
-            trajectory = environments.generate_trajectory_using_actor(env, actor)
-            metrics.append(trajectory.all_metrics())
+    metrics = []
+    for _ in range(len(echonet)):
+        trajectory = environments.generate_trajectory_using_actor(env, actor)
+        metrics.append(trajectory.all_metrics())
 
-        return avg_metrics(metrics)
+    return avg_metrics(metrics)

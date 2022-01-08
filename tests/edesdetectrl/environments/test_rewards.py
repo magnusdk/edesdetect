@@ -1,10 +1,10 @@
-import edesdetectrl.environments.binary_classification as bc
+import edesdetectrl.environments.rewards as rewards
 
 
-def test_get_dist_reward():
+def test_proximity_reward():
     def gen_rewards(prediction, ground_truth):
         return [
-            bc._get_dist_reward_impl(prediction, frame, ground_truth)
+            rewards.proximity_reward_impl(prediction, frame, ground_truth)
             for frame in range(len(ground_truth))
         ]
 

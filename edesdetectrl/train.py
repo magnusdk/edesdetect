@@ -15,7 +15,6 @@
 
 
 import dataclasses
-from concurrent.futures.thread import ThreadPoolExecutor
 
 import gym
 import jax
@@ -24,7 +23,6 @@ from acme import specs
 
 import edesdetectrl.agents.dqn.config as dqn_config
 import edesdetectrl.util.dm_env as util_dm_env
-import edesdetectrl.util.generators as generators
 from edesdetectrl.agents.dqn import agent
 from edesdetectrl.dataloaders.echonet import Echonet
 from edesdetectrl.nets import mobilenet, simple_dqn_network
@@ -32,31 +30,21 @@ from edesdetectrl.nets import mobilenet, simple_dqn_network
 
 def get_environment_factory(rng_key):
     def environment_factory(is_eval: bool, split="TRAIN"):
-        import edesdetectrl.environments.binary_classification
+        import edesdetectrl.environments.vanilla_binary_classification
 
-        thread_pool_executor = ThreadPoolExecutor(max_workers=5)
         if is_eval:
             if split == "VAL":
-                data_iterator = generators.async_buffered(
-                    Echonet("VAL").get_generator(),
-                    thread_pool_executor,
-                    5,
-                )
                 env = gym.make(
-                    "EDESClassification-v0",
-                    seq_iterator=data_iterator,
-                    reward="simple",
+                    "VanillaBinaryClassification-v0",
+                    dataloader=Echonet("VAL"),
+                    get_reward="simple",
                 )
             elif split == "TRAIN":
-                data_iterator = generators.async_buffered(
-                    Echonet("TRAIN").get_random_generator(rng_key),
-                    thread_pool_executor,
-                    5,
-                )
                 env = gym.make(
-                    "EDESClassification-v0",
-                    seq_iterator=data_iterator,
-                    reward="simple",
+                    "VanillaBinaryClassification-v0",
+                    dataloader=Echonet("TRAIN"),
+                    get_reward="simple",
+                    rng_key=rng_key,
                 )
 
             return {
@@ -66,15 +54,11 @@ def get_environment_factory(rng_key):
             }
 
         else:
-            data_iterator = generators.async_buffered(
-                Echonet(split).get_random_generator(rng_key),
-                thread_pool_executor,
-                5,
-            )
             env = gym.make(
-                "EDESClassification-v0",
-                seq_iterator=data_iterator,
-                reward="simple",
+                "VanillaBinaryClassification-v0",
+                dataloader=Echonet(split),
+                get_reward="simple",
+                rng_key=rng_key,
             )
             return util_dm_env.GymWrapper(env)
 
@@ -82,8 +66,8 @@ def get_environment_factory(rng_key):
 
 
 def network_factory(env_spec: specs.EnvironmentSpec):
-    return mobilenet(env_spec)
-    #return simple_dqn_network(env_spec)
+    # return mobilenet(env_spec)
+    return simple_dqn_network(env_spec)
 
 
 import mlflow

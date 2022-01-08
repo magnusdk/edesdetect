@@ -1,10 +1,10 @@
-from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Literal, Sequence, Tuple, Union
+from typing import Any, Callable, Literal, Optional, Sequence, Tuple, Union
 
+import edesdetectrl.util.generators as generators
 import gym
 import numpy as np
 from edesdetectrl import dataloaders
-from edesdetectrl.util.generators import async_buffered
+from jax._src.random import KeyArray
 
 ObservationFn = Callable[["BinaryClassificationBaseEnv"], Any]
 Action = int
@@ -75,6 +75,7 @@ class DataIteratorMixin:
         self,
         dataloader: Union[dataloaders.DataLoader, Literal["echonet"]],
         min_video_length: int,
+        rng_key: Optional[KeyArray] = None,
     ):
         if dataloader == "echonet":
             from edesdetectrl.dataloaders.echonet import Echonet
@@ -82,13 +83,10 @@ class DataIteratorMixin:
             dataloader = Echonet("TRAIN")
 
         self.data_iterator = filter(
-            lambda v: v[0].shape[0] >= min_video_length,
-            # TODO: async_buffered help much after all. Find better ways to speed things up.
-            async_buffered(
-                dataloader.get_generator(),
-                ThreadPoolExecutor(),
-                5,
-            ),
+            lambda v: v != generators.SKIP_ITEM and v[0].shape[0] >= min_video_length,
+            dataloader.get_random_generator(rng_key, as_task=False)
+            if rng_key is not None
+            else dataloader.get_generator(as_task=False),
         )
         self.video_and_labels = next(self.data_iterator)
 
