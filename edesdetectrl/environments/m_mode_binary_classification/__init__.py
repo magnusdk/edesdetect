@@ -41,19 +41,9 @@ STEP_SIZE = 1
 ROTATION_AMOUNT = 0.1
 
 
-def get_observation(
-    env: "EDESMModeClassificationBase_v0",
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Return a tuple of 2 arrays:
-    1. overview_data: An array with 2 channels that is the average pixel intensities in the video and the location of the line.
-    2. mmode_data: An array with 9 channels that is the M-mode image of the current line and the 8 adjacent lines."""
+def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
     # TODO: remove after https://github.com/magnusdk/edesdetect/issues/38
     video = env._video / 255  # Normalize pixel values
-
-    # Overview data
-    mean_image = np.mean(video, axis=0)  # Average of all frames in video
-    line_pixels = env.mmode_line.visualize_line()
-    overview_data = np.array([mean_image, line_pixels])
 
     # M-mode data
     rotations = [-0.5, 0, 0.5]
@@ -74,13 +64,36 @@ def get_observation(
     mmode_with_adjacent = mmode_with_adjacent - main_mmode_image
     mmode_with_adjacent[main_mmode_index] = main_mmode_image
 
+    return mmode_with_adjacent
+
+
+def get_overview_and_mmode_observation(
+    env: "EDESMModeClassificationBase_v0",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return a tuple of 2 arrays:
+    1. overview_data: An array with 2 channels that is the average pixel intensities in the video and the location of the line.
+    2. mmode_data: An array with 9 channels that is the M-mode image of the current line and the 8 adjacent lines."""
+    # TODO: remove after https://github.com/magnusdk/edesdetect/issues/38
+    video = env._video / 255  # Normalize pixel values
+
+    # Overview data
+    mean_image = np.mean(video, axis=0)  # Average of all frames in video
+    line_pixels = env.mmode_line.visualize_line()
+    overview_data = np.array([mean_image, line_pixels])
+
+    # M-mode data
+    mmode_with_adjacent = get_mmode_observation(env)
+
     return overview_data, mmode_with_adjacent
 
 
 class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     metadata = {"render.modes": ["rgb_array"], "actions": actions}
 
-    def __init__(self, get_reward: RewardFn):
+    def __init__(
+        self,
+        get_reward: Union[RewardFn, Literal["simple", "proximity"]],
+    ):
         get_reward = (
             rewards.simple_reward
             if get_reward == "simple"
@@ -88,7 +101,9 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
             if get_reward == "proximity"
             else get_reward
         )
-        super().__init__(N_PADDING, N_PADDING, get_observation, get_reward)
+        super().__init__(
+            N_PADDING, N_PADDING, get_overview_and_mmode_observation, get_reward
+        )
         self.action_space = spaces.Discrete(N_ACTIONS)
         self.action_space.dtype = np.int32
 
@@ -131,7 +146,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
 
     def render(self, mode="rgb_array"):
         assert mode == "rgb_array"
-        mean_image_data, mmode_image = get_observation(self)
+        mean_image_data, mmode_image = get_overview_and_mmode_observation(self)
         return render_observation(mean_image_data, mmode_image)
 
 
