@@ -5,30 +5,28 @@ from edesdetectrl.dataloaders import GroundTruth
 from scipy.ndimage.filters import gaussian_filter
 
 
-def next_maximum_diff(x, start_i):
-    increasing = np.gradient(gaussian_filter(x, sigma=2)) < 0
-
+def next_peak(x, start_i):
+    """Return the index of the next peak (local maximum) after start_i in x."""
+    grad = x[1:] - x[:-1]
     max_diff_i = start_i
-    for i in range(start_i + 1, len(x)):
-        if increasing[i]:
-            break
-        else:
-            max_diff_i = i
+    for i in range(start_i + 1, len(x) - 1):
+        max_diff_i = i
+        if grad[i] <= 0:
+            # The first frame that is not increasing is the closest next maximum (peak)
+            return max_diff_i
+    return len(x) - 1
 
-    return max_diff_i
 
-
-def prev_maximum_diff(x, start_i):
-    increasing = np.gradient(gaussian_filter(x, sigma=2)) >= 0
-
+def previous_peak(x, start_i):
+    """Return the index of the previous peak (local maximum) before start_i in x."""
+    grad = x[1:] - x[:-1]
     max_diff_i = start_i
     for i in range(start_i - 1, 0, -1):
-        if increasing[i]:
-            break
-        else:
-            max_diff_i = i
-
-    return max_diff_i
+        max_diff_i = i
+        if grad[i - 1] >= 0:
+            # The first frame that is not decreasing when searching backwards is the closest previous maximum (peak)
+            return max_diff_i
+    return 0
 
 
 def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, int]:
@@ -45,8 +43,7 @@ def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, in
     higher weight means we will look further into the "unknown", further out towards the
     previous or next maximum difference from a keyframe.
     """
-    # TODO: Try to blur entire image instead of diff in https://github.com/magnusdk/edesdetect/issues/43.
-    # x = gaussian_filter(x, sigma=2)
+    x = gaussian_filter(x, sigma=2)
     ed_i_diff = [np.sum((x[i] - x[ed_i]) ** 2) for i in range(x.shape[0])]
     es_i_diff = [np.sum((x[i] - x[es_i]) ** 2) for i in range(x.shape[0])]
 
@@ -54,11 +51,9 @@ def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, in
     # labels have to be returned -- i.e.: it's almost copy-paste in the two clauses below.
     if ed_i < es_i:
         some_before_ed_i = int(
-            prev_maximum_diff(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
+            previous_peak(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
         )
-        some_after_es_i = int(
-            next_maximum_diff(es_i_diff, es_i) * weight + es_i * (1 - weight)
-        )
+        some_after_es_i = int(next_peak(es_i_diff, es_i) * weight + es_i * (1 - weight))
         ground_truth = (
             [0] * (ed_i - some_before_ed_i + 1)  # Diastole
             + [1] * (es_i - ed_i)  # Systole
@@ -67,11 +62,9 @@ def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, in
         return ground_truth, some_before_ed_i, some_after_es_i
     else:
         some_before_es_i = int(
-            prev_maximum_diff(es_i_diff, es_i) * weight + es_i * (1 - weight)
+            previous_peak(es_i_diff, es_i) * weight + es_i * (1 - weight)
         )
-        some_after_ed_i = int(
-            next_maximum_diff(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
-        )
+        some_after_ed_i = int(next_peak(ed_i_diff, ed_i) * weight + ed_i * (1 - weight))
         ground_truth = (
             [1] * (es_i - some_before_es_i + 1)  # Systole
             + [0] * (ed_i - es_i)  # Diastole

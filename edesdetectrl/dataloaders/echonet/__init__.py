@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from edesdetectrl import dataloaders
 from edesdetectrl.config import config
-from edesdetectrl.dataloaders.echonet.label_frames import label_frames
+import edesdetectrl.dataloaders.echonet.label_frames as lf
 
 
 def loadvideo(filename: str) -> np.ndarray:
@@ -83,7 +83,7 @@ class Echonet(dataloaders.DataLoader):
         video = video - video.min()
         video = video / video.max()
 
-        ground_truth, start, end = label_frames(video, ed, es)
+        ground_truth, start, end = lf.label_frames(video, ed, es)
 
         return dataloaders.DataItem.from_video_and_ground_truth(
             video, ground_truth, start, end
