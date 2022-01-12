@@ -31,9 +31,9 @@ WIDTH = 112
 
 
 def get_observation(env: BinaryClassificationBaseEnv):
-    frame = env.current_frame
-    video = env._video
-    observation = video[frame - N_PADDING : frame + N_PADDING + 1]
+    observation = env.video.video[
+        env.current_frame - N_PADDING : env.current_frame + N_PADDING + 1
+    ]
     return observation.astype("float32")
 
 
@@ -81,7 +81,7 @@ class VanillaBinaryClassification_v0(
         rng_key: Optional[KeyArray] = None,
     ):
         VanillaBinaryClassificationBase_v0.__init__(self, get_reward)
-        DataIteratorMixin.__init__(self, dataloader, N_CHANNELS, rng_key)
+        DataIteratorMixin.__init__(self, dataloader, N_CHANNELS, N_CHANNELS, rng_key)
 
     def reset(self):
         self.next_video_and_labels()

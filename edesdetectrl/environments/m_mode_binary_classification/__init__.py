@@ -43,7 +43,7 @@ ROTATION_AMOUNT = 0.1
 
 def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
     # TODO: remove after https://github.com/magnusdk/edesdetect/issues/38
-    video = env._video / 255  # Normalize pixel values
+    video = env.video.video / 255  # Normalize pixel values
 
     # M-mode data
     rotations = [-0.5, 0, 0.5]
@@ -74,7 +74,7 @@ def get_overview_and_mmode_observation(
     1. overview_data: An array with 2 channels that is the average pixel intensities in the video and the location of the line.
     2. mmode_data: An array with 9 channels that is the M-mode image of the current line and the 8 adjacent lines."""
     # TODO: remove after https://github.com/magnusdk/edesdetect/issues/38
-    video = env._video / 255  # Normalize pixel values
+    video = env.video.video / 255  # Normalize pixel values
 
     # Overview data
     mean_image = np.mean(video, axis=0)  # Average of all frames in video
@@ -157,7 +157,7 @@ class EDESMModeClassification_v0(DataIteratorMixin, EDESMModeClassificationBase_
         get_reward: RewardFn,
     ):
         EDESMModeClassificationBase_v0.__init__(self, get_reward)
-        DataIteratorMixin.__init__(self, dataloader, N_FRAMES)
+        DataIteratorMixin.__init__(self, dataloader, N_PADDING, N_PADDING)
 
     def reset(self):
         self.next_video_and_labels()

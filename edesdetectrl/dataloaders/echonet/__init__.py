@@ -1,11 +1,12 @@
 import os
+from typing import List, Literal, Union
 
 import cv2
 import numpy as np
 import pandas as pd
 from edesdetectrl import dataloaders
 from edesdetectrl.config import config
-from scipy.ndimage.filters import gaussian_filter
+from edesdetectrl.dataloaders.echonet.label_frames import label_frames
 
 
 def loadvideo(filename: str) -> np.ndarray:
@@ -42,82 +43,6 @@ def loadvideo(filename: str) -> np.ndarray:
     return v
 
 
-def next_maximum_diff(x, start_i):
-    increasing = np.gradient(gaussian_filter(x, sigma=2)) < 0
-
-    max_diff_i = start_i
-    for i in range(start_i + 1, len(x)):
-        if increasing[i]:
-            break
-        else:
-            max_diff_i = i
-
-    return max_diff_i
-
-
-def prev_maximum_diff(x, start_i):
-    increasing = np.gradient(gaussian_filter(x, sigma=2)) >= 0
-
-    max_diff_i = start_i
-    for i in range(start_i - 1, 0, -1):
-        if increasing[i]:
-            break
-        else:
-            max_diff_i = i
-
-    return max_diff_i
-
-
-# TODO: Add test(s) for this function
-def label_frames(x, ed_i, es_i, weight=0.75):
-    """
-    Grab some frames before first keyframe (either ED or ES) where we are sure of the phase.
-
-    We can be relatively sure of the phase by looking at the difference between one of the
-    keyframes (either ED or ES) and all other frames. The frames leading up to the previous
-    frame with the most difference from the first keyframe will have the same phase as the
-    keyframe, and likewise the next frame with the most difference from the last keyframe
-    will have the opposite phase as the keyframe.
-
-    Weight is used to ensure that we can be certain that the new labels are correct. A
-    higher weight means we will look further into the "unknown", further out towards the
-    previous or next maximum difference from a keyframe.
-    """
-    ed_i_diff = [np.sum((x[i] - x[ed_i]) ** 2) for i in range(x.shape[0])]
-    es_i_diff = [np.sum((x[i] - x[es_i]) ** 2) for i in range(x.shape[0])]
-
-    # Either ED is labeled first, or ES is. The code logic is the same, but different
-    # labels have to be returned -- i.e.: it's almost copy-paste in the two clauses below.
-    if ed_i < es_i:
-        some_before_ed_i = int(
-            prev_maximum_diff(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
-        )
-        some_after_es_i = int(
-            next_maximum_diff(es_i_diff, es_i) * weight + es_i * (1 - weight)
-        )
-        frames = np.arange(some_before_ed_i, some_after_es_i + 1)
-        labels = (
-            [0] * (ed_i - some_before_ed_i + 1)  # Diastole
-            + [1] * (es_i - ed_i)  # Systole
-            + [0] * (some_after_es_i - es_i)  # Diastole
-        )
-        return (frames, labels)
-    else:
-        some_before_es_i = int(
-            prev_maximum_diff(es_i_diff, es_i) * weight + es_i * (1 - weight)
-        )
-        some_after_ed_i = int(
-            next_maximum_diff(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
-        )
-        frames = np.arange(some_before_es_i, some_after_ed_i + 1)
-        labels = (
-            [1] * (es_i - some_before_es_i + 1)  # Systole
-            + [0] * (ed_i - es_i)  # Diastole
-            + [1] * (some_after_ed_i - ed_i)  # Systole
-        )
-        return (frames, labels)
-
-
 def _ensure_file_extension(filename):
     if os.path.splitext(filename)[1] == "":
         filename = filename + ".avi"
@@ -132,7 +57,7 @@ def _get_filenames(filelist_csv_file, split=None):
 
 
 class Echonet(dataloaders.DataLoader):
-    def __init__(self, split):
+    def __init__(self, split: Literal["TRAIN", "VAL", "TEST"]):
         self.filelist_csv_file = config["data"]["filelist_path"]
         self.volumetracings_df = pd.read_csv(
             config["data"]["volumetracings_path"], index_col="FileName"
@@ -142,23 +67,20 @@ class Echonet(dataloaders.DataLoader):
         self.filenames = _get_filenames(self.filelist_csv_file, split)
 
     @property
-    def keys(self):
+    def keys(self) -> List[str]:
         return self.filenames
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Union[str, int]) -> dataloaders.DataItem:
         filename = key if isinstance(key, str) else self.keys[key]
         traces = self.volumetracings_df.loc[filename]
 
         # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
-        # Largest (diastolic) frame is first
-        ed = int(traces.iloc[0]["Frame"])
-        # Smallest (systolic) frame is last
-        es = int(traces.iloc[-1]["Frame"])
+        # Largest (diastolic) frame is first, smallest (systolic) frame is last
+        ed, es = int(traces.iloc[0]["Frame"]), int(traces.iloc[-1]["Frame"])
 
         video = loadvideo(self.videos_dir + filename)
-        # Labels are either 0 or 1.
-        # 0 means diastole and 1 means systole.
-        frames, labels = label_frames(video, ed, es)
-        video = video[frames]
+        ground_truth, start, end = label_frames(video, ed, es)
 
-        return video, labels
+        return dataloaders.DataItem.from_video_and_ground_truth(
+            video, ground_truth, start, end
+        )
