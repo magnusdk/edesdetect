@@ -79,6 +79,10 @@ class Echonet(dataloaders.DataLoader):
         ed, es = int(traces.iloc[0]["Frame"]), int(traces.iloc[-1]["Frame"])
 
         video = loadvideo(self.videos_dir + filename)
+        # Normalize pixel intensities (smallest always 0, biggest always 1)
+        video = video - video.min()
+        video = video / video.max()
+
         ground_truth, start, end = label_frames(video, ed, es)
 
         return dataloaders.DataItem.from_video_and_ground_truth(
