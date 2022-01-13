@@ -29,7 +29,7 @@ def previous_peak(x, start_i):
     return 0
 
 
-def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, int]:
+def label_frames(video, ed_i, es_i, p=0.75) -> Tuple[List[GroundTruth], int, int]:
     """
     Grab some frames before first keyframe (either ED or ES) where we are sure of the phase.
 
@@ -43,17 +43,16 @@ def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, in
     higher weight means we will look further into the "unknown", further out towards the
     previous or next maximum difference from a keyframe.
     """
-    x = gaussian_filter(x, sigma=2)
-    ed_i_diff = [np.sum((x[i] - x[ed_i]) ** 2) for i in range(x.shape[0])]
-    es_i_diff = [np.sum((x[i] - x[es_i]) ** 2) for i in range(x.shape[0])]
+    # Blur frames a bit to make difference more robust
+    video = [gaussian_filter(frame, sigma=2) for frame in video]
+    ed_i_diff = np.sum((video - video[ed_i]) ** 2, axis=(1, 2))
+    es_i_diff = np.sum((video - video[es_i]) ** 2, axis=(1, 2))
 
     # Either ED is labeled first, or ES is. The code logic is the same, but different
     # labels have to be returned -- i.e.: it's almost copy-paste in the two clauses below.
     if ed_i < es_i:
-        some_before_ed_i = int(
-            previous_peak(ed_i_diff, ed_i) * weight + ed_i * (1 - weight)
-        )
-        some_after_es_i = int(next_peak(es_i_diff, es_i) * weight + es_i * (1 - weight))
+        some_before_ed_i = int(previous_peak(ed_i_diff, ed_i) * p + ed_i * (1 - p))
+        some_after_es_i = int(next_peak(es_i_diff, es_i) * p + es_i * (1 - p))
         ground_truth = (
             [0] * (ed_i - some_before_ed_i + 1)  # Diastole
             + [1] * (es_i - ed_i)  # Systole
@@ -61,16 +60,11 @@ def label_frames(x, ed_i, es_i, weight=0.75) -> Tuple[List[GroundTruth], int, in
         )
         return ground_truth, some_before_ed_i, some_after_es_i
     else:
-        some_before_es_i = int(
-            previous_peak(es_i_diff, es_i) * weight + es_i * (1 - weight)
-        )
-        some_after_ed_i = int(next_peak(ed_i_diff, ed_i) * weight + ed_i * (1 - weight))
+        some_before_es_i = int(previous_peak(es_i_diff, es_i) * p + es_i * (1 - p))
+        some_after_ed_i = int(next_peak(ed_i_diff, ed_i) * p + ed_i * (1 - p))
         ground_truth = (
             [1] * (es_i - some_before_es_i + 1)  # Systole
             + [0] * (ed_i - es_i)  # Diastole
             + [1] * (some_after_ed_i - ed_i)  # Systole
         )
         return ground_truth, some_before_es_i, some_after_ed_i
-
-
-# TODO: Add tests https://github.com/magnusdk/edesdetect/issues/43
