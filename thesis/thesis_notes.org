@@ -1,0 +1,104 @@
+
+Stuff from the thesis Krissy sent that I also want to add to mine:
+* Research Motivation section
+Why RL? This is a traditional SL task. Look at how it performs at other tasks — it performs «surprisingly good!»
+Feasability of applying RL. A study in how to translate a problem into an RL formulation.
+It allows us to look at the problem in a new light, which might give new oppurtinities.
+
+* Limitations of the work
+Formulating the problem into RL framework varies between tasks.
+RL is notoriously slow to train and difficult to optimize hyperparameters for. This will therefore only be a preliminary study because the scope has to be reduced.
+Different tools have different strengths and weaknesses, and using a tool to its optimal effect means taking as much advantage of the strengths as possible. One of the strengths of RL is that it is able to explore without us explicitly telling the agent how. Extra care has to be taken to take advantage of this strength.
+RL may make inference slower, since the tasks becomes sequential.
+
+* Implementation details
+Trained distributedly on GPUs
+JAX ecosystem — why? I want to write about it, maybe as an appendix.
+
+* Chapter 2 stuff: 
+What is medical imaging?
+Comparison between MRI, CT, and US imaging.
+** How does ultrasound imaging work?
+- What is sound? 
+  - Frequency, amplitude, phase
+  - Every unique sound has a unique frequency spectrum, and all sounds can be represented in a frequency spectrum
+  - The difference between a note from a piano and the same note from a clarinet is the frequency spectrum. The «same» note really means that the frequencies with the highest amplitudes are generally the same between the instruments.
+  - What are pressure waves?
+- How do waves propagate through a medium?
+  - What are important properties of the medium? Speed of sound, density, non-linearity(?)
+  - Absorbtion
+- What are reflections?
+  - difference in acoustic impedance
+  - Size of reflectors matter. Size relative to wavelength.
+- How can we use this to our advantage?
+  - Body consists of tissues with different acoustic impedance, such that it reflects back waves.
+  - Measuring the time between the wave being sent out and when it is returned let’s us know how far inside the body the reflector is, given that we know the speed of sound
+  - Non-linearity — sending waves in one frequency and listening in on another.
+- What are limitations?
+  - Tissue with high acoustic impedance in front of tissue of interest (ribcage hiding the heart from ultrasound f.ex)
+  - Energy is lost the further in the wave gets
+  - Higher frequency (smaller wavelength) means higher resolution of smaller reflectors, but also means higher absorption and energy.
+    - Too much energy is dangerous for the body. I.e., there is a maximum frequency that we can use image the body. higher frequencies can be used for purposely destroying things inside the body, f.ex. kidney stones.
+  - Speckles
+  - Shadowing
+  - Wave interference
+  - Side-lobes: a consequence of discrete array beamforming
+    - Why??
+      - Beamforming becomes fourier transform in far field
+      - We are sending what is equivalent to a small pulse. A pulse has many frequencies.
+
+** Heart anatomy
+Basic anatomy with images
+Introduction of terms diastole and systole
+"the heart is imporant!" so diseases of the heart are severe and deadly.
+What are measurements: Why we need to find the ED and ES frames.
+
+
+** What is AI?
+- AI is hard to define, computer programs that can solve complex tasks without much assistance from humans.
+- ML is easier to define:
+  - Methods that given a metric, parameters and data can optimize the parameters wrt the metric as more data is introduced.
+  - In general they should be able to update themselves after seeing new data, and the sum of updates converges the algorithm's performance at the metric towards better performance, and hopefully the optimal performance.
+- ML in terms of gradient descent
+  - In ML we often don't know the true metric performance space wrt to parameters. If we did we could just select the best point without doing any training.
+  - For a certain class of functions we do however know its gradient at a single point. This basically means that we know how to change the parameters in a way to make the performance better.
+    - This class of functions are called differential functions, and great care is taken to ensure that both the algorithm and the performance metric is differential.
+  - All of the ground-breaking algorithms that we have seen in the last decade are built on the principle of gradient descent.
+  - Problems that must be solved are that of small gradients, local minima, etc.
+- Within the constraints of the differential functions requirements, we are free to explore any inference function and metric function we like.
+  - One of the simplest functions that we can use for the inference function are fully-connected neural networks. Take in inputs, dot product between parameters for each neuron. Can be extended to multiple layers and still be differentiable.
+  - The design of the inference function determines how it represents learned knowledge, which in turns adds bias to the function. A fully-connected neural network is for example permutation invariant, meaning that it does not have the means to represent structure between the inputs in a single layer. In practice this means that we could shuffle the input-variables and the algorithm would learn just as well, assuming that the inputs are shuffled in the exact same way every time.
+    - Bias isn't necessarily a bad thing in this example, because if the bias mirrors actual bias that is present in the data, then it may be able to more efficiently represent the needed knowledge.
+  - Therefore research is being done trying to find the intrinsic features of the data and build them into the design of the inference function.
+    - One of the best examples of this is the Convolutional Neural Network. Its parameters are structured into feature maps, and each feature map is applied everywhere in the image. Because a given feature map is applied everywhere in the image it doesn't matter where in the image the feature it matches actually are: i.e. CNNs are translational invariant.
+    - Other examples include RNNs, which are designed for sequential data, like for example natural language sentences. In RNNs, the same inference function is applied to every word in a sentence, and the result is fed into the next step. This allows the inference function to represent temporal relations between different input tokens. TODO: Get a better grasp in the context of representational bias.
+    - Another architecture that has been able to achieve really good results on sequential data lately is the Transformer. The Transformer uses a concept called attention which is a way to match inputs with eachother. TODO: this part.
+
+- Metric function: "how good does the inference function perform?" (differentiable)
+  - When using Gradient Descent, how the metric function is defined classify the type of algorithm. There are generally (hand-wavingly) three main classes of machine learning algorithms: Supervised Learning, Unsupervised Learning, and Reinforcement Learning.
+    - With supervised learning, we know what the output of the inference function should be, and the metric essentially measures the difference between the inference output and the ground truth. This could for example be an image classification task where the inference function outputs one number for each image class ("cat", "dog", "waffle", etc.), where a number of 1 for a class means that it is 100% certain that the image is of that class. The metric can then take the squared sum difference between the output and a one-hot encoding of the ground truth class. Because we want to minimize this difference we often call this metric for "loss", and we have to take a step in the opposite direction of the gradient to get to the optimal parameters.
+    - With unsupervised learning, we don't have, or choose not to use a ground truth in the metric function. Labeling data with ground truths is really expensive, so if we can avoid it then that is a good thing. Unsupervised learning methods create metric functions from the data itself. TODO: How, exactly? TODO: Difficult to get good results, but promising wrt transfer learning.
+    - With reinforcement learning, the solution to a problem requires multiple steps, and an agent is expected to create a strategy for solving it across time. Like with unsupervised learning, we either don't have, or choose to not explicitly use a ground truth in the metric function. Instead we have a reward signal that the agent is supposed to maximize. Reinforcement learning stands a bit out from the rest because it ... Hmm, yeah, why?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

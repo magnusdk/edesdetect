@@ -1,0 +1,1207 @@
+
+@article{vlontzos_multiple_2019,
+	title = {Multiple {Landmark} {Detection} using {Multi}-{Agent} {Reinforcement} {Learning}},
+	url = {http://arxiv.org/abs/1907.00318},
+	abstract = {The detection of anatomical landmarks is a vital step for medical image analysis and applications for diagnosis, interpretation and guidance. Manual annotation of landmarks is a tedious process that requires domain-specific expertise and introduces inter-observer variability. This paper proposes a new detection approach for multiple landmarks based on multi-agent reinforcement learning. Our hypothesis is that the position of all anatomical landmarks is interdependent and non-random within the human anatomy, thus finding one landmark can help to deduce the location of others. Using a Deep Q-Network (DQN) architecture we construct an environment and agent with implicit inter-communication such that we can accommodate K agents acting and learning simultaneously, while they attempt to detect K different landmarks. During training the agents collaborate by sharing their accumulated knowledge for a collective gain. We compare our approach with state-of-the-art architectures and achieve significantly better accuracy by reducing the detection error by 50\%, while requiring fewer computational resources and time to train compared to the naive approach of training K agents separately.},
+	urldate = {2021-05-11},
+	journal = {arXiv:1907.00318 [cs]},
+	author = {Vlontzos, Athanasios and Alansary, Amir and Kamnitsas, Konstantinos and Rueckert, Daniel and Kainz, Bernhard},
+	month = jul,
+	year = {2019},
+	note = {arXiv: 1907.00318},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {\# OverviewThe authors proposes a network for doing multiple landmark detection using machine learning. Specifically they use multi-agent reinforcement learnig (MARL), where each agent learns to detect a single landmark, but they share a lot of the convolutional layers. On top of the conv layers they use individual fully-connected networks which specializes in finding just one landmark using the information from the previous shared layers. The layer-sharing acts as a type of regularization for the network, because it has to support search-usecases for all different landmarks. Using such a collaborative network between agents increases accuracy by 50\%, but also speeds up the training.
+The hypothesis that argues in favor of a multi-agent approach is that the position of a single landmark is a good indication of where other landmarks are. i.e.: anatomical landmarks positions are dependent on each other.
+\# MethodsIt is s multi-agent reinforcement learning network (MARL). The environment is a 3D scan of the human anatomy. The state is a region-of-interest around the location of an actor. The action-set consists of taking a step in any direction. The rewards are relative distance gained between agent position and target (landmark ground truth) position. Each agent thus has its own state and its own reward.
+There's some stuff about how to make the network work with the assumptions needed for a Markov Decision Process formulation
+Termination in training is when the agent is very close to its landmark. Termination in testing is when the agent start showing oscillating behavior or exceed a defined macimum number of frames.
+If one agent reached the landmark before the others its weights are no longer updated for the remainder of the episode.
+Performance is mean distance in mm to targets.},
+	annote = {Comment: Accepted in MICCAI 2019, Camera Ready Version},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/MF8JXCDR/1907.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/NY7P94AG/Vlontzos et al. - 2019 - Multiple Landmark Detection using Multi-Agent Rein.pdf:application/pdf},
+}
+
+@article{alansary_evaluating_2019,
+	title = {Evaluating reinforcement learning agents for anatomical landmark detection},
+	volume = {53},
+	issn = {1361-8415},
+	url = {https://www.sciencedirect.com/science/article/pii/S1361841518306121},
+	doi = {10.1016/j.media.2019.02.007},
+	abstract = {Automatic detection of anatomical landmarks is an important step for a wide range of applications in medical image analysis. Manual annotation of landmarks is a tedious task and prone to observer errors. In this paper, we evaluate novel deep reinforcement learning (RL) strategies to train agents that can precisely and robustly localize target landmarks in medical scans. An artificial RL agent learns to identify the optimal path to the landmark by interacting with an environment, in our case 3D images. Furthermore, we investigate the use of fixed- and multi-scale search strategies with novel hierarchical action steps in a coarse-to-fine manner. Several deep Q-network (DQN) architectures are evaluated for detecting multiple landmarks using three different medical imaging datasets: fetal head ultrasound (US), adult brain and cardiac magnetic resonance imaging (MRI). The performance of our agents surpasses state-of-the-art supervised and RL methods. Our experiments also show that multi-scale search strategies perform significantly better than fixed-scale agents in images with large field of view and noisy background such as in cardiac MRI. Moreover, the novel hierarchical steps can significantly speed up the searching process by a factor of 4–5 times.},
+	language = {en},
+	urldate = {2021-05-11},
+	journal = {Medical Image Analysis},
+	author = {Alansary, Amir and Oktay, Ozan and Li, Yuanwei and Folgoc, Loic Le and Hou, Benjamin and Vaillant, Ghislain and Kamnitsas, Konstantinos and Vlontzos, Athanasios and Glocker, Ben and Kainz, Bernhard and Rueckert, Daniel},
+	month = apr,
+	year = {2019},
+	keywords = {Automatic landmark detection, Deep learning, DQN, Reinforcement learning},
+	pages = {156--164},
+	annote = {The authors tried multiple different reinforcement learning techniques for doing landmark detection of various anatomical structures (heart ultrasound and MR, and brain MR). They are working on 3D images, thus having x, y, and z dimensions.
+They formulate the RL problem as having:- Environment E being input images- Action-set A being a step in one of 6 directions (-x, +x, -y, +y, -z, +z)- State S being a 3D region of interest (a zoomed in image of the environment). It also has a frame history buffer of the last 4 states to stabilize search trajectories.- Reward function R being how much closer the agent got to the target since last state. They explained the problem of finding the reward function R as difficult.- Terminal state in training data when the agent is close enough to the target. Terminal state in testing data when we start seeing oscillating behavior (it goes around the target and don't really move much).
+They test out 4 different RL architectures:- DQN (deep Q-network)- DDQN (double deep Q-network)- Duel DQN (duel deep Q-network)- Duel DDQN (duel double deep Q-network)The performance of these were very similar, but if referncing this reread the results because it is not clear whether there is a better choice or not.
+The state changes over time. In the beginning the agent sees a large portion of the environment and is able to take coarse decisions on where to step next. Later the region of interest (ROI) shrinks and the agent should be able to take finer-grained decisions.
+The starting points of the agent are random. **Maybe we can improve this by teaching another network the ideal starting position for an agent?**
+They state that finding the target landmarks in ultrasound images are difficult because of artifacts such as shadowing, mirror images, refraction, and motion in the medium.
+Multiscale search improves performance and speed up the searching process by a factor of 4-5 times.},
+	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/TBRQB77V/S1361841518306121.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/S8DYX8I7/Alansary et al. - 2019 - Evaluating reinforcement learning agents for anato.pdf:application/pdf},
+}
+
+@article{mnih_human-level_2015,
+	title = {Human-level control through deep reinforcement learning},
+	volume = {518},
+	issn = {1476-4687},
+	url = {http://www.nature.com/articles/nature14236},
+	doi = {10.1038/nature14236},
+	abstract = {An artificial agent is developed that learns to play a diverse range of classic Atari 2600 computer games directly from sensory experience, achieving a performance comparable to that of an expert human player; this work paves the way to building general-purpose learning algorithms that bridge the divide between perception and action.},
+	language = {en},
+	number = {7540},
+	urldate = {2021-05-11},
+	journal = {Nature},
+	author = {Mnih, Volodymyr and Kavukcuoglu, Koray and Silver, David and Rusu, Andrei A. and Veness, Joel and Bellemare, Marc G. and Graves, Alex and Riedmiller, Martin and Fidjeland, Andreas K. and Ostrovski, Georg and Petersen, Stig and Beattie, Charles and Sadik, Amir and Antonoglou, Ioannis and King, Helen and Kumaran, Dharshan and Wierstra, Daan and Legg, Shane and Hassabis, Demis},
+	month = feb,
+	year = {2015},
+	note = {Number: 7540
+Publisher: Nature Publishing Group},
+	pages = {529--533},
+	annote = {First mention of DQN
+
+Uses CNN to approximate the optimal action-value function Q*
+Store trajectories in Experience Replay
+
+Improves stability because CNN learns froms randomly sampled state-action-reward tuples.
+Greater sample efficiency, because same sample is used multiple times.
+Fixes problem of too-correlated data between tuples close in time and big changes in CNN as effect to small changes to Q. Tsitsiklis, J. \& Roy, B. V. An analysis of temporal-difference learning with function approximation. IEEE Trans. Automat. Contr. 42, 674–690 (1997)
+
+
+Iterative update, only periodically updated Q. This means that en episode is played using a policy \$\${\textbackslash}pi\_i\$\$ and it is not updated until after the episode has ended, resulting in \$\${\textbackslash}pi\_\{i+1\}\$\$.
+Evaluated on Atari games
+
+Take only raw pixels as input, 210x160 pixels with 128 colours.
+
+
+Maps state+history to predicted value of each action, instead of having one action as input. Speeds up algorithm
+Model-free and off-policy algorithm
+Using separate networks for target and updating. Only one is updated at a time, and which one it is is swapped every C updated. This fixes issue where when an action is good the network will be overly optimistic about that one and create bias int rajctory for this action.
+Clipping of error term to -1 and 1. Increasing stability. This ensures that the biggest step one could take is one step in the direction of gradient.
+Notes:
+
+Updating “surprising” Q-values are slow, because after training a while they occur rarely because of low exploration. This is fixed in later articles, I think. This was acknowledged and article references Moore, A. \& Atkeson, C. Prioritized sweeping: reinforcement learning with less data and less real time. Mach. Learn. 13, 103–130 (1993)
+
+
+},
+	file = {Snapshot:/Users/magnus/Zotero/storage/SVMTJBPG/nature14236.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/44GDK6B5/Mnih et al. - 2015 - Human-level control through deep reinforcement lea.pdf:application/pdf},
+}
+
+@inproceedings{coates_learning_2008,
+	address = {New York, NY, USA},
+	series = {{ICML} '08},
+	title = {Learning for control from multiple demonstrations},
+	isbn = {978-1-60558-205-4},
+	url = {https://doi.org/10.1145/1390156.1390175},
+	doi = {10.1145/1390156.1390175},
+	abstract = {We consider the problem of learning to follow a desired trajectory when given a small number of demonstrations from a sub-optimal expert. We present an algorithm that (i) extracts the---initially unknown---desired trajectory from the sub-optimal expert's demonstrations and (ii) learns a local model suitable for control along the learned trajectory. We apply our algorithm to the problem of autonomous helicopter flight. In all cases, the autonomous helicopter's performance exceeds that of our expert helicopter pilot's demonstrations. Even stronger, our results significantly extend the state-of-the-art in autonomous helicopter aerobatics. In particular, our results include the first autonomous tic-tocs, loops and hurricane, vastly superior performance on previously performed aerobatic maneuvers (such as in-place flips and rolls), and a complete airshow, which requires autonomous transitions between these and various other maneuvers.},
+	urldate = {2021-05-10},
+	booktitle = {Proceedings of the 25th international conference on {Machine} learning},
+	publisher = {Association for Computing Machinery},
+	author = {Coates, Adam and Abbeel, Pieter and Ng, Andrew Y.},
+	month = jul,
+	year = {2008},
+	pages = {144--151},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/863UBWF2/Coates et al. - 2008 - Learning for control from multiple demonstrations.pdf:application/pdf},
+}
+
+@inproceedings{abbeel_apprenticeship_2004,
+	address = {New York, NY, USA},
+	series = {{ICML} '04},
+	title = {Apprenticeship learning via inverse reinforcement learning},
+	isbn = {978-1-58113-838-2},
+	url = {https://doi.org/10.1145/1015330.1015430},
+	doi = {10.1145/1015330.1015430},
+	abstract = {We consider learning in a Markov decision process where we are not explicitly given a reward function, but where instead we can observe an expert demonstrating the task that we want to learn to perform. This setting is useful in applications (such as the task of driving) where it may be difficult to write down an explicit reward function specifying exactly how different desiderata should be traded off. We think of the expert as trying to maximize a reward function that is expressible as a linear combination of known features, and give an algorithm for learning the task demonstrated by the expert. Our algorithm is based on using "inverse reinforcement learning" to try to recover the unknown reward function. We show that our algorithm terminates in a small number of iterations, and that even though we may never recover the expert's reward function, the policy output by the algorithm will attain performance close to that of the expert, where here performance is measured with respect to the expert's unknown reward function.},
+	urldate = {2021-05-10},
+	booktitle = {Proceedings of the twenty-first international conference on {Machine} learning},
+	publisher = {Association for Computing Machinery},
+	author = {Abbeel, Pieter and Ng, Andrew Y.},
+	month = jul,
+	year = {2004},
+	pages = {1},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/GLC5U4Z3/Abbeel and Ng - 2004 - Apprenticeship learning via inverse reinforcement .pdf:application/pdf},
+}
+
+@inproceedings{caicedo_active_2015,
+	title = {Active {Object} {Localization} with {Deep} {Reinforcement} {Learning}},
+	doi = {10.1109/ICCV.2015.286},
+	abstract = {We present an active detection model for localizing objects in scenes. The model is class-specific and allows an agent to focus attention on candidate regions for identifying the correct location of a target object. This agent learns to deform a bounding box using simple transformation actions, with the goal of determining the most specific location of target objects following top-down reasoning. The proposed localization agent is trained using deep reinforcement learning, and evaluated on the Pascal VOC 2007 dataset. We show that agents guided by the proposed model are able to localize a single instance of an object after analyzing only between 11 and 25 regions in an image, and obtain the best detection results among systems that do not use object proposals for object localization.},
+	booktitle = {2015 {IEEE} {International} {Conference} on {Computer} {Vision} ({ICCV})},
+	author = {Caicedo, Juan C. and Lazebnik, Svetlana},
+	month = dec,
+	year = {2015},
+	note = {ISSN: 2380-7504},
+	keywords = {Computational modeling, History, Learning (artificial intelligence), Prediction algorithms, Proposals, Search problems, Transforms},
+	pages = {2488--2496},
+	annote = {Object localization with RL.
+Actions set: Move bounding box
+
+left or right
+up or down
+make it smaller or bigger
+increase or decrease aspect ratio
+trigger (meaning terminate/localized)
+
+Will paint a black cross on the image in the center of the bounding box, and the agent will be reset to another part of the image (a corner). The image is shrunk by 75\%.
+
+
+
+State set:
+
+feature vector of observed region
+history of taken actions vector
+
+This makes it more stable to train and yields 3 percent better precision.
+Stops the agent from going around in circles.
+History of actions instead of history of feature vectors because it has much lower dimensionality and produces better results.
+
+
+
+Reward function:
+
+Sign of Intersection-over-union between selected bounding box and ground truth object.
+Except for trigger action, which has reward 3 if a certain threshold of the object is within the bounding box, or penalty of 3 (-3) if it is not.
+
+Uses Q-learning, DQN.
+Initialized using Inverse RL (IRL).
+Weakness in recall - finding all objects in an image when there are many objects.
+ 
+ 
+ 
+ 
+ },
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/C2W8MNUF/7410643.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/LF3GVLBD/Caicedo and Lazebnik - 2015 - Active Object Localization with Deep Reinforcement.pdf:application/pdf},
+}
+
+@article{ghesu_towards_2018,
+	title = {Towards intelligent robust detection of anatomical structures in incomplete volumetric data},
+	volume = {48},
+	issn = {1361-8415},
+	url = {https://www.sciencedirect.com/science/article/pii/S1361841518304092},
+	doi = {10.1016/j.media.2018.06.007},
+	abstract = {Robust and fast detection of anatomical structures represents an important component of medical image analysis technologies. Current solutions for anatomy detection are based on machine learning, and are generally driven by suboptimal and exhaustive search strategies. In particular, these techniques do not effectively address cases of incomplete data, i.e., scans acquired with a partial field-of-view. We address these challenges by following a new paradigm, which reformulates the detection task to teaching an intelligent artificial agent how to actively search for an anatomical structure. Using the principles of deep reinforcement learning with multi-scale image analysis, artificial agents are taught optimal navigation paths in the scale-space representation of an image, while accounting for structures that are missing from the field-of-view. The spatial coherence of the observed anatomical landmarks is ensured using elements from statistical shape modeling and robust estimation theory. Experiments show that our solution outperforms marginal space deep learning, a powerful deep learning method, at detecting different anatomical structures without any failure. The dataset contains 5043 3D-CT volumes from over 2000 patients, totaling over 2,500,000 image slices. In particular, our solution achieves 0\% false-positive and 0\% false-negative rates at detecting whether the landmarks are captured in the field-of-view of the scan (excluding all border cases), with an average detection accuracy of 2.78 mm. In terms of runtime, we reduce the detection-time of the marginal space deep learning method by 20–30 times to under 40 ms, an unmatched performance for high resolution incomplete 3D-CT data.},
+	language = {en},
+	urldate = {2021-05-10},
+	journal = {Medical Image Analysis},
+	author = {Ghesu, Florin C. and Georgescu, Bogdan and Grbic, Sasa and Maier, Andreas and Hornegger, Joachim and Comaniciu, Dorin},
+	month = aug,
+	year = {2018},
+	keywords = {Deep learning, Deep reinforcement learning, Incomplete 3D-data, M-estimator sample consensus, Multi-scale detection, Real-time detection, Robust statistical shape-modeling, Scale-space modeling},
+	pages = {203--213},
+	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/FNR3PMDX/S1361841518304092.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/498GGVUP/Ghesu et al. - 2018 - Towards intelligent robust detection of anatomical.pdf:application/pdf},
+}
+
+@inproceedings{ghesu_robust_2017,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {Robust {Multi}-scale {Anatomical} {Landmark} {Detection} in {Incomplete} {3D}-{CT} {Data}},
+	isbn = {978-3-319-66182-7},
+	doi = {10.1007/978-3-319-66182-7_23},
+	abstract = {Robust and fast detection of anatomical structures is an essential prerequisite for the next-generation automated medical support tools. While machine learning techniques are most often applied to address this problem, the traditional object search scheme is typically driven by suboptimal and exhaustive strategies. Most importantly, these techniques do not effectively address cases of incomplete data, i.e., scans taken with a partial field-of-view. To address these limitations, we present a solution that unifies the anatomy appearance model and the search strategy by formulating a behavior-learning task. This is solved using the capabilities of deep reinforcement learning with multi-scale image analysis and robust statistical shape modeling. Using these mechanisms artificial agents are taught optimal navigation paths in the image scale-space that can account for missing structures to ensure the robust and spatially-coherent detection of the observed anatomical landmarks. The identified landmarks are then used as robust guidance in estimating the extent of the body-region. Experiments show that our solution outperforms a state-of-the-art deep learning method in detecting different anatomical structures, without any failure, on a dataset of over 2300 3D-CT volumes. In particular, we achieve 0\% false-positive and 0\% false-negative rates at detecting the landmarks or recognizing their absence from the field-of-view of the scan. In terms of runtime, we reduce the detection-time of the reference method by 15−20 times to under 40 ms, an unmatched performance in the literature for high-resolution 3D-CT.},
+	language = {en},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	publisher = {Springer International Publishing},
+	author = {Ghesu, Florin C. and Georgescu, Bogdan and Grbic, Sasa and Maier, Andreas K. and Hornegger, Joachim and Comaniciu, Dorin},
+	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
+	year = {2017},
+	pages = {194--202},
+	annote = {RL for landmark detection in 3D CT scan volumes.
+Some structures in CT scan may be missing because of unknown FOV.
+State:
+
+Region of interest around point
+
+Actions
+
+Move in one of the basis vector directions
+
+Reward
+
+Relative change in distance to landmark
+
+Multiple models are trained for multiple scales. Start at coarsest scale level and each time the agent converges go to the next scale level until convergence on the finest scale.
+Convergence when the agent starts oscillating around a point. The center of the oscillation circle is the convergence point.
+Trained explicitly on images where the landmark is outside of the frame.},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/HWHLX8BR/Ghesu et al. - 2017 - Robust Multi-scale Anatomical Landmark Detection i.pdf:application/pdf},
+}
+
+@inproceedings{ghesu_artificial_2016,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {An {Artificial} {Agent} for {Anatomical} {Landmark} {Detection} in {Medical} {Images}},
+	isbn = {978-3-319-46726-9},
+	doi = {10.1007/978-3-319-46726-9_27},
+	abstract = {Fast and robust detection of anatomical structures or pathologies represents a fundamental task in medical image analysis. Most of the current solutions are however suboptimal and unconstrained by learning an appearance model and exhaustively scanning the space of parameters to detect a specific anatomical structure. In addition, typical feature computation or estimation of meta-parameters related to the appearance model or the search strategy, is based on local criteria or predefined approximation schemes. We propose a new learning method following a fundamentally different paradigm by simultaneously modeling both the object appearance and the parameter search strategy as a unified behavioral task for an artificial agent. The method combines the advantages of behavior learning achieved through reinforcement learning with effective hierarchical feature extraction achieved through deep learning. We show that given only a sequence of annotated images, the agent can automatically and strategically learn optimal paths that converge to the sought anatomical landmark location as opposed to exhaustively scanning the entire solution space. The method significantly outperforms state-of-the-art machine learning and deep learning approaches both in terms of accuracy and speed on 2D magnetic resonance images, 2D ultrasound and 3D CT images, achieving average detection errors of 1-2 pixels, while also recognizing the absence of an object from the image.},
+	language = {en},
+	booktitle = {Medical {Image} {Computing} and {Computer}-{Assisted} {Intervention} - {MICCAI} 2016},
+	publisher = {Springer International Publishing},
+	author = {Ghesu, Florin C. and Georgescu, Bogdan and Mansi, Tommaso and Neumann, Dominik and Hornegger, Joachim and Comaniciu, Dorin},
+	editor = {Ourselin, Sebastien and Joskowicz, Leo and Sabuncu, Mert R. and Unal, Gozde and Wells, William},
+	year = {2016},
+	keywords = {Experience Replay, Image Parsing, Landmark Detection, Network Response Function, Parameter Search Strategy},
+	pages = {229--237},
+	annote = {"We propose a new learning method following a fundamentally different paradigm by simultaneously modeling both the object appearance and the parameter search strategy as a unified behavioral task for an artificial agent."
+"The method significantly outperforms state-of-the-art machine learning and deep learning approaches both in terms of accuracy and speed on 2D magnetic resonance images, 2D ultrasound and 3D CT images, achieving average detection errors of 1-2 pixels, while also recognizing the absence of an object from the image."
+State:
+
+Region of interest around point
+
+Actions
+
+Move in one of four directions for 2D image
+
+Reward
+
+Relative change in distance to landmark
+
+ 
+DQN with deep CNN for function approximation.
+Reference update delay (dual DQN?)
+Experience Replay
+Agent starts in random position and runs until oscillation.
+Can detect objects not in image
+90\% converges to solution
+Much faster than other (then state-of-the-art) methods. 80x speed improvement for 2D and 3100x(!!) for 3D.
+ 
+Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/WRZI8KG4/Ghesu et al. - 2016 - An Artificial Agent for Anatomical Landmark Detect.pdf:application/pdf},
+}
+
+@article{zhou_deep_2021,
+	title = {Deep reinforcement learning in medical imaging: {A} literature review},
+	shorttitle = {Deep reinforcement learning in medical imaging},
+	url = {http://arxiv.org/abs/2103.05115},
+	abstract = {Deep reinforcement learning (DRL) augments the reinforcement learning framework, which learns a sequence of actions that maximizes the expected reward, with the representative power of deep neural networks. Recent works have demonstrated the great potential of DRL in medicine and healthcare. This paper presents a literature review of DRL in medical imaging. We start with a comprehensive tutorial of DRL, including the latest model-free and model-based algorithms. We then cover existing DRL applications for medical imaging, which are roughly divided into three main categories: (I) parametric medical image analysis tasks including landmark detection, object/lesion detection, registration, and view plane localization; (ii) solving optimization tasks including hyperparameter tuning, selecting augmentation strategies, and neural architecture search; and (iii) miscellaneous applications including surgical gesture segmentation, personalized mobile health intervention, and computational model personalization. The paper concludes with discussions of future perspectives.},
+	urldate = {2021-05-10},
+	journal = {arXiv:2103.05115 [cs, eess]},
+	author = {Zhou, S. Kevin and Le, Hoang Ngan and Luu, Khoa and Nguyen, Hien V. and Ayache, Nicholas},
+	month = mar,
+	year = {2021},
+	note = {arXiv: 2103.05115},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Electrical Engineering and Systems Science - Image and Video Processing},
+	annote = {Comment: 39 pages, 20 figures},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/U6GZKVTK/2103.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6LEPDE2B/Zhou et al. - 2021 - Deep reinforcement learning in medical imaging A .pdf:application/pdf},
+}
+
+@misc{noauthor_zotero_nodate,
+	title = {Zotero {\textbar} {Your} personal research assistant},
+	url = {https://www.zotero.org/start},
+	urldate = {2021-05-10},
+}
+
+@article{liao_artificial_2016,
+	title = {An {Artificial} {Agent} for {Robust} {Image} {Registration}},
+	url = {http://arxiv.org/abs/1611.10336},
+	abstract = {3-D image registration, which involves aligning two or more images, is a critical step in a variety of medical applications from diagnosis to therapy. Image registration is commonly performed by optimizing an image matching metric as a cost function. However, this task is challenging due to the non-convex nature of the matching metric over the plausible registration parameter space and insufficient approaches for a robust optimization. As a result, current approaches are often customized to a specific problem and sensitive to image quality and artifacts. In this paper, we propose a completely different approach to image registration, inspired by how experts perform the task. We first cast the image registration problem as a "strategy learning" process, where the goal is to find the best sequence of motion actions (e.g. up, down, etc.) that yields image alignment. Within this approach, an artificial agent is learned, modeled using deep convolutional neural networks, with 3D raw image data as the input, and the next optimal action as the output. To cope with the dimensionality of the problem, we propose a greedy supervised approach for an end-to-end training, coupled with attention-driven hierarchical strategy. The resulting registration approach inherently encodes both a data-driven matching metric and an optimal registration strategy (policy). We demonstrate, on two 3-D/3-D medical image registration examples with drastically different nature of challenges, that the artificial agent outperforms several state-of-art registration methods by a large margin in terms of both accuracy and robustness.},
+	urldate = {2021-05-12},
+	journal = {arXiv:1611.10336 [cs]},
+	author = {Liao, Rui and Miao, Shun and de Tournemire, Pierre and Grbic, Sasa and Kamen, Ali and Mansi, Tommaso and Comaniciu, Dorin},
+	month = nov,
+	year = {2016},
+	note = {arXiv: 1611.10336},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {Comment: To appear in AAAI Conference 2017},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/RIL2BX2Y/Liao et al. - 2016 - An Artificial Agent for Robust Image Registration.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/SE4QVVL8/1611.html:text/html},
+}
+
+@inproceedings{krebs_robust_2017,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {Robust {Non}-rigid {Registration} {Through} {Agent}-{Based} {Action} {Learning}},
+	isbn = {978-3-319-66182-7},
+	doi = {10.1007/978-3-319-66182-7_40},
+	abstract = {Robust image registration in medical imaging is essential for comparison or fusion of images, acquired from various perspectives, modalities or at different times. Typically, an objective function needs to be minimized assuming specific a priori deformation models and predefined or learned similarity measures. However, these approaches have difficulties to cope with large deformations or a large variability in appearance. Using modern deep learning (DL) methods with automated feature design, these limitations could be resolved by learning the intrinsic mapping solely from experience. We investigate in this paper how DL could help organ-specific (ROI-specific) deformable registration, to solve motion compensation or atlas-based segmentation problems for instance in prostate diagnosis. An artificial agent is trained to solve the task of non-rigid registration by exploring the parametric space of a statistical deformation model built from training data. Since it is difficult to extract trustworthy ground-truth deformation fields, we present a training scheme with a large number of synthetically deformed image pairs requiring only a small number of real inter-subject pairs. Our approach was tested on inter-subject registration of prostate MR data and reached a median DICE score of .88 in 2-D and .76 in 3-D, therefore showing improved results compared to state-of-the-art registration algorithms.},
+	language = {en},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	publisher = {Springer International Publishing},
+	author = {Krebs, Julian and Mansi, Tommaso and Delingette, Hervé and Zhang, Li and Ghesu, Florin C. and Miao, Shun and Maier, Andreas K. and Ayache, Nicholas and Liao, Rui and Kamen, Ali},
+	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
+	year = {2017},
+	pages = {344--352},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/C5QEINPR/Krebs et al. - 2017 - Robust Non-rigid Registration Through Agent-Based .pdf:application/pdf},
+}
+
+@inproceedings{maicas_deep_2017,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {Deep {Reinforcement} {Learning} for {Active} {Breast} {Lesion} {Detection} from {DCE}-{MRI}},
+	isbn = {978-3-319-66179-7},
+	doi = {10.1007/978-3-319-66179-7_76},
+	abstract = {We present a novel methodology for the automated detection of breast lesions from dynamic contrast-enhanced magnetic resonance volumes (DCE-MRI). Our method, based on deep reinforcement learning, significantly reduces the inference time for lesion detection compared to an exhaustive search, while retaining state-of-art accuracy.This speed-up is achieved via an attention mechanism that progressively focuses the search for a lesion (or lesions) on the appropriate region(s) of the input volume. The attention mechanism is implemented by training an artificial agent to learn a search policy, which is then exploited during inference. Specifically, we extend the deep Q-network approach, previously demonstrated on simpler problems such as anatomical landmark detection, in order to detect lesions that have a significant variation in shape, appearance, location and size. We demonstrate our results on a dataset containing 117 DCE-MRI volumes, validating run-time and accuracy of lesion detection.},
+	language = {en},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	publisher = {Springer International Publishing},
+	author = {Maicas, Gabriel and Carneiro, Gustavo and Bradley, Andrew P. and Nascimento, Jacinto C. and Reid, Ian},
+	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
+	year = {2017},
+	keywords = {Reinforcement learning, Breast lesion detection, Deep Q-learning, Magnetic resonance imaging, Q-net},
+	pages = {665--673},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/5XKTGP6K/Maicas et al. - 2017 - Deep Reinforcement Learning for Active Breast Lesi.pdf:application/pdf},
+}
+
+@article{wang_general_2013,
+	title = {A {General} {Framework} for {Context}-{Specific} {Image} {Segmentation} {Using} {Reinforcement} {Learning}},
+	volume = {32},
+	issn = {1558-254X},
+	doi = {10.1109/TMI.2013.2252431},
+	abstract = {This paper presents an online reinforcement learning framework for medical image segmentation. The concept of context-specific segmentation is introduced such that the model is adaptive not only to a defined objective function but also to the user's intention and prior knowledge. Based on this concept, a general segmentation framework using reinforcement learning is proposed, which can assimilate specific user intention and behavior seamlessly in the background. The method is able to establish an implicit model for a large state-action space and generalizable to different image contents or segmentation requirements based on learning in situ. In order to demonstrate the practical value of the method, example applications of the technique to four different segmentation problems are presented. Detailed validation results have shown that the proposed framework is able to significantly reduce user interaction, while maintaining both segmentation accuracy and consistency.},
+	number = {5},
+	journal = {IEEE Transactions on Medical Imaging},
+	author = {Wang, Lichao and Lekadir, Karim and Lee, Su-Lin and Merrifield, Robert and Yang, Guang-Zhong},
+	month = may,
+	year = {2013},
+	note = {Conference Name: IEEE Transactions on Medical Imaging},
+	keywords = {Algorithm design and analysis, Cardiac image segmentation, Context, context-specific segmentation, Image segmentation, Learning, Muscles, reinforcement learning, Shape, statistical shape model, Vectors},
+	pages = {943--956},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/5MCB4LEW/Wang et al. - 2013 - A General Framework for Context-Specific Image Seg.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/ZFCB462G/6479705.html:text/html},
+}
+
+@inproceedings{h_p_van_hasselt_hado_double_2010,
+	title = {Double {Q}-learning},
+	url = {https://ir.cwi.nl/pub/16889},
+	abstract = {In some stochastic environments the well-known reinforcement learning algorithm Q-learning performs very poorly. This poor performance is caused by large overestimations of action values, which result from a positive bias that is introduced because Q-learning uses the maximum action value as an approximation for the maximum expected action value. We introduce an alternative way to approximate the maximum expected value for any set of random variables. The obtained double estimator method is shown to sometimes underestimate rather than overestimate the maximum expected value. We apply the double estimator to Q-learning to construct Double Q-learning, a new off-policy reinforcement learning algorithm. We show the new algorithm converges to the optimal policy and that it performs well in some settings in which Q-learning performs poorly due to its overestimation.},
+	language = {en},
+	urldate = {2021-05-15},
+	booktitle = {Advances in {Neural} {Information} {Processing} {Systems}},
+	publisher = {The MIT Press},
+	author = {{H. P. van Hasselt (Hado)} and {Intelligent and autonomous systems}},
+	month = dec,
+	year = {2010},
+	keywords = {reinforcement learning, bias, double Q-learning, Q-learning},
+}
+
+@article{van_hasselt_deep_2015,
+	title = {Deep {Reinforcement} {Learning} with {Double} {Q}-learning},
+	url = {http://arxiv.org/abs/1509.06461},
+	abstract = {The popular Q-learning algorithm is known to overestimate action values under certain conditions. It was not previously known whether, in practice, such overestimations are common, whether they harm performance, and whether they can generally be prevented. In this paper, we answer all these questions affirmatively. In particular, we first show that the recent DQN algorithm, which combines Q-learning with a deep neural network, suffers from substantial overestimations in some games in the Atari 2600 domain. We then show that the idea behind the Double Q-learning algorithm, which was introduced in a tabular setting, can be generalized to work with large-scale function approximation. We propose a specific adaptation to the DQN algorithm and show that the resulting algorithm not only reduces the observed overestimations, as hypothesized, but that this also leads to much better performance on several games.},
+	urldate = {2021-05-15},
+	journal = {arXiv:1509.06461 [cs]},
+	author = {van Hasselt, Hado and Guez, Arthur and Silver, David},
+	month = dec,
+	year = {2015},
+	note = {arXiv: 1509.06461},
+	keywords = {Computer Science - Machine Learning},
+	annote = {Comment: AAAI 2016},
+	annote = {
+Reduce over-optimistic value functions, based on the work of Double Q-learning: van Hasselt. Double Q-learning.Advances in Neural Informa-tion Processing Systems, 23:2613–2621, 2010[3]
+Over-optimistic because of approximating Q-values, and we use max\_a for “looking into the future”. If the value of an actions have a variance, but correct mean value, the value of the maximum value is always selected. This has a trickle-down effect for other value estimates.
+Shows that over-estimating DQN make poorer policies.
+Use one network to select the best action and another for evaluating how good taking that action would be.
+DQN can be turned into Double DQN by decomposing the target into an action-selector and an action-value estimator, and using different networks for them, but periodically copying the online network params into the target network params.
+},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/4SAWKFH8/1509.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/TF2YWAQN/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/TYNVKNNJ/1509.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/I7LYX5JX/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf},
+}
+
+@article{mada_razvan_o_how_2015,
+	title = {How to {Define} {End}-{Diastole} and {End}-{Systole}?},
+	volume = {8},
+	url = {https://www.jacc.org/doi/full/10.1016/j.jcmg.2014.10.010},
+	doi = {10.1016/j.jcmg.2014.10.010},
+	number = {2},
+	urldate = {2021-05-15},
+	journal = {JACC: Cardiovascular Imaging},
+	author = {{Mada Razvan O.} and {Lysyansky Peter} and {Daraban Ana M.} and {Duchenne Jürgen} and {Voigt Jens-Uwe}},
+	month = feb,
+	year = {2015},
+	note = {Publisher: American College of Cardiology Foundation},
+	pages = {148--157},
+	file = {Snapshot:/Users/magnus/Zotero/storage/HLQ5XGMJ/j.jcmg.2014.10.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/97X3IJTM/Mada Razvan O. et al. - 2015 - How to Define End-Diastole and End-Systole.pdf:application/pdf},
+}
+
+@article{lane_multibeat_2021,
+	title = {Multibeat echocardiographic phase detection using deep neural networks},
+	volume = {133},
+	issn = {0010-4825},
+	url = {https://www.sciencedirect.com/science/article/pii/S0010482521001670},
+	doi = {10.1016/j.compbiomed.2021.104373},
+	abstract = {Background
+Accurate identification of end-diastolic and end-systolic frames in echocardiographic cine loops is important, yet challenging, for human experts. Manual frame selection is subject to uncertainty, affecting crucial clinical measurements, such as myocardial strain. Therefore, the ability to automatically detect frames of interest is highly desirable.
+Methods
+We have developed deep neural networks, trained and tested on multi-centre patient data, for the accurate identification of end-diastolic and end-systolic frames in apical four-chamber 2D multibeat cine loop recordings of arbitrary length. Seven experienced cardiologist experts independently labelled the frames of interest, thereby providing infallible annotations, allowing for observer variability measurements.
+Results
+When compared with the ground-truth, our model shows an average frame difference of −0.09 ± 1.10 and 0.11 ± 1.29 frames for end-diastolic and end-systolic frames, respectively. When applied to patient datasets from a different clinical site, to which the model was blind during its development, average frame differences of −1.34 ± 3.27 and −0.31 ± 3.37 frames were obtained for both frames of interest. All detection errors fall within the range of inter-observer variability: [-0.87, −5.51]±[2.29, 4.26] and [-0.97, −3.46]±[3.67, 4.68] for ED and ES events, respectively.
+Conclusions
+The proposed automated model can identify multiple end-systolic and end-diastolic frames in echocardiographic videos of arbitrary length with performance indistinguishable from that of human experts, but with significantly shorter processing time.},
+	language = {en},
+	urldate = {2021-05-12},
+	journal = {Computers in Biology and Medicine},
+	author = {Lane, Elisabeth S. and Azarmehr, Neda and Jevsikov, Jevgeni and Howard, James P. and Shun-shin, Matthew J. and Cole, Graham D. and Francis, Darrel P. and Zolgharni, Massoud},
+	month = jun,
+	year = {2021},
+	keywords = {Deep learning, Cardiac imaging, Echocardiography, Phase detection},
+	pages = {104373},
+	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/EQDQCJJI/S0010482521001670.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/LK8CSIAR/Lane et al. - 2021 - Multibeat echocardiographic phase detection using .pdf:application/pdf},
+}
+
+@article{mordi_efficacy_2017,
+	title = {Efficacy of noninvasive cardiac imaging tests in diagnosis and management of stable coronary artery disease},
+	volume = {13},
+	issn = {1176-6344},
+	url = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5701553/},
+	doi = {10.2147/VHRM.S106838},
+	abstract = {The aim of this review was to discuss the current literature regarding the utility of noninvasive imaging in diagnosis and management of stable coronary artery disease (CAD) including recent data from large randomized trials assessing diagnosis and prognosis. Current guidelines recommend revascularization in patients with refractory angina and in those with potential prognostic benefit. Appropriate risk stratification through noninvasive assessment is important in ensuring patients are not exposed to unnecessary invasive coronary angiograms. The past 20 years have seen an unprecedented expansion in noninvasive imaging modalities for the assessment of stable CAD, with cardiovascular magnetic resonance and computed tomography complementing established techniques such as myocardial perfusion imaging, echocardiography and exercise electrocardiogram. In this review, we examine the current state-of-the-art in noninvasive imaging to provide an up-to-date analysis of current investigation and management options.},
+	urldate = {2021-05-12},
+	journal = {Vascular Health and Risk Management},
+	author = {Mordi, Ify R and Badar, Athar A and Irving, R John and Weir-McCall, Jonathan R and Houston, J Graeme and Lang, Chim C},
+	month = nov,
+	year = {2017},
+	pmid = {29200864},
+	pmcid = {PMC5701553},
+	pages = {427--437},
+	file = {PubMed Central Full Text PDF:/Users/magnus/Zotero/storage/IHCB5IHL/Mordi et al. - 2017 - Efficacy of noninvasive cardiac imaging tests in d.pdf:application/pdf},
+}
+
+@misc{noauthor_cardiovascular_nodate,
+	title = {Cardiovascular diseases},
+	url = {https://www.who.int/westernpacific/health-topics/cardiovascular-diseases},
+	abstract = {Cardiovascular Diseases},
+	language = {en},
+	urldate = {2021-05-12},
+	file = {Snapshot:/Users/magnus/Zotero/storage/Q9T6QTUT/cardiovascular-diseases.html:text/html},
+}
+
+@article{mcmanus_prognostic_2009,
+	title = {Prognostic {Value} of {Left} {Ventricular} {End}-{Systolic} {Volume} {Index} as a {Predictor} of {Heart} {Failure} {Hospitalization} in {Stable} {Coronary} {Artery} {Disease}: {Data} from the {Heart} and {Soul} {Study}},
+	volume = {22},
+	issn = {0894-7317},
+	shorttitle = {Prognostic {Value} of {Left} {Ventricular} {End}-{Systolic} {Volume} {Index} as a {Predictor} of {Heart} {Failure} {Hospitalization} in {Stable} {Coronary} {Artery} {Disease}},
+	url = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2675872/},
+	doi = {10.1016/j.echo.2008.11.005},
+	abstract = {Objective
+Left ventricular (LV) end-systolic volume indexed to body surface area (ESVI) is a simple yet powerful echocardiographic marker of LV remodeling that can be measured easily. The prognostic value of ESVI and its merit relative to other markers of LV remodeling in patients with coronary heart disease are unknown.
+
+Methods
+We examined the association of ESVI with hospitalization for heart failure (HF) and mortality in a prospective study of patients with coronary heart disease.
+
+Results
+Of the 989 participants, 110 (11\%) were hospitalized for HF during 3.6 ± 1.1 years of follow-up. Among participants in the highest ESVI quartile ({\textgreater}25 mL/m2), 67 of 248 (27\%) developed HF compared with 8 of 248 (3\%) among those in the lowest quartile. The association between ESVI and HF hospitalization persisted after adjustment for potential confounders (hazard ratio 5.0, 95\% confidence interval, 1.5–16.9; P = .01).
+
+Conclusion
+ESVI {\textgreater}25 mL/m2 is an independent predictor of hospitalization for HF in patients with stable coronary heart disease.},
+	number = {2},
+	urldate = {2021-05-12},
+	journal = {Journal of the American Society of Echocardiography : official publication of the American Society of Echocardiography},
+	author = {McManus, David D. and Shah, Sanjiv J. and Fabi, Mary Rose and Rosen, Alisa and Whooley, Mary A. and Schiller, Nelson B.},
+	month = feb,
+	year = {2009},
+	pmid = {19084372},
+	pmcid = {PMC2675872},
+	pages = {190--197},
+	file = {PubMed Central Full Text PDF:/Users/magnus/Zotero/storage/LMN3IQIB/McManus et al. - 2009 - Prognostic Value of Left Ventricular End-Systolic .pdf:application/pdf},
+}
+
+@inproceedings{kong_recognizing_2016,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {Recognizing {End}-{Diastole} and {End}-{Systole} {Frames} via {Deep} {Temporal} {Regression} {Network}},
+	isbn = {978-3-319-46726-9},
+	doi = {10.1007/978-3-319-46726-9_31},
+	abstract = {Accurate measurement of left ventricular volumes and Ejection Fraction from cine MRI is of paramount importance to the evaluation of cardiovascular functions, yet it usually requires laborious and tedious work of trained experts to interpret them. To facilitate this procedure, numerous computer aided diagnosis (CAD) methods and tools have been proposed, most of which focus on the left or right ventricle segmentation. However, the identification of ES and ED frames from cardiac sequences is largely ignored, which is a key procedure in the automated workflow. This seemingly easy task is quite challenging, due to the requirement of high accuracy (i.e., precisely identifying specific frames from a sequence) and subtle differences among consecutive frames. Recently, with the rapid growth of annotated data and the increasing computational power, deep learning methods have been widely exploited in medical image analysis. In this paper, we propose a novel deep learning architecture, named as temporal regression network (TempReg-Net), to accurately identify specific frames from MRI sequences, by integrating the Convolutional Neural Network (CNN) with the Recurrent Neural Network (RNN). Specifically, a CNN encodes the spatial information of a cardiac sequence, and a RNN decodes the temporal information. In addition, we design a new loss function in our network to constrain the structure of predicted labels, which further improves the performance. Our approach is extensively validated on thousands of cardiac sequences and the average difference is merely 0.4 frames, comparing favorably with previous systems.},
+	language = {en},
+	booktitle = {Medical {Image} {Computing} and {Computer}-{Assisted} {Intervention} - {MICCAI} 2016},
+	publisher = {Springer International Publishing},
+	author = {Kong, Bin and Zhan, Yiqiang and Shin, Min and Denny, Thomas and Zhang, Shaoting},
+	editor = {Ourselin, Sebastien and Joskowicz, Leo and Sabuncu, Mert R. and Unal, Gozde and Wells, William},
+	year = {2016},
+	keywords = {Cardiac Sequence, Deep Learning Methods, Long Short-term Memory (LSTM), LSTM Model, Right Ventricle Segmentation},
+	pages = {264--272},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/CDXRCX7V/Kong et al. - 2016 - Recognizing End-Diastole and End-Systole Frames vi.pdf:application/pdf},
+}
+
+@book{sutton_reinforcement_2018,
+	title = {Reinforcement {Learning}, second edition: {An} {Introduction}},
+	isbn = {978-0-262-35270-3},
+	shorttitle = {Reinforcement {Learning}, second edition},
+	abstract = {The significantly expanded and updated new edition of a widely used text on reinforcement learning, one of the most active research areas in artificial intelligence.Reinforcement learning, one of the most active research areas in artificial intelligence, is a computational approach to learning whereby an agent tries to maximize the total amount of reward it receives while interacting with a complex, uncertain environment. In Reinforcement Learning, Richard Sutton and Andrew Barto provide a clear and simple account of the field's key ideas and algorithms. This second edition has been significantly expanded and updated, presenting new topics and updating coverage of other topics.Like the first edition, this second edition focuses on core online learning algorithms, with the more mathematical material set off in shaded boxes. Part I covers as much of reinforcement learning as possible without going beyond the tabular case for which exact solutions can be found. Many algorithms presented in this part are new to the second edition, including UCB, Expected Sarsa, and Double Learning. Part II extends these ideas to function approximation, with new sections on such topics as artificial neural networks and the Fourier basis, and offers expanded treatment of off-policy learning and policy-gradient methods. Part III has new chapters on reinforcement learning's relationships to psychology and neuroscience, as well as an updated case-studies chapter including AlphaGo and AlphaGo Zero, Atari game playing, and IBM Watson's wagering strategy. The final chapter discusses the future societal impacts of reinforcement learning.},
+	language = {en},
+	publisher = {MIT Press},
+	author = {Sutton, Richard S. and Barto, Andrew G.},
+	month = nov,
+	year = {2018},
+	note = {Google-Books-ID: uWV0DwAAQBAJ},
+	keywords = {Computers / Artificial Intelligence / General},
+	file = {Sutton and Barto - 2018 - Reinforcement Learning, second edition An Introdu.pdf:/Users/magnus/Zotero/storage/USK568A9/Sutton and Barto - 2018 - Reinforcement Learning, second edition An Introdu.pdf:application/pdf},
+}
+
+@article{maaten_visualizing_2008,
+	title = {Visualizing {Data} using t-{SNE}},
+	volume = {9},
+	issn = {1533-7928},
+	url = {http://jmlr.org/papers/v9/vandermaaten08a.html},
+	number = {86},
+	urldate = {2021-05-15},
+	journal = {Journal of Machine Learning Research},
+	author = {Maaten, Laurens van der and Hinton, Geoffrey},
+	year = {2008},
+	pages = {2579--2605},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/WGFCDDZI/Maaten and Hinton - 2008 - Visualizing Data using t-SNE.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/TGQNCILG/vandermaaten08a.html:text/html},
+}
+
+@article{hessel_rainbow_2017,
+	title = {Rainbow: {Combining} {Improvements} in {Deep} {Reinforcement} {Learning}},
+	shorttitle = {Rainbow},
+	url = {http://arxiv.org/abs/1710.02298},
+	abstract = {The deep reinforcement learning community has made several independent improvements to the DQN algorithm. However, it is unclear which of these extensions are complementary and can be fruitfully combined. This paper examines six extensions to the DQN algorithm and empirically studies their combination. Our experiments show that the combination provides state-of-the-art performance on the Atari 2600 benchmark, both in terms of data efficiency and final performance. We also provide results from a detailed ablation study that shows the contribution of each component to overall performance.},
+	urldate = {2021-05-16},
+	journal = {arXiv:1710.02298 [cs]},
+	author = {Hessel, Matteo and Modayil, Joseph and van Hasselt, Hado and Schaul, Tom and Ostrovski, Georg and Dabney, Will and Horgan, Dan and Piot, Bilal and Azar, Mohammad and Silver, David},
+	month = oct,
+	year = {2017},
+	note = {arXiv: 1710.02298},
+	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence},
+	annote = {
+Combines many networks and performs ablation studies to find which matter the most
+The aggregate Rainbow DQN performs better than all of its components alone
+Uses:
+
+Double DQN
+Prioritized replay
+Dual DQN
+Multi-step learning
+Distributional RL
+Noisy Nets
+
+
+Removing Double and Dual showed the least amount of performance reduction.
+Prioritized replay and multi-step learning were most important
+Other networks not analysed:
+
+Policy-based algorithms such as PPO (Schulman et al. 2015)
+Actor-critic (Mnih et al. 2016; O’Donoghue et al. 2016)
+Asynchronous learning from parallel copies of the environment, as in A3C (Mnih et al. 2016), Gorila (Nair et al. 2015), or Evolution Strategies (Salimans et al. 2017)
+Hierarchical RL: h-DQN (Kulkarni et al. 2016a) and Feudal Networks (Vezhnevets et al. 2017)
+“The state representation could also be made more efficient by exploiting auxiliary tasks such as pixel control or feature control (Jaderberg et al. 2016), supervised predictions (Dosovitskiy and Koltun 2016) or successor features (Kulkarni et al. 2016b).”
+
+
+},
+	annote = {Comment: Under review as a conference paper at AAAI 2018},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/KEXIU79P/Hessel et al. - 2017 - Rainbow Combining Improvements in Deep Reinforcem.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/LTQEMKGV/1710.html:text/html},
+}
+
+@article{schaul_prioritized_2016,
+	title = {Prioritized {Experience} {Replay}},
+	url = {http://arxiv.org/abs/1511.05952},
+	abstract = {Experience replay lets online reinforcement learning agents remember and reuse experiences from the past. In prior work, experience transitions were uniformly sampled from a replay memory. However, this approach simply replays transitions at the same frequency that they were originally experienced, regardless of their significance. In this paper we develop a framework for prioritizing experience, so as to replay important transitions more frequently, and therefore learn more efficiently. We use prioritized experience replay in Deep Q-Networks (DQN), a reinforcement learning algorithm that achieved human-level performance across many Atari games. DQN with prioritized experience replay achieves a new state-of-the-art, outperforming DQN with uniform replay on 41 out of 49 games.},
+	urldate = {2021-05-16},
+	journal = {arXiv:1511.05952 [cs]},
+	author = {Schaul, Tom and Quan, John and Antonoglou, Ioannis and Silver, David},
+	month = feb,
+	year = {2016},
+	note = {arXiv: 1511.05952},
+	keywords = {Computer Science - Machine Learning},
+	annote = {Comment: Published at ICLR 2016},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/AXJTPJMN/Schaul et al. - 2016 - Prioritized Experience Replay.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/NRGWNM9V/1511.html:text/html},
+}
+
+@article{wang_dueling_2016,
+	title = {Dueling {Network} {Architectures} for {Deep} {Reinforcement} {Learning}},
+	url = {http://arxiv.org/abs/1511.06581},
+	abstract = {In recent years there have been many successes of using deep representations in reinforcement learning. Still, many of these applications use conventional architectures, such as convolutional networks, LSTMs, or auto-encoders. In this paper, we present a new neural network architecture for model-free reinforcement learning. Our dueling network represents two separate estimators: one for the state value function and one for the state-dependent action advantage function. The main benefit of this factoring is to generalize learning across actions without imposing any change to the underlying reinforcement learning algorithm. Our results show that this architecture leads to better policy evaluation in the presence of many similar-valued actions. Moreover, the dueling architecture enables our RL agent to outperform the state-of-the-art on the Atari 2600 domain.},
+	urldate = {2021-05-16},
+	journal = {arXiv:1511.06581 [cs]},
+	author = {Wang, Ziyu and Schaul, Tom and Hessel, Matteo and van Hasselt, Hado and Lanctot, Marc and de Freitas, Nando},
+	month = apr,
+	year = {2016},
+	note = {arXiv: 1511.06581},
+	keywords = {Computer Science - Machine Learning},
+	annote = {Comment: 15 pages, 5 figures, and 5 tables},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/L5VHA48I/Wang et al. - 2016 - Dueling Network Architectures for Deep Reinforceme.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/2MEI64AU/1511.html:text/html},
+}
+
+@article{bellemare_distributional_2017,
+	title = {A {Distributional} {Perspective} on {Reinforcement} {Learning}},
+	url = {http://arxiv.org/abs/1707.06887},
+	abstract = {In this paper we argue for the fundamental importance of the value distribution: the distribution of the random return received by a reinforcement learning agent. This is in contrast to the common approach to reinforcement learning which models the expectation of this return, or value. Although there is an established body of literature studying the value distribution, thus far it has always been used for a specific purpose such as implementing risk-aware behaviour. We begin with theoretical results in both the policy evaluation and control settings, exposing a significant distributional instability in the latter. We then use the distributional perspective to design a new algorithm which applies Bellman's equation to the learning of approximate value distributions. We evaluate our algorithm using the suite of games from the Arcade Learning Environment. We obtain both state-of-the-art results and anecdotal evidence demonstrating the importance of the value distribution in approximate reinforcement learning. Finally, we combine theoretical and empirical evidence to highlight the ways in which the value distribution impacts learning in the approximate setting.},
+	urldate = {2021-05-18},
+	journal = {arXiv:1707.06887 [cs, stat]},
+	author = {Bellemare, Marc G. and Dabney, Will and Munos, Rémi},
+	month = jul,
+	year = {2017},
+	note = {arXiv: 1707.06887},
+	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning},
+	annote = {Comment: ICML 2017},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/M5CYSMIP/Bellemare et al. - 2017 - A Distributional Perspective on Reinforcement Lear.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/VIZUNELQ/1707.html:text/html},
+}
+
+@misc{noauthor_nonlinear_2021,
+	title = {Nonlinear dimensionality reduction},
+	copyright = {Creative Commons Attribution-ShareAlike License},
+	url = {https://en.wikipedia.org/w/index.php?title=Nonlinear_dimensionality_reduction&oldid=1016616599},
+	abstract = {High-dimensional data, meaning data that requires more than two or three dimensions to represent, can be  difficult to interpret. One approach to simplification is to assume that the data of interest lies within lower-dimensional space. If the data of interest is of low enough dimension, the data can be visualised in the low-dimensional space.
+
+Below is a summary of some notable methods for nonlinear dimensionality reduction. Many of these non-linear dimensionality reduction methods are related to the linear methods listed below. Non-linear methods can be broadly classified into two groups: those that provide a mapping (either from the high-dimensional space to the low-dimensional embedding or vice versa), and those that just give a visualisation.},
+	language = {en},
+	urldate = {2021-05-17},
+	journal = {Wikipedia},
+	month = apr,
+	year = {2021},
+	note = {Page Version ID: 1016616599},
+}
+
+@misc{noauthor_principal_2021,
+	title = {Principal component analysis},
+	copyright = {Creative Commons Attribution-ShareAlike License},
+	url = {https://en.wikipedia.org/w/index.php?title=Principal_component_analysis&oldid=1022935748},
+	abstract = {The principal components of a collection of points in a real coordinate space are a sequence of 
+  
+    
+      
+        p
+      
+    
+    \{{\textbackslash}displaystyle p\}
+   unit vectors, where the 
+  
+    
+      
+        i
+      
+    
+    \{{\textbackslash}displaystyle i\}
+  -th vector is the direction of a line that best fits the data while being orthogonal to the first 
+  
+    
+      
+        i
+        −
+        1
+      
+    
+    \{{\textbackslash}displaystyle i-1\}
+   vectors. Here, a best-fitting line is defined as one that minimizes the average squared distance from the points to the line. These directions constitute an orthonormal basis in which different individual dimensions of the data are linearly uncorrelated. Principal component analysis (PCA) is the process of computing the principal components and using them to perform a change of basis on the data, sometimes using only the first few principal components and ignoring the rest.
+PCA is used in exploratory data analysis and for making predictive models. It is commonly used for dimensionality reduction by projecting each data point onto only the first few principal components to obtain lower-dimensional data while preserving as much of the data's variation as possible. The first principal component can equivalently be defined as a direction that maximizes the variance of the projected data. The 
+  
+    
+      
+        i
+      
+    
+    \{{\textbackslash}displaystyle i\}
+  -th principal component can be taken as a direction orthogonal to the first 
+  
+    
+      
+        i
+        −
+        1
+      
+    
+    \{{\textbackslash}displaystyle i-1\}
+   principal components that maximizes the variance of the projected data.
+From either objective, it can be shown that the principal components are eigenvectors of the data's covariance matrix. Thus, the principal components are often computed by eigendecomposition of the data covariance matrix or singular value decomposition of the data matrix. PCA is the simplest of the true eigenvector-based multivariate analyses and is closely related to factor analysis. Factor analysis typically incorporates more domain specific assumptions about the underlying structure and solves eigenvectors of a slightly different matrix. PCA is also related to canonical correlation analysis (CCA). CCA defines coordinate systems that optimally describe the cross-covariance between two datasets while PCA defines a new orthogonal coordinate system that optimally describes variance in a single dataset. Robust and L1-norm-based variants of standard PCA have also been proposed.},
+	language = {en},
+	urldate = {2021-05-17},
+	journal = {Wikipedia},
+	month = may,
+	year = {2021},
+	note = {Page Version ID: 1022935748},
+}
+
+@article{vaswani_attention_2017,
+	title = {Attention {Is} {All} {You} {Need}},
+	url = {http://arxiv.org/abs/1706.03762},
+	abstract = {The dominant sequence transduction models are based on complex recurrent or convolutional neural networks in an encoder-decoder configuration. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely. Experiments on two machine translation tasks show these models to be superior in quality while being more parallelizable and requiring significantly less time to train. Our model achieves 28.4 BLEU on the WMT 2014 English-to-German translation task, improving over the existing best results, including ensembles by over 2 BLEU. On the WMT 2014 English-to-French translation task, our model establishes a new single-model state-of-the-art BLEU score of 41.8 after training for 3.5 days on eight GPUs, a small fraction of the training costs of the best models from the literature. We show that the Transformer generalizes well to other tasks by applying it successfully to English constituency parsing both with large and limited training data.},
+	urldate = {2021-05-17},
+	journal = {arXiv:1706.03762 [cs]},
+	author = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, Lukasz and Polosukhin, Illia},
+	month = dec,
+	year = {2017},
+	note = {arXiv: 1706.03762},
+	keywords = {Computer Science - Machine Learning, Computer Science - Computation and Language},
+	annote = {Comment: 15 pages, 5 figures},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/GXEJM4HJ/1706.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/FRBZ5AMQ/Vaswani et al. - 2017 - Attention Is All You Need.pdf:application/pdf},
+}
+
+@article{cho_learning_2014,
+	title = {Learning {Phrase} {Representations} using {RNN} {Encoder}-{Decoder} for {Statistical} {Machine} {Translation}},
+	url = {http://arxiv.org/abs/1406.1078},
+	abstract = {In this paper, we propose a novel neural network model called RNN Encoder-Decoder that consists of two recurrent neural networks (RNN). One RNN encodes a sequence of symbols into a fixed-length vector representation, and the other decodes the representation into another sequence of symbols. The encoder and decoder of the proposed model are jointly trained to maximize the conditional probability of a target sequence given a source sequence. The performance of a statistical machine translation system is empirically found to improve by using the conditional probabilities of phrase pairs computed by the RNN Encoder-Decoder as an additional feature in the existing log-linear model. Qualitatively, we show that the proposed model learns a semantically and syntactically meaningful representation of linguistic phrases.},
+	urldate = {2021-05-17},
+	journal = {arXiv:1406.1078 [cs, stat]},
+	author = {Cho, Kyunghyun and van Merrienboer, Bart and Gulcehre, Caglar and Bahdanau, Dzmitry and Bougares, Fethi and Schwenk, Holger and Bengio, Yoshua},
+	month = sep,
+	year = {2014},
+	note = {arXiv: 1406.1078},
+	keywords = {Computer Science - Machine Learning, Statistics - Machine Learning, Computer Science - Computation and Language, Computer Science - Neural and Evolutionary Computing},
+	annote = {Comment: EMNLP 2014},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/9N7BTSAL/1406.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/7YKVUHJB/Cho et al. - 2014 - Learning Phrase Representations using RNN Encoder-.pdf:application/pdf},
+}
+
+@article{huang_densely_2018,
+	title = {Densely {Connected} {Convolutional} {Networks}},
+	url = {http://arxiv.org/abs/1608.06993},
+	abstract = {Recent work has shown that convolutional networks can be substantially deeper, more accurate, and efficient to train if they contain shorter connections between layers close to the input and those close to the output. In this paper, we embrace this observation and introduce the Dense Convolutional Network (DenseNet), which connects each layer to every other layer in a feed-forward fashion. Whereas traditional convolutional networks with L layers have L connections - one between each layer and its subsequent layer - our network has L(L+1)/2 direct connections. For each layer, the feature-maps of all preceding layers are used as inputs, and its own feature-maps are used as inputs into all subsequent layers. DenseNets have several compelling advantages: they alleviate the vanishing-gradient problem, strengthen feature propagation, encourage feature reuse, and substantially reduce the number of parameters. We evaluate our proposed architecture on four highly competitive object recognition benchmark tasks (CIFAR-10, CIFAR-100, SVHN, and ImageNet). DenseNets obtain significant improvements over the state-of-the-art on most of them, whilst requiring less computation to achieve high performance. Code and pre-trained models are available at https://github.com/liuzhuang13/DenseNet .},
+	urldate = {2021-05-17},
+	journal = {arXiv:1608.06993 [cs]},
+	author = {Huang, Gao and Liu, Zhuang and van der Maaten, Laurens and Weinberger, Kilian Q.},
+	month = jan,
+	year = {2018},
+	note = {arXiv: 1608.06993},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+	annote = {Comment: CVPR 2017},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/6DUQ25RW/1608.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/XJBHA79W/Huang et al. - 2018 - Densely Connected Convolutional Networks.pdf:application/pdf},
+}
+
+@article{he_deep_2015,
+	title = {Deep {Residual} {Learning} for {Image} {Recognition}},
+	url = {http://arxiv.org/abs/1512.03385},
+	abstract = {Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers---8x deeper than VGG nets but still having lower complexity. An ensemble of these residual nets achieves 3.57\% error on the ImageNet test set. This result won the 1st place on the ILSVRC 2015 classification task. We also present analysis on CIFAR-10 with 100 and 1000 layers. The depth of representations is of central importance for many visual recognition tasks. Solely due to our extremely deep representations, we obtain a 28\% relative improvement on the COCO object detection dataset. Deep residual nets are foundations of our submissions to ILSVRC \& COCO 2015 competitions, where we also won the 1st places on the tasks of ImageNet detection, ImageNet localization, COCO detection, and COCO segmentation.},
+	urldate = {2021-05-17},
+	journal = {arXiv:1512.03385 [cs]},
+	author = {He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+	month = dec,
+	year = {2015},
+	note = {arXiv: 1512.03385},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {Comment: Tech report},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/NVDAJWKK/1512.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/DFE3P7CB/He et al. - 2015 - Deep Residual Learning for Image Recognition.pdf:application/pdf},
+}
+
+@article{fortunato_noisy_2019,
+	title = {Noisy {Networks} for {Exploration}},
+	url = {http://arxiv.org/abs/1706.10295},
+	abstract = {We introduce NoisyNet, a deep reinforcement learning agent with parametric noise added to its weights, and show that the induced stochasticity of the agent's policy can be used to aid efficient exploration. The parameters of the noise are learned with gradient descent along with the remaining network weights. NoisyNet is straightforward to implement and adds little computational overhead. We find that replacing the conventional exploration heuristics for A3C, DQN and dueling agents (entropy reward and \${\textbackslash}epsilon\$-greedy respectively) with NoisyNet yields substantially higher scores for a wide range of Atari games, in some cases advancing the agent from sub to super-human performance.},
+	urldate = {2021-05-18},
+	journal = {arXiv:1706.10295 [cs, stat]},
+	author = {Fortunato, Meire and Azar, Mohammad Gheshlaghi and Piot, Bilal and Menick, Jacob and Osband, Ian and Graves, Alex and Mnih, Vlad and Munos, Remi and Hassabis, Demis and Pietquin, Olivier and Blundell, Charles and Legg, Shane},
+	month = jul,
+	year = {2019},
+	note = {arXiv: 1706.10295},
+	keywords = {Computer Science - Machine Learning, Statistics - Machine Learning},
+	annote = {Comment: ICLR 2018},
+	annote = {Comment: ICLR 2018},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/W2RZBG7A/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/BQFBZ9CK/1706.html:text/html;arXiv.org Snapshot:/Users/magnus/Zotero/storage/IMVWW2J7/1706.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/YM7PCJPD/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf},
+}
+
+@misc{quan_dqn_2020,
+	title = {{DQN} {Zoo}: {Reference} implementations of {DQN}-based agents},
+	url = {http://github.com/deepmind/dqn_zoo},
+	author = {Quan, John and Ostrovski, Georg},
+	year = {2020},
+}
+
+@article{bellemare_unifying_2016,
+	title = {Unifying {Count}-{Based} {Exploration} and {Intrinsic} {Motivation}},
+	url = {http://arxiv.org/abs/1606.01868},
+	abstract = {We consider an agent's uncertainty about its environment and the problem of generalizing this uncertainty across observations. Specifically, we focus on the problem of exploration in non-tabular reinforcement learning. Drawing inspiration from the intrinsic motivation literature, we use density models to measure uncertainty, and propose a novel algorithm for deriving a pseudo-count from an arbitrary density model. This technique enables us to generalize count-based exploration algorithms to the non-tabular case. We apply our ideas to Atari 2600 games, providing sensible pseudo-counts from raw pixels. We transform these pseudo-counts into intrinsic rewards and obtain significantly improved exploration in a number of hard games, including the infamously difficult Montezuma's Revenge.},
+	urldate = {2021-05-19},
+	journal = {arXiv:1606.01868 [cs, stat]},
+	author = {Bellemare, Marc G. and Srinivasan, Sriram and Ostrovski, Georg and Schaul, Tom and Saxton, David and Munos, Remi},
+	month = nov,
+	year = {2016},
+	note = {arXiv: 1606.01868},
+	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning},
+	annote = {Notes how hard the ATARI game "Montezuma's Revenge" is.},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/7BW84ICW/1606.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6QN75R9U/Bellemare et al. - 2016 - Unifying Count-Based Exploration and Intrinsic Mot.pdf:application/pdf},
+}
+
+@article{silver_mastering_2016,
+	title = {Mastering the game of {Go} with deep neural networks and tree search},
+	volume = {529},
+	issn = {1476-4687},
+	url = {http://www.nature.com/articles/nature16961},
+	doi = {10.1038/nature16961},
+	abstract = {The game of Go has long been viewed as the most challenging of classic games for artificial intelligence owing to its enormous search space and the difficulty of evaluating board positions and moves. Here we introduce a new approach to computer Go that uses ‘value networks’ to evaluate board positions and ‘policy networks’ to select moves. These deep neural networks are trained by a novel combination of supervised learning from human expert games, and reinforcement learning from games of self-play. Without any lookahead search, the neural networks play Go at the level of state-of-the-art Monte Carlo tree search programs that simulate thousands of random games of self-play. We also introduce a new search algorithm that combines Monte Carlo simulation with value and policy networks. Using this search algorithm, our program AlphaGo achieved a 99.8\% winning rate against other Go programs, and defeated the human European Go champion by 5 games to 0. This is the first time that a computer program has defeated a human professional player in the full-sized game of Go, a feat previously thought to be at least a decade away.},
+	language = {en},
+	number = {7587},
+	urldate = {2021-05-21},
+	journal = {Nature},
+	author = {Silver, David and Huang, Aja and Maddison, Chris J. and Guez, Arthur and Sifre, Laurent and van den Driessche, George and Schrittwieser, Julian and Antonoglou, Ioannis and Panneershelvam, Veda and Lanctot, Marc and Dieleman, Sander and Grewe, Dominik and Nham, John and Kalchbrenner, Nal and Sutskever, Ilya and Lillicrap, Timothy and Leach, Madeleine and Kavukcuoglu, Koray and Graepel, Thore and Hassabis, Demis},
+	month = jan,
+	year = {2016},
+	note = {Number: 7587
+Publisher: Nature Publishing Group},
+	pages = {484--489},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/H925ATKP/Silver et al. - 2016 - Mastering the game of Go with deep neural networks.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/GHQWCTF7/nature16961.html:text/html},
+}
+
+@article{vinyals_grandmaster_2019,
+	title = {Grandmaster level in {StarCraft} {II} using multi-agent reinforcement learning},
+	volume = {575},
+	copyright = {2019 The Author(s), under exclusive licence to Springer Nature Limited},
+	issn = {1476-4687},
+	url = {https://www.nature.com/articles/s41586-019-1724-z},
+	doi = {10.1038/s41586-019-1724-z},
+	abstract = {Many real-world applications require artificial agents to compete and coordinate with other agents in complex environments. As a stepping stone to this goal, the domain of StarCraft has emerged as an important challenge for artificial intelligence research, owing to its iconic and enduring status among the most difficult professional esports and its relevance to the real world in terms of its raw complexity and multi-agent challenges. Over the course of a decade and numerous competitions1–3, the strongest agents have simplified important aspects of the game, utilized superhuman capabilities, or employed hand-crafted sub-systems4. Despite these advantages, no previous agent has come close to matching the overall skill of top StarCraft players. We chose to address the challenge of StarCraft using general-purpose learning methods that are in principle applicable to other complex domains: a multi-agent reinforcement learning algorithm that uses data from both human and agent games within a diverse league of continually adapting strategies and counter-strategies, each represented by deep neural networks5,6. We evaluated our agent, AlphaStar, in the full game of StarCraft II, through a series of online games against human players. AlphaStar was rated at Grandmaster level for all three StarCraft races and above 99.8\% of officially ranked human players. AlphaStar uses a multi-agent reinforcement learning algorithm and has reached Grandmaster level, ranking among the top 0.2\% of human players for the real-time strategy game StarCraft II.},
+	language = {en},
+	number = {7782},
+	urldate = {2021-05-21},
+	journal = {Nature},
+	author = {Vinyals, Oriol and Babuschkin, Igor and Czarnecki, Wojciech M. and Mathieu, Michaël and Dudzik, Andrew and Chung, Junyoung and Choi, David H. and Powell, Richard and Ewalds, Timo and Georgiev, Petko and Oh, Junhyuk and Horgan, Dan and Kroiss, Manuel and Danihelka, Ivo and Huang, Aja and Sifre, Laurent and Cai, Trevor and Agapiou, John P. and Jaderberg, Max and Vezhnevets, Alexander S. and Leblond, Rémi and Pohlen, Tobias and Dalibard, Valentin and Budden, David and Sulsky, Yury and Molloy, James and Paine, Tom L. and Gulcehre, Caglar and Wang, Ziyu and Pfaff, Tobias and Wu, Yuhuai and Ring, Roman and Yogatama, Dani and Wünsch, Dario and McKinney, Katrina and Smith, Oliver and Schaul, Tom and Lillicrap, Timothy and Kavukcuoglu, Koray and Hassabis, Demis and Apps, Chris and Silver, David},
+	month = nov,
+	year = {2019},
+	note = {Number: 7782
+Publisher: Nature Publishing Group},
+	pages = {350--354},
+	file = {Snapshot:/Users/magnus/Zotero/storage/VI4IBHEE/s41586-019-1724-z.html:text/html},
+}
+
+@book{d_reinforcement_2020,
+	title = {Reinforcement {Learning}: {Industrial} {Applications} of {Intelligent} {Agents}},
+	isbn = {978-1-09-811483-1},
+	shorttitle = {Reinforcement {Learning}},
+	abstract = {Reinforcement learning (RL) will deliver one of the biggest breakthroughs in AI over the next decade, enabling algorithms to learn from their environment to achieve arbitrary goals. This exciting development avoids constraints found in traditional machine learning (ML) algorithms. This practical book shows data science and AI professionals how to learn by reinforcement and enable a machine to learn by itself. Author Phil Winder of Winder Research covers everything from basic building blocks to state-of-the-art practices. You'll explore the current state of RL, focus on industrial applications, learn numerous algorithms, and benefit from dedicated chapters on deploying RL solutions to production. This is no cookbook; doesn't shy away from math and expects familiarity with ML.  Learn what RL is and how the algorithms help solve problems Become grounded in RL fundamentals including Markov decision processes, dynamic programming, and temporal difference learning Dive deep into a range of value and policy gradient methods Apply advanced RL solutions such as meta learning, hierarchical learning, multi-agent, and imitation learning Understand cutting-edge deep RL algorithms including Rainbow, PPO, TD3, SAC, and more Get practical examples through the accompanying website},
+	language = {en},
+	publisher = {O'Reilly Media, Incorporated},
+	author = {D, Phil Winder Ph},
+	month = dec,
+	year = {2020},
+	note = {Google-Books-ID: u87AzQEACAAJ},
+	keywords = {Computers / Business \& Productivity Software / Business Intelligence, Computers / Data Science / Machine Learning, Computers / Machine Theory},
+}
+
+@misc{noauthor_reinforcement_nodate,
+	title = {Reinforcement {Learning} [{Book}]},
+	url = {https://www.oreilly.com/library/view/reinforcement-learning/9781492072386/},
+	abstract = {Reinforcement learning (RL) will deliver one of the biggest breakthroughs in AI over the next decade, enabling algorithms to learn from their environment to achieve arbitrary goals. This exciting development … - Selection from Reinforcement Learning [Book]},
+	language = {en},
+	urldate = {2021-05-21},
+	file = {Snapshot:/Users/magnus/Zotero/storage/P632UV3U/9781492072386.html:text/html},
+}
+
+@article{liu_ultrasound_2020,
+	title = {Ultrasound {Video} {Summarization} using {Deep} {Reinforcement} {Learning}},
+	url = {http://arxiv.org/abs/2005.09531},
+	abstract = {Video is an essential imaging modality for diagnostics, e.g. in ultrasound imaging, for endoscopy, or movement assessment. However, video hasn't received a lot of attention in the medical image analysis community. In the clinical practice, it is challenging to utilise raw diagnostic video data efficiently as video data takes a long time to process, annotate or audit. In this paper we introduce a novel, fully automatic video summarization method that is tailored to the needs of medical video data. Our approach is framed as reinforcement learning problem and produces agents focusing on the preservation of important diagnostic information. We evaluate our method on videos from fetal ultrasound screening, where commonly only a small amount of the recorded data is used diagnostically. We show that our method is superior to alternative video summarization methods and that it preserves essential information required by clinical diagnostic standards.},
+	urldate = {2021-05-26},
+	journal = {arXiv:2005.09531 [cs]},
+	author = {Liu, Tianrui and Meng, Qingjie and Vlontzos, Athanasios and Tan, Jeremy and Rueckert, Daniel and Kainz, Bernhard},
+	month = may,
+	year = {2020},
+	note = {arXiv: 2005.09531},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	annote = {** SummaryThe authors created an algorithm that summarizes a fetal ultrasound video. These videos vary in length between 15 to 65 minutes so they can be quite long.
+The network passes the frames through an encoder-decoder convolutional network. They use a Bi-LSTM to get information about future and past for a given frame. The RL network takes as input the latent scores from this previous network.
+The main benefit of using reinforcement learning in this case is the reward signal. The action space is binary, two possible actions, so there's not that much complex exploration going on. But a RL framework allows the authors to describe a pretty high-level set of rewards and the network automatically finds a way to fulfill them.
+The rewards are a sum of:- \${\textbackslash}mathcal\{R\}\_\{det\}\$: likelyhood of a selected frame being a standard diagnostic plane.- \${\textbackslash}mathcal\{R\}\_\{rep\}\$: rewards keeping the output frames as temporally cohesive as possible. It will optimize for selecting chunks of video.- \${\textbackslash}mathcal\{R\}\_\{div\}\$: rewards diversity of the selected frames. Rewards selecting frames that are very different, in hope that the summarized video will be more representative of the whole session.
+** Codehttps://github.com/Lorna-Liu/ultrasound\_vsumm\_RL},
+	annote = {Comment: Accepted by MICCAI'20},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/4GLQMC67/Liu et al. - 2020 - Ultrasound Video Summarization using Deep Reinforc.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/AEA3D9U4/2005.html:text/html},
+}
+
+@article{hochreiter_long_1997,
+	title = {Long {Short}-term {Memory}},
+	volume = {9},
+	doi = {10.1162/neco.1997.9.8.1735},
+	abstract = {Learning to store information over extended time intervals by recurrent backpropagation takes a very long time, mostly because of insufficient, decaying error backflow. We briefly review Hochreiter's (1991) analysis of this problem, then address it by introducing a novel, efficient, gradient-based method called long short-term memory (LSTM). Truncating the gradient where this does not do harm, LSTM can learn to bridge minimal time lags in excess of 1000 discrete-time steps by enforcing constant error flow through constant error carousels within special units. Multiplicative gate units learn to open and close access to the constant error flow. LSTM is local in space and time; its computational complexity per time step and weight is O(1). Our experiments with artificial data involve local, distributed, real-valued, and noisy pattern representations. In comparisons with real-time recurrent learning, back propagation through time, recurrent cascade correlation, Elman nets, and neural sequence chunking, LSTM leads to many more successful runs, and learns much faster. LSTM also solves complex, artificial long-time-lag tasks that have never been solved by previous recurrent network algorithms.},
+	journal = {Neural computation},
+	author = {Hochreiter, Sepp and Schmidhuber, Jürgen},
+	month = dec,
+	year = {1997},
+	pages = {1735--80},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/BCG6WGYM/Hochreiter and Schmidhuber - 1997 - Long Short-term Memory.pdf:application/pdf},
+}
+
+@article{neller_introduction_2013,
+	title = {An {Introduction} to {Counterfactual} {Regret} {Minimization}},
+	url = {https://www.semanticscholar.org/paper/An-Introduction-to-Counterfactual-Regret-Neller-Lanctot/0184855c7baafdbcadcab967d4bfa7d4f8b86285},
+	abstract = {In 2000, Hart and Mas-Colell introduced the important game-theoretic algorithm of regret matching. Players reach equilibrium play by tracking regrets for past plays, making future plays proportional to positive regrets. The technique is not only simple and intuitive; it has sparked a revolution in computer game play of some of the most difficult bluffing games, including clear domination of annual computer poker competitions. Since the algorithm is relatively recent, there are few curricular materials available to introduce regret-based algorithms to the next generation of researchers and practitioners in this area. These materials represent a modest first step towards making recent innovations more accessible to advanced Computer Science undergraduates, graduate students, interested researchers, and ambitious practitioners. In Section 2, we introduce the concept of player regret, describe the regret-matching algorithm, present a rock-paper-scissors worked example in the literate programming style, and suggest related exercises. Counterfactual Regret Minimization (CFR) is introduced in Section 3 with a worked example solving Kuhn Poker. Supporting code is provided for a substantive CFR exercise computing optimal play for 1-die-versus-1-die Dudo. In Section 4, we briefly mention means of “cleaning” approximately optimal computed policies, which can in many cases improve results. Section 5 covers an advanced application of CFR to games with repeated states (e.g. through imperfect recall abstraction) that can reduce computational complexity of a CFR training iteration from exponential to linear. Here, we use our independently devised game of Liar Die to demonstrate application of the algorithm. We then suggest that the reader apply the technique to 1-die-versus-1-die Dudo with a memory of 3 claims. In Section 6, we briefly discuss an open research problem: Among possible equilibrium strategies, how do we compute one that optimally exploits opponent errors? The reader is invited to modify our Liar Die example code to so as to gain insight to this interesting problem. Finally, in Section 7, we suggest further challenge problems and paths for continued learning.},
+	language = {en},
+	urldate = {2021-06-22},
+	journal = {undefined},
+	author = {Neller, T. and Lanctot, Marc},
+	year = {2013},
+	file = {Snapshot:/Users/magnus/Zotero/storage/N7FITHNP/0184855c7baafdbcadcab967d4bfa7d4f8b86285.html:text/html},
+}
+
+@misc{noauthor_kommisjon_nodate,
+	title = {Kommisjon 14},
+	url = {https://docs.google.com/spreadsheets/u/2/d/1M8nZQL23yE8G60r02Vx3lk2md8nAjb4cjBouP8aNYeQ/edit?usp=embed_facebook},
+	abstract = {Grading
+
+Max score,180,Average scores
+Points,Max.,Percentage,A,B,C,D,E
+Thresholds,Threads and processes,165,138,104,82,72
+Lower limit,Upper limit,Percent,Grade,Threads and processes 1,4,40,10,44,0\%,165,138,104,82,72
+165,180,91,67\%,A,Threads and processes 2,10,165,138,104,82,72
+138,164,9,76,67\%,B,...},
+	language = {no-NO},
+	urldate = {2021-06-11},
+	journal = {Google Docs},
+	file = {Snapshot:/Users/magnus/Zotero/storage/9N6Q3TEB/edit.html:text/html},
+}
+
+@article{silver_reward_2021,
+	title = {Reward is enough},
+	volume = {299},
+	issn = {0004-3702},
+	url = {https://www.sciencedirect.com/science/article/pii/S0004370221000862},
+	doi = {10.1016/j.artint.2021.103535},
+	abstract = {In this article we hypothesise that intelligence, and its associated abilities, can be understood as subserving the maximisation of reward. Accordingly, reward is enough to drive behaviour that exhibits abilities studied in natural and artificial intelligence, including knowledge, learning, perception, social intelligence, language, generalisation and imitation. This is in contrast to the view that specialised problem formulations are needed for each ability, based on other signals or objectives. Furthermore, we suggest that agents that learn through trial and error experience to maximise reward could learn behaviour that exhibits most if not all of these abilities, and therefore that powerful reinforcement learning agents could constitute a solution to artificial general intelligence.},
+	language = {en},
+	urldate = {2021-06-10},
+	journal = {Artificial Intelligence},
+	author = {Silver, David and Singh, Satinder and Precup, Doina and Sutton, Richard S.},
+	month = oct,
+	year = {2021},
+	keywords = {Reinforcement learning, Artificial general intelligence, Artificial intelligence, Reward},
+	pages = {103535},
+	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/UBPR35JW/S0004370221000862.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/E8WZAJI5/Silver et al. - 2021 - Reward is enough.pdf:application/pdf},
+}
+
+@book{zhang_dive_2020,
+	title = {Dive into {Deep} {Learning}},
+	author = {Zhang, Aston and Lipton, Zachary C. and Li, Mu and Smola, Alexander J.},
+	year = {2020},
+	annote = {https://d2l.ai},
+}
+
+@inproceedings{dezaki_deep_2017,
+	address = {Cham},
+	series = {Lecture {Notes} in {Computer} {Science}},
+	title = {Deep {Residual} {Recurrent} {Neural} {Networks} for {Characterisation} of {Cardiac} {Cycle} {Phase} from {Echocardiograms}},
+	isbn = {978-3-319-67558-9},
+	doi = {10.1007/978-3-319-67558-9_12},
+	abstract = {Characterisation of cardiac cycle phase in echocardiography data is a necessary preprocessing step for developing automated systems that measure various cardiac parameters. Accurate characterisation is challenging, due to differences in appearance of the cardiac anatomy and the variability of heart rate in individuals. Here, we present a method for automatic recognition of cardiac cycle phase from echocardiograms by using a new deep neural networks architecture. Specifically, we propose to combine deep residual neural networks (ResNets), which extract the hierarchical features from the individual echocardiogram frames, with recurrent neural networks (RNNs), which model the temporal dependencies between sequential frames. We demonstrate that such new architecture produces results that outperform baseline architecture for the automatic characterisation of cardiac cycle phase in large datasets of echocardiograms containing different levels of pathological conditions.},
+	language = {en},
+	booktitle = {Deep {Learning} in {Medical} {Image} {Analysis} and {Multimodal} {Learning} for {Clinical} {Decision} {Support}},
+	publisher = {Springer International Publishing},
+	author = {Dezaki, Fatemeh Taheri and Dhungel, Neeraj and Abdi, Amir H. and Luong, Christina and Tsang, Teresa and Jue, John and Gin, Ken and Hawley, Dale and Rohling, Robert and Abolmaesumi, Purang},
+	editor = {Cardoso, M. Jorge and Arbel, Tal and Carneiro, Gustavo and Syeda-Mahmood, Tanveer and Tavares, João Manuel R.S. and Moradi, Mehdi and Bradley, Andrew and Greenspan, Hayit and Papa, João Paulo and Madabhushi, Anant and Nascimento, Jacinto C. and Cardoso, Jaime S. and Belagiannis, Vasileios and Lu, Zhi},
+	year = {2017},
+	keywords = {Deep residual neural networks, Echocardiograms, Frame identification, Long short term memory, Recurrent neural networks},
+	pages = {100--108},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/894849MS/Dezaki et al. - 2017 - Deep Residual Recurrent Neural Networks for Charac.pdf:application/pdf},
+}
+
+@article{taheri_dezaki_cardiac_2019,
+	title = {Cardiac {Phase} {Detection} in {Echocardiograms} {With} {Densely} {Gated} {Recurrent} {Neural} {Networks} and {Global} {Extrema} {Loss}},
+	volume = {38},
+	issn = {1558-254X},
+	doi = {10.1109/TMI.2018.2888807},
+	abstract = {Accurate detection of end-systolic (ES) and end-diastolic (ED) frames in an echocardiographic cine series can be difficult but necessary pre-processing step for the development of automatic systems to measure cardiac parameters. The detection task is challenging due to variations in cardiac anatomy and heart rate often associated with pathological conditions. We formulate this problem as a regression problem and propose several deep learning-based architectures that minimize a novel global extrema structured loss function to localize the ED and ES frames. The proposed architectures integrate convolution neural networks (CNNs)-based image feature extraction model and recurrent neural networks (RNNs) to model temporal dependencies between each frame in a sequence. We explore two CNN architectures: DenseNet and ResNet, and four RNN architectures: long short-term memory, bi-directional LSTM, gated recurrent unit (GRU), and Bi-GRU, and compare the performance of these models. The optimal deep learning model consists of a DenseNet and GRU trained with the proposed loss function. On average, we achieved 0.20 and 1.43 frame mismatch for the ED and ES frames, respectively, which are within reported inter-observer variability for the manual detection of these frames.},
+	number = {8},
+	journal = {IEEE Transactions on Medical Imaging},
+	author = {Taheri Dezaki, Fatemeh and Liao, Zhibin and Luong, Christina and Girgis, Hany and Dhungel, Neeraj and Abdi, Amir H. and Behnami, Delaram and Gin, Ken and Rohling, Robert and Abolmaesumi, Purang and Tsang, Teresa},
+	month = aug,
+	year = {2019},
+	note = {Conference Name: IEEE Transactions on Medical Imaging},
+	keywords = {Magnetic resonance imaging, Echocardiography, Phase detection, echocardiography, Electrocardiography, Deep residual neural networks, Recurrent neural networks, bi-directional RNN, cardiac cycle phase detection, densely-connected networks, gated recurrent unit, Logic gates, long short term memory, recurrent neural networks},
+	pages = {1821--1832},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/C32UQ5KD/Taheri Dezaki et al. - 2019 - Cardiac Phase Detection in Echocardiograms With De.pdf:application/pdf},
+}
+
+@inproceedings{fiorito_detection_2018,
+	title = {Detection of {Cardiac} {Events} in {Echocardiography} {Using} {3D} {Convolutional} {Recurrent} {Neural} {Networks}},
+	doi = {10.1109/ULTSYM.2018.8580137},
+	abstract = {A proper definition of cardiac events such as end-diastole (ED) and end-systole (ES) is important for quantitative measurements in echocardiography. While ED can be found using electrocardiography (ECG), ES is difficult to extract from ECG alone. Further, on hand-held devices ECG is not available or cumbersome. Several methods for automatic detection of cardiac events have been proposed in the recent years, such as using a 2D convolutional neural network (CNN) followed by 1D recurrent layers. This structure may be suboptimal, as tissue movement has a spatio-temporal nature which is ignored in the CNN. We propose using a 3D CNN to extract spatio-temporal features directly from the input video, which are fed to long short term memory (LSTM) layers. The joint network is trained to classify whether frames belong to either diastole or systole. ES and ED are then automatically detected as the switch between the two states. The 3D CNN + LSTM model performs favourably at detecting cardiac events on a dataset consisting of standard B-mode images of apical four-and two-chamber views from 500 patients. The mean absolute error between events in the apical four-chamber view is 1.63 and 1.71 frames from ED/ES reference respectively. Model inference is fast, using (30 ± 2) ms per 30 frame input sequence on a modern graphics processing unit.},
+	booktitle = {2018 {IEEE} {International} {Ultrasonics} {Symposium} ({IUS})},
+	author = {Fiorito, Adrian Meidell and Østvik, Andreas and Smistad, Erik and Leclerc, Sarah and Bernard, Olivier and Lovstakken, Lasse},
+	month = oct,
+	year = {2018},
+	note = {ISSN: 1948-5727},
+	keywords = {Echocardiography, Electrocardiography, Ultrasonic imaging, Feature extraction, Solid modeling, Three-dimensional displays, Training},
+	pages = {1--4},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/TE3X33DN/Fiorito et al. - 2018 - Detection of Cardiac Events in Echocardiography Us.pdf:application/pdf},
+}
+
+@article{jahren_estimation_2020,
+	title = {Estimation of {End}-{Diastole} in {Cardiac} {Spectral} {Doppler} {Using} {Deep} {Learning}},
+	volume = {67},
+	issn = {1525-8955},
+	doi = {10.1109/TUFFC.2020.2995118},
+	abstract = {Electrocardiogram (ECG) is often used together with a spectral Doppler ultrasound to separate heart cycles by determining the end-diastole locations. However, the ECG signal is not always recorded. In such cases, the cardiac cycles can be estimated manually from the ultrasound data retrospectively. We present a deep learning-based method for automatic detection of the end-diastoles in spectral Doppler spectrograms. The method uses a combination of a convolutional neural network (CNN) for extracting features and a recurrent neural network (RNN) for modeling temporal relations. In echocardiography, there are three Doppler spectrogram modalities, continuous wave, pulsed wave, and tissue velocity Doppler. Both the training and test data sets include all three modalities. The model was tested on 643 spectrograms coming from different hospitals than in the training data set. For the purposes described in this work, a valid end-diastole detection is defined as a prediction being closer than 60 ms to the reference value. We will refer to these as true detections. Similarly, a prediction farther away is defined as nonvalid or false detections. The method automatically rejects spectrograms where the detection of an end-diastole has low confidence. When setting the algorithm to reject 1.9\%, the method achieved 97.7\% true detections with a mean error of 14 ms and had 2.5\% false detections on the remaining spectrograms.},
+	number = {12},
+	journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	author = {Jahren, Tollef Struksnes and Steen, Erik N. and Aase, Svein Arne and Solberg, Anne H. Schistad},
+	month = dec,
+	year = {2020},
+	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	keywords = {Deep learning, Doppler effect, echocardiography, Electrocardiography, end-diastole, Heart, Machine learning, spectral Doppler, Spectrogram, Ultrasonic imaging, Valves},
+	pages = {2605--2614},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/NX3EFS8V/Jahren et al. - 2020 - Estimation of End-Diastole in Cardiac Spectral Dop.pdf:application/pdf},
+}
+
+@article{zeiler_visualizing_2013,
+	title = {Visualizing and {Understanding} {Convolutional} {Networks}},
+	url = {http://arxiv.org/abs/1311.2901},
+	abstract = {Large Convolutional Network models have recently demonstrated impressive classification performance on the ImageNet benchmark. However there is no clear understanding of why they perform so well, or how they might be improved. In this paper we address both issues. We introduce a novel visualization technique that gives insight into the function of intermediate feature layers and the operation of the classifier. We also perform an ablation study to discover the performance contribution from different model layers. This enables us to find model architectures that outperform Krizhevsky {\textbackslash}etal on the ImageNet classification benchmark. We show our ImageNet model generalizes well to other datasets: when the softmax classifier is retrained, it convincingly beats the current state-of-the-art results on Caltech-101 and Caltech-256 datasets.},
+	urldate = {2021-05-31},
+	journal = {arXiv:1311.2901 [cs]},
+	author = {Zeiler, Matthew D. and Fergus, Rob},
+	month = nov,
+	year = {2013},
+	note = {arXiv: 1311.2901},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/UZ89GNSM/1311.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/35S855Y7/Zeiler and Fergus - 2013 - Visualizing and Understanding Convolutional Networ.pdf:application/pdf},
+}
+
+@article{darvishi_measuring_2013,
+	title = {Measuring {Left} {Ventricular} {Volumes} in {Two}-{Dimensional} {Echocardiography} {Image} {Sequence} {Using} {Level}-set {Method} for {Automatic} {Detection} of {End}-{Diastole} and {End}-systole {Frames}},
+	volume = {2},
+	issn = {2251-9572},
+	url = {https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4253755/},
+	doi = {10.5812/cardiovascmed.6397},
+	abstract = {Background:
+Identifying End-Diastole (ED) and End-Systole (ES) frames is highly important in the process of evaluating cardiac function and measuring global parameters accurately, such as Ejection Fraction (EF), Cardiac Output (CO) and Stroke Volume.
+
+Objectives:
+The current study aimed to develop a new method based on measuring volume changes in Left Ventricle (LV) during cardiac cycle.
+
+Material and Methods:
+For this purpose, the Level Set method was used both in detecting endocardium border and quantifying cardiac function of all frames.
+
+Results:
+Demonstrating LV volumes displays ED and ES frames and the volumes used in calculating the required parameters.
+
+Conclusions:
+Since ES and ED frames exist in iso-volumic phases of the cardiac cycle with minimum and maximum values of LV volume signals, such peaks can be utilized in finding related frames.},
+	number = {1},
+	urldate = {2021-05-31},
+	journal = {Research in Cardiovascular Medicine},
+	author = {Darvishi, Saeed and Behnam, Hamid and Pouladian, Majid and Samiei, Niloufar},
+	month = feb,
+	year = {2013},
+	pmid = {25478488},
+	pmcid = {PMC4253755},
+	pages = {39--45},
+	file = {PubMed Central Full Text PDF:/Users/magnus/Zotero/storage/TIGTTYPX/Darvishi et al. - 2013 - Measuring Left Ventricular Volumes in Two-Dimensio.pdf:application/pdf},
+}
+
+@article{barcaro_automatic_2008,
+	title = {Automatic computation of left ventricle ejection fraction from dynamic ultrasound images},
+	volume = {18},
+	issn = {1555-6212},
+	url = {https://doi.org/10.1134/S1054661808020247},
+	doi = {10.1134/S1054661808020247},
+	abstract = {Left Ventricle (LV) Ejection Fraction (EF) is a fundamental parameter for heart function assessment. Being based on border tracing, however, manual computation of EF is time-consuming and extremely prone to inter-and intraobserver variability. In this paper we present an automatic method for EF computation which provides results in agreement with those provided by expert observers. The segmentation strategy consists of two stages: first, the region of interest is identified by means of mimetic criteria; then, the identified region is used for initialization of an active contour based on a variational formulation of level set methods, which provides accurate segmentation of the LV cavity. Volume calculation is then performed according to the conventional Simpson’s rule and, finally, the EF is computed.},
+	language = {en},
+	number = {2},
+	urldate = {2021-05-31},
+	journal = {Pattern Recognition and Image Analysis},
+	author = {Barcaro, U. and Moroni, D. and Salvetti, O.},
+	month = jun,
+	year = {2008},
+	pages = {351},
+	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/LSLN36XP/Barcaro et al. - 2008 - Automatic computation of left ventricle ejection f.pdf:application/pdf},
+}
+
+@article{a_automatic_2015,
+	title = {Automatic {Detection} of the {End}-{Diastolic} and {End}-{Systolic} from {4D} {Echocardiographic} {Images}},
+	volume = {11},
+	doi = {10.3844/jcssp.2015.230.240},
+	abstract = {Accurate detection of the End-Diastolic (ED) and End-Systolic (ES) frames of a cardiac cycle are significant factors that may affect the accuracy of abnormality assessment of a ventricle. This process is a routine step of the ventricle assessment procedure as most of the time in clinical reports many parameters are measured in these two frames to help in diagnosing and dissection making. According to the previous works the process of detecting the ED and ES remains a challenge in that the ED and ES frames for the cavity are usually determined manually by review of individual image phases of the cavity and/or tracking the tricuspid valve. The proposed algorithm aims to automatically determine the ED and ES frames from the four Dimensional Echocardiographic images (4DE) of the Right Ventricle (RV) from one cardiac cycle. By computing the area of three slices along one cardiac cycle and selecting the maximum area as the ED frame and the minimum area as the ES frame. This method gives an accurate determination for the ED and ES frames, hence avoid the need for time consuming, expert contributions during the process of computing the cavity stroke volume.},
+	journal = {Journal of Computer Science},
+	author = {A., Anas and Wirza, Rahmita and Kadiman, Suhaini and Dimon, Mohd and Abdullah, Lili and Saripan, M Iqbal and Khaleel, Hasan},
+	month = jan,
+	year = {2015},
+	pages = {230--240},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/6AZKP8UT/A. et al. - 2015 - Automatic Detection of the End-Diastolic and End-S.pdf:application/pdf},
+}
+
+@inproceedings{yuan_machine_2017,
+	title = {Machine learning for cardiac ultrasound time series data},
+	volume = {10137},
+	url = {https://www.spiedigitallibrary.org/conference-proceedings-of-spie/10137/101372D/Machine-learning-for-cardiac-ultrasound-time-series-data/10.1117/12.2254704.short},
+	doi = {10.1117/12.2254704},
+	abstract = {We consider the problem of identifying frames in a cardiac ultrasound video associated with left ventricular chamber end-systolic (ES, contraction) and end-diastolic (ED, expansion) phases of the cardiac cycle. Our procedure involves a simple application of non-negative matrix factorization (NMF) to a series of frames of a video from a single patient. Rank-2 NMF is performed to compute two end-members. The end members are shown to be close representations of the actual heart morphology at the end of each phase of the heart function. Moreover, the entire time series can be represented as a linear combination of these two end-member states thus providing a very low dimensional representation of the time dynamics of the heart. Unlike previous work, our methods do not require any electrocardiogram (ECG) information in order to select the end-diastolic frame. Results are presented for a data set of 99 patients including both healthy and diseased examples.},
+	urldate = {2021-05-31},
+	booktitle = {Medical {Imaging} 2017: {Biomedical} {Applications} in {Molecular}, {Structural}, and {Functional} {Imaging}},
+	publisher = {International Society for Optics and Photonics},
+	author = {Yuan, Baichuan and Chitturi, Sathya R. and Iyer, Geoffrey and Li, Nuoyu and Xu, Xiaochuan and Zhan, Ruohan and Llerena, Rafael and Yen, Jesse T. and Bertozzi, Andrea L.},
+	month = mar,
+	year = {2017},
+	pages = {101372D},
+	file = {Full Text:/Users/magnus/Zotero/storage/CZ2I6SMQ/Yuan et al. - 2017 - Machine learning for cardiac ultrasound time serie.pdf:application/pdf},
+}
+
+@inproceedings{gifani_noise_2011,
+	title = {Noise reduction of echocardiography images using {Isomap} algorithm},
+	doi = {10.1109/MECBME.2011.5752087},
+	abstract = {Medical applications of ultrasound imaging have expanded enormously over the last two decades. De-noising is challenging issues for better medical interpretation and diagnosis on high volume of data sets in echocardiography. In this paper, manifold learning algorithm is applied on 2-D echocardiography images to discover the relationship between the frames of consecutive cycles of the heart motion. By this approach, each image is depicted by a point on reconstructed two-dimensional manifold by Isomap algorithm and similar points related to similar images according to the property of periodic heartbeat cycle stand together. Noise reduction is achieved by averaging similar images on reconstructed manifold. By comparing the proposed method with some common methods and according to qualitative expert's opinions, the proposed method has maximum noise reduction, minimum blurring and better contrast among the similar methods.},
+	booktitle = {2011 1st {Middle} {East} {Conference} on {Biomedical} {Engineering}},
+	author = {Gifani, Parisa and Behnam, Hamid and Shalbaf, Ahmad and Sani, Zahra Alizadeh},
+	month = feb,
+	year = {2011},
+	note = {ISSN: 1558-2531},
+	keywords = {Echocardiography, Heart, Filtering, Isomap algorithm, Manifold Learning, Manifolds, Noise, Noise reduction, registration, Speckle noise},
+	pages = {150--153},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/LIMWE2XC/Gifani et al. - 2011 - Noise reduction of echocardiography images using I.pdf:application/pdf},
+}
+
+@misc{noauthor_noise_nodate,
+	title = {Noise reduction of echocardiography images using {Isomap} algorithm {\textbar} {IEEE} {Conference} {Publication} {\textbar} {IEEE} {Xplore}},
+	url = {https://ieeexplore-ieee-org.ezproxy.uio.no/document/5752087},
+	urldate = {2021-05-31},
+	file = {Noise reduction of echocardiography images using Isomap algorithm | IEEE Conference Publication | IEEE Xplore:/Users/magnus/Zotero/storage/WEK2GMPH/5752087.html:text/html},
+}
+
+@article{gifani_automatic_2010,
+	title = {Automatic detection of end-diastole and end-systole from echocardiography images using manifold learning},
+	volume = {31},
+	issn = {1361-6579},
+	doi = {10.1088/0967-3334/31/9/002},
+	abstract = {The automatic detection of end-diastole and end-systole frames of echocardiography images is the first step for calculation of the ejection fraction, stroke volume and some other features related to heart motion abnormalities. In this paper, the manifold learning algorithm is applied on 2D echocardiography images to find out the relationship between the frames of one cycle of heart motion. By this approach the nonlinear embedded information in sequential images is represented in a two-dimensional manifold by the LLE algorithm and each image is depicted by a point on reconstructed manifold. There are three dense regions on the manifold which correspond to the three phases of cardiac cycle ('isovolumetric contraction', 'isovolumetric relaxation', 'reduced filling'), wherein there is no prominent change in ventricular volume. By the fact that the end-systolic and end-diastolic frames are in isovolumic phases of the cardiac cycle, the dense regions can be used to find these frames. By calculating the distance between consecutive points in the manifold, the isovolumic frames are mapped on the three minimums of the distance diagrams which were used to select the corresponding images. The minimum correlation between these images leads to detection of end-systole and end-diastole frames. The results on six healthy volunteers have been validated by an experienced echo cardiologist and depict the usefulness of the presented method.},
+	language = {eng},
+	number = {9},
+	journal = {Physiological Measurement},
+	author = {Gifani, Parisa and Behnam, Hamid and Shalbaf, Ahmad and Sani, Zahra Alizadeh},
+	month = sep,
+	year = {2010},
+	pmid = {20651421},
+	keywords = {Echocardiography, Heart, Algorithms, Artificial Intelligence, Automation, Diastole, Humans, Image Processing, Computer-Assisted, Systole},
+	pages = {1091--1103},
+}
+
+@article{kachenoura_automatic_2007,
+	title = {Automatic detection of end systole within a sequence of left ventricular echocardiographic images using autocorrelation and mitral valve motion detection},
+	volume = {2007},
+	issn = {2375-7477},
+	doi = {10.1109/IEMBS.2007.4353340},
+	abstract = {The automatic detection of end diastole and end systole is the first step of any software developed for a fully automatic calculation of the ejection fraction. In this study, methods of image processing were applied to black and white echocardiographic image sequences corresponding to a cardiac cycle and the end systolic image number was automatically estimated. The first method took the advantage of the rapid mitral valve motion to estimate the end systole from the time signal intensity variation in a cavity region defined thanks to three landmarks usually used for the standard left ventricular segmentation. The second method was fully automatic; it was based on the left ventricular deformation during the cardiac cycle. The deformation curve was estimated using correlation and its minimal value was used to detect end systole. Method 3 was a combination of the two previous methods to overcome their limitations. The three methods were tested on a group of 37 patients (four chambers and two chambers apical views). The first image exhibiting the beginning of the mitral opening was considered as the end systolic on the visual readings. Compared with this visual reference reading, a linear regression led to a correlation coefficient r of 0.84 for the first method. This coefficient was improved to 0.87 for the second method and increased significantly to r=0.93 for the third method.},
+	language = {eng},
+	journal = {Annual International Conference of the IEEE Engineering in Medicine and Biology Society. IEEE Engineering in Medicine and Biology Society. Annual International Conference},
+	author = {Kachenoura, Nadjia and Delouche, Annie and Herment, Alain and Frouin, Frédérique and Diebold, Benoit},
+	year = {2007},
+	pmid = {18003006},
+	keywords = {Echocardiography, Humans, Image Processing, Computer-Assisted, Systole, Female, Heart Ventricles, Male, Mitral Valve},
+	pages = {4504--4507},
+}
+
+@article{cassirer_reverb_2021,
+	title = {Reverb: {A} {Framework} {For} {Experience} {Replay}},
+	shorttitle = {Reverb},
+	url = {https://arxiv.org/abs/2102.04736v1},
+	abstract = {A central component of training in Reinforcement Learning (RL) is Experience: the data used for training. The mechanisms used to generate and consume this data have an important effect on the performance of RL algorithms. In this paper, we introduce Reverb: an efficient, extensible, and easy to use system designed specifically for experience replay in RL. Reverb is designed to work efficiently in distributed configurations with up to thousands of concurrent clients. The flexible API provides users with the tools to easily and accurately configure the replay buffer. It includes strategies for selecting and removing elements from the buffer, as well as options for controlling the ratio between sampled and inserted elements. This paper presents the core design of Reverb, gives examples of how it can be applied, and provides empirical results of Reverb's performance characteristics.},
+	language = {en},
+	urldate = {2021-11-08},
+	author = {Cassirer, Albin and Barth-Maron, Gabriel and Brevdo, Eugene and Ramos, Sabela and Boyd, Toby and Sottiaux, Thibault and Kroiss, Manuel},
+	month = feb,
+	year = {2021},
+	file = {Snapshot:/Users/magnus/Zotero/storage/G8NI7VD7/2102.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/F3UM4G72/Cassirer et al. - 2021 - Reverb A Framework For Experience Replay.pdf:application/pdf},
+}
+
+@article{srinivas_curl_2020,
+	title = {{CURL}: {Contrastive} {Unsupervised} {Representations} for {Reinforcement} {Learning}},
+	shorttitle = {{CURL}},
+	url = {http://arxiv.org/abs/2004.04136},
+	abstract = {We present CURL: Contrastive Unsupervised Representations for Reinforcement Learning. CURL extracts high-level features from raw pixels using contrastive learning and performs off-policy control on top of the extracted features. CURL outperforms prior pixel-based methods, both model-based and model-free, on complex tasks in the DeepMind Control Suite and Atari Games showing 1.9x and 1.2x performance gains at the 100K environment and interaction steps benchmarks respectively. On the DeepMind Control Suite, CURL is the first image-based algorithm to nearly match the sample-efficiency of methods that use state-based features. Our code is open-sourced and available at https://github.com/MishaLaskin/curl.},
+	urldate = {2021-11-11},
+	journal = {arXiv:2004.04136 [cs, stat]},
+	author = {Srinivas, Aravind and Laskin, Michael and Abbeel, Pieter},
+	month = sep,
+	year = {2020},
+	note = {arXiv: 2004.04136},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+	annote = {Comment: First two authors contributed equally, website: https://mishalaskin.github.io/curl code: https://github.com/MishaLaskin/curl},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/V354ESL6/Srinivas et al. - 2020 - CURL Contrastive Unsupervised Representations for.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/9IT9L77L/2004.html:text/html},
+}
+
+@book{szabo_diagnostic_2014,
+	title = {Diagnostic ultrasound imaging: inside out},
+	isbn = {978-0-12-396542-4},
+	shorttitle = {Diagnostic ultrasound imaging},
+	url = {http://www.books24x7.com/marc.asp?bookid=58830},
+	abstract = {Diagnostic Ultrasound Imaging provides a unified description of the physical principles of ultrasound imaging, signal processing, systems and measurements. This comprehensive reference is a core resource for both graduate students and engineers in medical ultrasound research and design. With continuing rapid technological development of ultrasound in medical diagnosis, it is a critical subject for biomedical engineers, clinical and healthcare engineers and practitioners, medical physicists, and related professionals in the fields of signal and image processing. The book contains 17 new and updated chapters covering the fundamentals and latest advances in the area, and includes four appendices, 450 figures (60 available in color), and almost 1,500 references. In addition to the continual influx of readers entering the field of ultrasound worldwide who need the broad grounding in the core technologies of ultrasound, this book provides those already working in these areas with clear and comprehensive expositions of these key new topics as well as introductions to state-of-the-art innovations in this field. Enables practicing engineers, students and clinical professionals to understand the essential physics and signal processing techniques behind modern imaging systems as well as introducing the latest developments that will shape medical ultrasound in the futureSuitable for both newcomers and experienced readers, the practical, progressively organized applied approach is supported by hands-on MATLAB code and worked examples that enable readers to understand the principles underlying diagnostic and therapeutic ultrasound. Covers the new important developments in the use of medical ultrasound: elastography and high-intensity therapeutic ultrasound. Many new developments are comprehensively reviewed and explained, including aberration correction, acoustic measurements, acoustic radiation force imaging, alternate imaging architectures, bioeffects: diagnostic to therapeutic, Fourier transform imaging, multimode imaging, plane wave compounding, research platforms, synthetic aperture, vector Doppler, transient shear wave elastography, ultrafast imaging and Doppler, functional ultrasound and viscoelastic models.},
+	language = {English},
+	urldate = {2021-11-22},
+	author = {Szabo, Thomas L},
+	year = {2014},
+	note = {OCLC: 866931381},
+}

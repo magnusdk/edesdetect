@@ -112,6 +112,9 @@ The agent uses a discount factor of 0.99 and 5-step bootstrapping.
   - Reverb
 
 
+** JAX
+We use JAX[TODO: Cite] for our algorithms, a framework developed by Google. 
+
 ** Reverb
 An important component of many RL algorithms is the Replay Buffer. In it, the agent stores previous experiences which it can sample from in order to learn about how to better act in the environment in the future. In offline RL there is a natural distinction between acting in the environment and learning from past experiences. The acting process performs actions according to some policy, while the learning process updates the policy with respect to previous experiences. These processes can run independently of each other, as seen in figure [[fig:sep_actor_learner_reverb]]. This allows us the run the algorithm distributedly, with multiple actors generating experience, and possibly multiple learners updating the actors.
 
@@ -128,7 +131,7 @@ Reverb[TODO: Citation] is a database developed by DeepMind that facilitates trai
 If we want to sample items from the table uniformly (randomly), then we could use a uniform sampler. If we want to remove the oldest items first when the table is full, then we could use a First-In-First-Out (FIFO) remover. If we want to make sure that the actors don't insert items too quickly for the learner, and that the learner doesn't sample items faster than the actors can insert them, we could use a sample-to-insert-ratio rate limiter. The rate limiter will block insertion- or sample-calls to the table until the other component has caught up.
 
 ** Acme
-Acme is another library developed by DeepMind that provides a framework for decomposing an RL agent into multiple building blocks. This, in addition to another library of theirs called launchpad, lets us develop an agent that can be run at multiple different scales — i.e. the building blocks can be combined into an agent that runs on a single thread or they can be combined into a distributed agent.
+Acme[TODO: cite] is another library developed by DeepMind that provides a framework for decomposing an RL agent into multiple building blocks. This, in addition to another library of theirs called Launchpad[TODO: cite], lets us develop an agent that can be run at multiple different scales — i.e. the building blocks can be combined into an agent that runs on a single thread or they can be combined into a distributed agent.
 
 
 
