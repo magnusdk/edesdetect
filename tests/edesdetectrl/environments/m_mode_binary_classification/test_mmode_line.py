@@ -1,14 +1,10 @@
 import random
+from timeit import timeit
 from typing import Callable
 
 import numpy as np
 import numpy.testing as np_testing
-from edesdetectrl.environments.m_mode_binary_classification.line import (
-    Bounds,
-    Line,
-    MModeLine,
-    interpolate_points,
-)
+from edesdetectrl.environments.m_mode_binary_classification.line import MModeLine
 
 
 def random_step(mmode_line: MModeLine):
@@ -29,10 +25,10 @@ def random_steps(
     num=1000,
 ):
     """Perform num random actions and assert invariant."""
-    assert invariant(mmode_line)
+    assert invariant(mmode_line) == True
     for _ in range(num):
         random_step(mmode_line)
-        assert invariant(mmode_line)
+        assert invariant(mmode_line) == True
 
 
 def test_mmode_line_invariants():
@@ -56,35 +52,12 @@ def test_mmode_line_invariants():
                 random_horizontal_translation,
             )
             return True
-        except:
-            return False
+        except Exception as e:
+            return e
 
     mmode_line = MModeLine.from_shape(video.shape[1], video.shape[2])
     random_steps(mmode_line, line_always_within_bounds)
     random_steps(mmode_line, mmode_image_doesnt_crash)
-
-
-def test_interpolate_points():
-    """Assert that interpolate_points gets approximately the same result as just
-    naively indexing the on the rounded coordinates."""
-    video_frame = np.random.rand(100, 120) * 100
-    bounds = Bounds.from_shape(video_frame.shape)
-    n_points = 50
-
-    summed_difference = np.zeros((n_points))
-    n_iterations = 1000
-    for _ in range(n_iterations):
-        line = Line.center_of_bounds(bounds, 80).rotate(random.random() * np.pi * 2)
-        X, Y = line.as_points(n_points)
-        naively_interpolated = video_frame[
-            np.round(X).astype(int), np.round(Y).astype(int)
-        ]
-        true_interpolated = interpolate_points(video_frame, X, Y)
-        summed_difference += naively_interpolated - true_interpolated
-
-    np_testing.assert_allclose(
-        summed_difference / n_iterations, np.zeros_like(summed_difference)
-    )
 
 
 def test_mmode_adjacent():
@@ -136,3 +109,18 @@ def test_mmode_adjacent():
         video, rotations=[-1, 0, 1], horizontal_translations=[-2, 2]
     )
     assert len(only_rotation_and_2_translations) == 3 * 2
+
+
+def test_mmode_with_adjacent_performance():
+    video = np.random.random((100, 112, 112))  # 100 frames, 112 by 112 pixels video
+    mmode_line = MModeLine.from_shape(video.shape[1], video.shape[2])
+
+    def thunk():
+        mmode_line.get_mmode_image_with_adjacent(
+            video,
+            rotations=[-0.5, 0, 0.5],
+            horizontal_translations=[-5, 0, 5],
+        )
+
+    average_time_ms = timeit(thunk, number=1000)
+    assert average_time_ms <= 20

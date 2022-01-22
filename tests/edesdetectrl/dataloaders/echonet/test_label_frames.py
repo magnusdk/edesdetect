@@ -25,16 +25,18 @@ def test_previous_and_next_maximum():
     assert lf.next_peak(arr, 0) == 0
 
 
+def get_image(t):
+    """A slightly noisy frame of a video that repeats every 2*pi t."""
+    size = 100
+    image = np.linspace(0, 4 * 2 * np.pi, size)
+    image = np.tile(image, (size, 1))
+    # image *= (image.T / 3) ** 2
+    image = np.sin(image + t)
+    image += np.random.rand(size, size)
+    return image
+
+
 def _test_label_frames_helper(ed, es):
-    def get_image(t):
-        """A slightly noisy frame of a video that repeats every 2*pi t."""
-        size = 100
-        image = np.linspace(0, 4 * 2 * np.pi, size)
-        image = np.tile(image, (size, 1))
-        # image *= (image.T / 3) ** 2
-        image = np.sin(image + t)
-        image += np.random.rand(size, size)
-        return image
 
     # Video repeats 5 times, once every 20 frames.
     # That means that if ED is at frame i, then frame i+10 will be ES, i.e.: half a cycle afterwards.

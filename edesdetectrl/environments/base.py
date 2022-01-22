@@ -93,9 +93,9 @@ class DataIteratorMixin:
 
         self.data_iterator = filter(
             has_enough_frames,
-            dataloader.get_random_generator(rng_key, as_task=False)
+            dataloader.get_random_generator(rng_key)
             if rng_key is not None
-            else dataloader.get_generator(as_task=False),
+            else dataloader.get_generator(),
         )
         self.video = next(self.data_iterator)
 

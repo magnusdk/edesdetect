@@ -10,7 +10,7 @@ def return_after_random_sleep_task(x):
         time.sleep(random.random() / 4)
         return x
 
-    return task
+    return task, ()
 
 
 def return_after_sleep_task(x, sleep_for):
@@ -18,7 +18,7 @@ def return_after_sleep_task(x, sleep_for):
         time.sleep(sleep_for)
         return x
 
-    return task
+    return task, ()
 
 
 def test_async_buffered_no_race_conditions():

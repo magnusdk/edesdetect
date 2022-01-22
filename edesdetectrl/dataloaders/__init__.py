@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from itertools import count
-from typing import Any, Callable, Generator, Literal, Sequence, Union
+from typing import Any, Callable, Generator, Literal, Sequence, Tuple, Union
 
 import edesdetectrl.util.generators as generators
 import numpy as np
+from edesdetectrl.util.concurrent_pool import process_pool
 from jax import random
 from jax._src.random import KeyArray
 
@@ -42,7 +43,11 @@ class DataItem:
         )
 
 
-def _safe_get_item(items: "DataLoader", index: int) -> DataItem:
+# A tuple of a function and args. The function can be called with the args.
+DataloaderTask = Tuple[Callable[..., DataItem], Tuple]
+
+
+def _safe_get_item(items: "DataLoader", index: int) -> Union[DataloaderTask, str]:
     try:
         return items[index]
     except KeyError:
@@ -54,39 +59,36 @@ class DataLoader:
     def keys(self):
         raise NotImplementedError
 
-    def __getitem__(self, index) -> DataItem:
+    def __getitem__(self, index: Any) -> DataloaderTask:
+        """Return a DataloaderTask which is a tuple of task_fn and args.
+        We can call task_fn with args as such: task_fn(*args), and it will return a DataItem."""
         raise NotImplementedError
 
     def __len__(self) -> int:
         return len(self.keys)
 
     def get_random_generator(
-        self, rng_key: KeyArray, as_task: bool = True
-    ) -> Generator[Union[DataItem, Callable[[], DataItem]], None, None]:
-        """Return a generator that generates all items from dataloader in random order.
+        self, rng_key: KeyArray
+    ) -> Generator[DataItem, None, None]:
+        """Return a generator that generates all items from dataloader in random order."""
 
-        If as_task is True, then generated values are 0-arity functions that can be
-        called to get the actual value. This is useful when wrapping the generator in
-        an asynchronous generator."""
-        key1 = rng_key
-        while True:
-            key1, key2 = random.split(key1)
-            task = lambda: _safe_get_item(
-                self, random.randint(key2, (1,), 0, len(self))[0]
-            )
-            yield task if as_task else task()
+        def task_gen():
+            key1 = rng_key
+            while True:
+                key1, key2 = random.split(key1)
+                index = random.randint(key2, (1,), 0, len(self))[0]
+                yield _safe_get_item(self, index)
 
-    def get_generator(
-        self, as_task: bool = True
-    ) -> Generator[Union[DataItem, Callable[[], DataItem]], None, None]:
+        return generators.async_buffered(task_gen(), process_pool, 20)
+
+    def get_generator(self) -> Generator[DataItem, None, None]:
         """Return a generator that generates all items from dataloader, ordered by index.
 
-        The generator will generate indefinitely, cycling back to the start after all items have been generated.
+        The generator will generate indefinitely, cycling back to the start after all items have been generated."""
 
-        If as_task is True, then generated values are 0-arity functions that can be
-        called to get the actual value. This is useful when wrapping the generator in
-        an asynchronous generator."""
-        for n in count():
-            index = n % len(self)
-            task = lambda: _safe_get_item(self, index)
-            yield task if as_task else task()
+        def task_gen():
+            for n in count():
+                index = n % len(self)
+                yield _safe_get_item(self, index)
+
+        return generators.async_buffered(task_gen(), process_pool, 20)

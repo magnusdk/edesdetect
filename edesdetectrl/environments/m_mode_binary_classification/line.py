@@ -110,14 +110,6 @@ class Bounds:
         return self.max_x - self.min_x, self.max_y - self.min_y
 
 
-def interpolate_points(video_frame, X, Y):
-    # Pad data
-    video_frame = np.pad(video_frame, 1)
-    X = np.clip(np.round(X + 1), 0, video_frame.shape[0] - 1).astype(int)
-    Y = np.clip(np.round(Y + 1), 0, video_frame.shape[1] - 1).astype(int)
-    return video_frame[X, Y]
-
-
 class MModeLine:
     def __init__(
         self,
@@ -160,19 +152,17 @@ class MModeLine:
         It would make sense that the bounds of self matches the width and height of the video, but this is not required.
 
         Optionally rotate or translate the line before creating the M-mode image."""
-        n_frames = video.shape[0]
         interp_line = (
             self.line.rotate(rotation)
             .move_vertically(vertical_translation)
             .move_horizontally(horizontal_translation)
         )
+        Y, X = interp_line.as_points(self.n_line_samples)
+        X = np.clip(np.round(X + 1), 0, video.shape[1] - 1).astype(int)
+        Y = np.clip(np.round(Y + 1), 0, video.shape[2] - 1).astype(int)
 
-        mmode_image = np.empty((n_frames, self.n_line_samples), dtype=float)
-        # Populate mmode_image with lines from each frame
-        for frame_i in range(n_frames):
-            Y, X = interp_line.as_points(self.n_line_samples)
-            mmode_image[frame_i] = interpolate_points(video[frame_i], X, Y)
-        return mmode_image
+        video = np.pad(video, ((0, 0), (1, 1), (1, 1)))
+        return video[:, Y, X]
 
     def get_mmode_image_with_adjacent(
         self,

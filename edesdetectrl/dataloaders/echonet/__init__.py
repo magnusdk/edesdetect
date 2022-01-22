@@ -1,5 +1,5 @@
 import os
-from typing import List, Literal, Union
+from typing import Any, Callable, List, Literal, Tuple, Type, Union
 
 import cv2
 import numpy as np
@@ -56,6 +56,19 @@ def _get_filenames(filelist_csv_file, split=None):
     return [_ensure_file_extension(filename) for filename in filelist_df["FileName"]]
 
 
+def _get_item_impl(filename: str, ed_frame: int, es_frame: int) -> dataloaders.DataItem:
+    video = loadvideo(filename)
+    # Normalize pixel intensities (smallest always 0, biggest always 1)
+    video = video - video.min()
+    video = video / video.max()
+
+    ground_truth, start, end = lf.label_frames(video, ed_frame, es_frame)
+
+    return dataloaders.DataItem.from_video_and_ground_truth(
+        video, ground_truth, start, end
+    )
+
+
 class Echonet(dataloaders.DataLoader):
     def __init__(self, split: Literal["TRAIN", "VAL", "TEST"]):
         self.filelist_csv_file = config["data"]["filelist_path"]
@@ -70,7 +83,7 @@ class Echonet(dataloaders.DataLoader):
     def keys(self) -> List[str]:
         return self.filenames
 
-    def __getitem__(self, key: Union[str, int]) -> dataloaders.DataItem:
+    def __getitem__(self, key: Union[str, int]) -> dataloaders.DataloaderTask:
         filename = key if isinstance(key, str) else self.keys[key]
         traces = self.volumetracings_df.loc[filename]
 
@@ -78,13 +91,6 @@ class Echonet(dataloaders.DataLoader):
         # Largest (diastolic) frame is first, smallest (systolic) frame is last
         ed, es = int(traces.iloc[0]["Frame"]), int(traces.iloc[-1]["Frame"])
 
-        video = loadvideo(self.videos_dir + filename)
-        # Normalize pixel intensities (smallest always 0, biggest always 1)
-        video = video - video.min()
-        video = video / video.max()
-
-        ground_truth, start, end = lf.label_frames(video, ed, es)
-
-        return dataloaders.DataItem.from_video_and_ground_truth(
-            video, ground_truth, start, end
-        )
+        task_fn = _get_item_impl
+        args = (self.videos_dir + filename, ed, es)
+        return task_fn, args

@@ -32,7 +32,8 @@ iactions = {**iactions, **{str(v): k for k, v in actions.items()}}
 
 WIDTH = 112
 HEIGHT = 112
-N_CHANNELS = 5
+N_OVERVIEW_CHANNELS = 2
+N_MMODE_CHANNELS = 9
 N_ACTIONS = len(actions)
 N_PADDING = 15
 N_FRAMES = N_PADDING * 2 + 1
@@ -43,10 +44,14 @@ ROTATION_AMOUNT = 0.1
 
 def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
     # M-mode data
+    video_start = env.current_frame - N_PADDING
+    video_end = env.current_frame + N_PADDING + 1
+    video = env.video.video[video_start:video_end]
+
     rotations = [-0.5, 0, 0.5]
     horizontal_translations = [-5, 0, 5]
     mmode_with_adjacent = env.mmode_line.get_mmode_image_with_adjacent(
-        env.video.video,
+        video,
         rotations=rotations,
         horizontal_translations=horizontal_translations,
     )
@@ -71,7 +76,9 @@ def get_overview_and_mmode_observation(
     1. overview_data: An array with 2 channels that is the average pixel intensities in the video and the location of the line.
     2. mmode_data: An array with 9 channels that is the M-mode image of the current line and the 8 adjacent lines."""
     # Overview data
-    mean_image = np.mean(env.video.video, axis=0)  # Average of all frames in video
+    mean_image = np.mean(
+        env.video.video[:50], axis=0
+    )  # Average of first 50 frames in video
     line_pixels = env.mmode_line.visualize_line()
     overview_data = np.array([mean_image, line_pixels])
 
@@ -105,10 +112,10 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         # 1. an averaged image of the video and the current line (2 channels)
         # 2. and the M-mode image with adjacent lines (1+4 channels for 4 adjacent)
         overview_space = spaces.Box(
-            low=0, high=1, shape=(2, HEIGHT, WIDTH), dtype="float32"
+            low=0, high=1, shape=(N_OVERVIEW_CHANNELS, HEIGHT, WIDTH), dtype="float32"
         )
         m_mode_space = spaces.Box(
-            low=0, high=1, shape=(N_CHANNELS, N_FRAMES, LINE_LENGTH), dtype="float32"
+            low=0, high=1, shape=(N_MMODE_CHANNELS, N_FRAMES, LINE_LENGTH), dtype="float32"
         )
         self.observation_space = spaces.Tuple([overview_space, m_mode_space])
 
@@ -148,7 +155,7 @@ class EDESMModeClassification_v0(DataIteratorMixin, EDESMModeClassificationBase_
     def __init__(
         self,
         dataloader: Union[dataloaders.DataLoader, Literal["echonet"]],
-        get_reward: RewardFn,
+        get_reward: Union[RewardFn, Literal["simple", "proximity"]],
     ):
         EDESMModeClassificationBase_v0.__init__(self, get_reward)
         DataIteratorMixin.__init__(self, dataloader, N_PADDING, N_PADDING)

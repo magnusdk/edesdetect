@@ -1,12 +1,12 @@
 import queue
 from concurrent.futures import Executor
-from typing import Any, Callable, Generator
+from typing import Any, Callable, Generator, Tuple, Union
 
 SKIP_ITEM = "__SKIP_ITEM__"
 
 
 def async_buffered(
-    task_gen: Generator[Callable[[], Any], None, None],
+    task_gen: Generator[Union[Tuple[Callable[[Tuple], Any], Tuple], str], None, None],
     task_executor: Executor,
     buffer_maxsize: int,
 ):
@@ -28,9 +28,11 @@ def async_buffered(
 
     # Just a local helper function
     def async_put_next():
-        task = next(task_gen)
-        future = task_executor.submit(task)
-        buffer.put(future)
+        next_item = next(task_gen)
+        if next_item != SKIP_ITEM:
+            task_fn, args = next_item
+            future = task_executor.submit(task_fn, *args)
+            buffer.put(future)
 
     # Backfill buffer (asynchronously).
     while not buffer.full():
