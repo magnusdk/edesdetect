@@ -20,6 +20,7 @@ import gym
 import jax
 import launchpad as lp
 from acme import specs
+from launchpad.nodes.python.local_multi_processing import PythonProcess
 
 import edesdetectrl.agents.dqn.config as dqn_config
 import edesdetectrl.util.dm_env as util_dm_env
@@ -107,7 +108,17 @@ def main():
         ).build()
 
         # Launch experiment.
-        lp.launch(program, lp.LaunchType.LOCAL_MULTI_PROCESSING)
+        no_cuda_devices = PythonProcess(env=dict(CUDA_VISIBLE_DEVICES=""))
+        lp.launch(
+            program,
+            lp.LaunchType.LOCAL_MULTI_PROCESSING,
+            local_resources={
+                "actor": no_cuda_devices,
+                "evaluator": no_cuda_devices,
+                "counter": no_cuda_devices,
+                "replay": no_cuda_devices,
+            },
+        )
 
 
 if __name__ == "__main__":
