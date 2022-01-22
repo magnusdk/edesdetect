@@ -15,22 +15,24 @@
 
 """DQN agent implementation."""
 
-
 import functools
 from typing import Callable, Optional
 
 import dm_env
-import jax.numpy as jnp
+import reverb
 import rlax
-from acme import specs
+from acme import core as acme_core
+from acme import environment_loop, specs
 from acme.agents.jax import actor_core as actor_core_lib
 from acme.agents.jax import normalization
 from acme.jax import networks as networks_lib
 from acme.jax import utils
 from acme.jax.layouts import distributed_layout
+from acme.utils import counting
 from edesdetectrl.agents.dqn import builder
 from edesdetectrl.agents.dqn import config as dqn_config
 from edesdetectrl.agents.dqn import evaluator, loggers, losses
+from edesdetectrl.util import gpu
 from jax import random
 
 NetworkFactory = Callable[[specs.EnvironmentSpec], networks_lib.FeedForwardNetwork]
@@ -160,3 +162,31 @@ class DistributedDQN(distributed_layout.DistributedLayout):
                 save_reverb_logs, log_every
             ),
         )
+
+    def coordinator(self, counter: counting.Counter, max_actor_steps: int):
+        gpu.disable_tensorflow_gpu_usage()
+        return super().coordinator(counter, max_actor_steps)
+
+    def counter(self):
+        gpu.disable_tensorflow_gpu_usage()
+        return super().counter()
+
+    def learner(
+        self,
+        random_key: networks_lib.PRNGKey,
+        replay: reverb.Client,
+        counter: counting.Counter,
+    ):
+        gpu.disable_tensorflow_gpu_usage()
+        return super().learner(random_key, replay, counter)
+
+    def actor(
+        self,
+        random_key: networks_lib.PRNGKey,
+        replay: reverb.Client,
+        variable_source: acme_core.VariableSource,
+        counter: counting.Counter,
+        actor_id: int,
+    ) -> environment_loop.EnvironmentLoop:
+        gpu.disable_tensorflow_gpu_usage()
+        return super().actor(random_key, replay, variable_source, counter, actor_id)

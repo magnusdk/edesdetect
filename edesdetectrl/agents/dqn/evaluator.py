@@ -13,6 +13,7 @@ from acme.utils import counting
 from acme.utils.loggers import base
 from edesdetectrl.agents.dqn import loggers
 from edesdetectrl.environments import generate_trajectory_using_actor
+from edesdetectrl.util import gpu
 
 
 def evaluate_and_get_metrics(
@@ -96,6 +97,7 @@ def get_evaluator_factory(
         counter: counting.Counter,
     ):
         """The evaluation process."""
+        gpu.disable_tensorflow_gpu_usage()
         environment = environment_factory()
         # Environment spec is the same for validation and training.
         env_spec = specs.make_environment_spec(environment["env"])
