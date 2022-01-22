@@ -82,7 +82,7 @@ class PrioritizedDoubleQLearning(learning_lib.LossFn):
         # Reweight.
         loss = jnp.mean(importance_weights * batch_loss)  # []
         reverb_update = learning_lib.ReverbUpdate(
-            keys=keys, priorities=jnp.abs(td_error).astype(jnp.float64)
+            keys=keys, priorities=jnp.abs(td_error)
         )
         extra = learning_lib.LossExtra(metrics={}, reverb_update=reverb_update)
         return loss, (state_tm1, extra)
@@ -145,7 +145,7 @@ class PrioritizedCategoricalDoubleQLearning(learning_lib.LossFn):
         # Reweight.
         loss = jnp.mean(importance_weights * batch_loss)  # []
         reverb_update = learning_lib.ReverbUpdate(
-            keys=keys, priorities=jnp.abs(batch_loss).astype(jnp.float64)
+            keys=keys, priorities=jnp.abs(batch_loss)
         )
         extra = learning_lib.LossExtra(metrics={}, reverb_update=reverb_update)
         return loss, extra
