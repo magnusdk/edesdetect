@@ -13,67 +13,64 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import dataclasses
 
 import gym
 import jax
 import launchpad as lp
+import mlflow
 from acme import specs
 from launchpad.nodes.python.local_multi_processing import PythonProcess
 
 import edesdetectrl.agents.dqn.config as dqn_config
+import edesdetectrl.config as general_config
 import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl.agents.dqn import agent
 from edesdetectrl.dataloaders.echonet import Echonet
 from edesdetectrl.nets import mobilenet, simple_dqn_network
 
 
-def get_environment_factory(rng_key):
+@dataclasses.dataclass
+class ExperimentConfig:
+    environment: str = "VanillaBinaryClassification-v0"
+    network: str = "mobilenet"
+    reward_spec: str = "simple"
+
+
+def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
     def environment_factory(is_eval: bool, split="TRAIN"):
-        import edesdetectrl.environments.vanilla_binary_classification
+        if experiment_config.environment == "VanillaBinaryClassification-v0":
+            import edesdetectrl.environments.vanilla_binary_classification
 
-        if is_eval:
-            if split == "VAL":
-                env = gym.make(
-                    "VanillaBinaryClassification-v0",
-                    dataloader=Echonet("VAL"),
-                    get_reward="simple",
-                )
-            elif split == "TRAIN":
-                env = gym.make(
-                    "VanillaBinaryClassification-v0",
-                    dataloader=Echonet("TRAIN"),
-                    get_reward="simple",
-                    rng_key=rng_key,
-                )
+        env = util_dm_env.GymWrapper(
+            gym.make(
+                experiment_config.environment,
+                dataloader=Echonet(split),
+                get_reward=experiment_config.reward_spec,
+                rng_key=rng_key if split == "TRAIN" else None,
+            )
+        )
 
+        if is_eval:  # Evaluation expects a dictionary with some additional information.
             return {
                 "num_samples": len(Echonet("VAL")),
-                "env": util_dm_env.GymWrapper(env),
+                "env": env,
                 "split": split,
             }
-
-        else:
-            env = gym.make(
-                "VanillaBinaryClassification-v0",
-                dataloader=Echonet(split),
-                get_reward="simple",
-                rng_key=rng_key,
-            )
-            return util_dm_env.GymWrapper(env)
+        else:  # Otherwise, just return env.
+            return env
 
     return environment_factory
 
 
-def network_factory(env_spec: specs.EnvironmentSpec):
-    # return mobilenet(env_spec)
-    return simple_dqn_network(env_spec)
+def get_network_factory(experiment_config: ExperimentConfig):
+    def network_factory(env_spec: specs.EnvironmentSpec):
+        if experiment_config.network == "simple":
+            return simple_dqn_network(env_spec)
+        elif experiment_config.network == "mobilenet":
+            return mobilenet(env_spec)
 
-
-import mlflow
-
-import edesdetectrl.config as general_config
+    return network_factory
 
 
 def main():
@@ -93,11 +90,15 @@ def main():
             num_sgd_steps_per_step=8,
             seed=seed,
         )
+        experiment_config = ExperimentConfig()
         mlflow.log_params(dataclasses.asdict(config))
-        environment_factory = get_environment_factory(jax.random.PRNGKey(seed + 1))
+        mlflow.log_params(dataclasses.asdict(experiment_config))
+
         program = agent.DistributedDQN(
-            environment_factory=environment_factory,
-            network_factory=network_factory,
+            environment_factory=get_environment_factory(
+                experiment_config, jax.random.PRNGKey(seed + 1)
+            ),
+            network_factory=get_network_factory(experiment_config),
             config=config,
             seed=seed,
             num_actors=6,
