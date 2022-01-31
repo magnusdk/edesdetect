@@ -40,10 +40,12 @@ class Evaluator(core.Worker):
         actor: core.Actor,
         environment: dict,
         logger: base.Logger,
+        counter: counting.Counter,
     ):
         self.actor = actor
         self.environment = environment
         self.logger = logger
+        self.counter = counter
 
     def run(self):
 
@@ -62,17 +64,19 @@ class Evaluator(core.Worker):
         num_samples = self.environment["num_samples"]
 
         while True:
+            counts = self.counter.get_counts()
+            learner_steps = counts.get("learner_steps", 0)
+
             time_before = time.time()
             balanced_accuracy = evaluate_and_get_metrics(
-                self.actor,
-                num_samples,
-                environment,
+                self.actor, num_samples, environment
             )
             elapsed_seconds = time.time() - time_before
             result = {
                 (split + "_elapsed_seconds"): elapsed_seconds,
                 (split + "_episodes_per_second"): (2 * num_samples) / elapsed_seconds,
                 (split + "_balanced_accuracy"): balanced_accuracy,
+                "learner_steps": learner_steps,
             }
 
             self.logger.write(result)
@@ -114,6 +118,6 @@ def get_evaluator_factory(
         else:
             logger = loggers.make_default_logger("evaluator", log_to_bigtable)
 
-        return Evaluator(actor, environment, logger)
+        return Evaluator(actor, environment, logger, counter)
 
     return evaluator

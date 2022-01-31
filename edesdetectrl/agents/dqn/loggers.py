@@ -14,15 +14,20 @@ class MlflowLogger(loggers.Logger):
         tracking_uri,
         experiment,
         run_id,
+        step_key="learner_steps",
     ):
         # A bit dirty to set these global state variables... Oh well.
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment)
         mlflow.start_run(run_id=run_id)
+        self.step_key = step_key
 
     def write(self, values: loggers.LoggingData):
         values = {k: float(v) for k, v in values.items()}
-        mlflow.log_metrics(values)
+        step = values.get(self.step_key, None)
+        step = int(step) if isinstance(step, float) else step
+        values.pop(self.step_key, None)
+        mlflow.log_metrics(values, step=step)
 
     def close(self):
         pass
