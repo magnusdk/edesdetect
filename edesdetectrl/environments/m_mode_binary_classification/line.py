@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable, Tuple
+from typing import Iterable, Optional, Tuple
 
 import numpy as np
 
@@ -94,10 +94,10 @@ class Bounds:
     def is_within(self, line: Line) -> bool:
         """Return True if the line is within the bounds, else False. min and max values are inclusive."""
         return (
-            self.min_x <= line.x1 <= self.max_x
-            and self.min_x <= line.x2 <= self.max_x
-            and self.min_y <= line.y1 <= self.max_y
-            and self.min_y <= line.y2 <= self.max_y
+            self.min_x <= line.x1 < self.max_x
+            and self.min_x <= line.x2 < self.max_x
+            and self.min_y <= line.y1 < self.max_y
+            and self.min_y <= line.y2 < self.max_y
         )
 
     @staticmethod
@@ -186,7 +186,7 @@ class MModeLine:
         )
 
     def visualize_line(self):
-        image = np.zeros(self.bounds.shape, dtype=float)
+        image = np.zeros(self.bounds.shape, dtype=np.float32)
         Y, X = self.line.as_points(self.n_line_samples)  # Video is height by width
         image[X.astype(int), Y.astype(int)] = 1
         return image
@@ -196,6 +196,7 @@ class MModeLine:
         width: float,
         height: float,
         relative_line_length: float = 0.5,
+        n_line_samples: Optional[int] = None,
     ) -> "MModeLine":
         """Construct an MModeLine where the bounds are determined by the video width and height and the line is centered horizontally in the bounds, and points upwards.
 
@@ -207,4 +208,4 @@ class MModeLine:
         assert bounds.is_within(
             line
         ), "Line must be within the bounds of the video. Try adjusting relative_line_length."
-        return MModeLine(line, bounds)
+        return MModeLine(line, bounds, n_line_samples)

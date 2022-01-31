@@ -2,7 +2,7 @@ from collections import namedtuple
 
 import acme.core
 import dm_env
-import jax.numpy as jnp
+import numpy as np
 import sklearn.metrics as metrics
 
 TrajectoryItem = namedtuple("TrajectoryItem", ["s", "a", "r", "q_values", "env_info"])
@@ -16,6 +16,8 @@ def all_equal(xs):
 
 
 def safe_balanced_accuracy(ground_truths, actions):
+    if len(ground_truths) == 0:
+        return 0
     if all_equal(ground_truths):
         # Balanced accuracy is only defined when ground truth contains all possible elements.
         # If that's not true, then use regular accuracy (adjusted: x*2-1).
@@ -50,10 +52,17 @@ class Trajectory(list):
         return [item.env_info for item in self]
 
     def _labels_and_predictions(self):
-        ground_truths = jnp.array(
-            [env_info["ground_truth"] for env_info in self.env_info()]
+        actions_and_gt = np.array(
+            [
+                np.array([a, env_info["ground_truth"]])
+                for (a, env_info) in zip(self.actions(), self.env_info())
+                if a in (0, 1)
+            ]
         )
-        actions = jnp.array(self.actions())
+        if len(actions_and_gt) == 0:
+            return [], []
+        actions = actions_and_gt[:, 0]
+        ground_truths = actions_and_gt[:, 1]
         return ground_truths, actions
 
     def sum_rewards(self):
@@ -101,7 +110,7 @@ def generate_trajectory_using_q(env, q) -> Trajectory:
     trajectory = Trajectory()
     while not done:
         qs = q(current_state)
-        a = jnp.argmax(qs)
+        a = np.argmax(qs)
         next_state, r, done, info = env.step(a)
 
         trajectory.append(TrajectoryItem(current_state, a, r, qs, info))
@@ -111,13 +120,13 @@ def generate_trajectory_using_q(env, q) -> Trajectory:
 
 
 def generate_trajectory_using_actor(
-    env: dm_env.Environment,
-    actor: acme.core.Actor,
+    env: dm_env.Environment, actor: acme.core.Actor, max_steps: int = 500
 ) -> Trajectory:
     timestep = env.reset()
     actor.observe_first(timestep)
     trajectory = Trajectory()
-    while not timestep.last():
+    steps = 0
+    while not timestep.last() and steps < max_steps:
         action = actor.select_action(timestep.observation)
         next_timestep = env.step(action)
         actor.observe(action, next_timestep=next_timestep)
@@ -132,5 +141,6 @@ def generate_trajectory_using_actor(
             )
         )
         timestep = next_timestep
+        steps += 1
 
     return trajectory

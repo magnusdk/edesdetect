@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import dataclasses
+from typing import Literal
 
 import gym
 import jax
@@ -27,20 +28,39 @@ import edesdetectrl.config as general_config
 import edesdetectrl.util.dm_env as util_dm_env
 from edesdetectrl.agents.dqn import agent
 from edesdetectrl.dataloaders.echonet import Echonet
-from edesdetectrl.nets import mobilenet, simple_dqn_network
+from edesdetectrl.nets import (
+    mobilenet,
+    overview_and_m_mode_nets,
+    simple_dqn_network,
+    transform,
+)
 
 
 @dataclasses.dataclass
 class ExperimentConfig:
-    environment: str = "VanillaBinaryClassification-v0"
-    network: str = "mobilenet"
-    reward_spec: str = "simple"
+    environment: Literal[
+        "VanillaBinaryClassification-v0",
+        "EDESMModeClassification-v0",
+    ] = "VanillaBinaryClassification-v0"
+
+    network: Literal[
+        "simple",
+        "mobilenet",
+        "m_mode_simple",
+    ] = "mobilenet"
+
+    reward_spec: Literal[
+        "simple",
+        "proximity",
+    ] = "simple"
 
 
 def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
     def environment_factory(is_eval: bool, split="TRAIN"):
         if experiment_config.environment == "VanillaBinaryClassification-v0":
             import edesdetectrl.environments.vanilla_binary_classification
+        elif experiment_config.environment == "EDESMModeClassification-v0":
+            import edesdetectrl.environments.m_mode_binary_classification
 
         env = util_dm_env.GymWrapper(
             gym.make(
@@ -66,9 +86,11 @@ def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
 def get_network_factory(experiment_config: ExperimentConfig):
     def network_factory(env_spec: specs.EnvironmentSpec):
         if experiment_config.network == "simple":
-            return simple_dqn_network(env_spec)
+            return transform(env_spec, simple_dqn_network(env_spec))
         elif experiment_config.network == "mobilenet":
-            return mobilenet(env_spec)
+            return transform(env_spec, mobilenet(env_spec))
+        elif experiment_config.network == "m_mode_simple":
+            return transform(env_spec, overview_and_m_mode_nets(env_spec))
 
     return network_factory
 
@@ -83,14 +105,18 @@ def main():
 
         seed = 42
         config = dqn_config.DQNConfig(
-            epsilon=1,
-            learning_rate=1e-4,
-            discount=0,
-            n_step=1,
+            epsilon=0.2,
+            learning_rate=1e-3,
+            discount=0.97,
+            n_step=5,
             num_sgd_steps_per_step=8,
             seed=seed,
         )
-        experiment_config = ExperimentConfig()
+        experiment_config = ExperimentConfig(
+            environment="EDESMModeClassification-v0",
+            network="m_mode_simple",
+            reward_spec="proximity",
+        )
         mlflow.log_params(dataclasses.asdict(config))
         mlflow.log_params(dataclasses.asdict(experiment_config))
 

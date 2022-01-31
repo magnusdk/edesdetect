@@ -45,9 +45,16 @@ class BinaryClassificationBaseEnv(gym.Env):
 
         # Go to the next frame if the action was Diastole or Systole
         # and if we have not yet reached the end of labeled frames
-        if action in (0, 1) and self.current_frame < self.video.ground_truth_end:
+        if (
+            action in (0, 1)
+            and self.current_frame < self.video.ground_truth_end
+            and (self.current_frame + self.pad_right + 1) < self.video.total_length
+        ):
             self.current_frame += 1
-        done = self.current_frame >= self.video.ground_truth_end
+        done = (
+            self.current_frame >= self.video.ground_truth_end
+            or (self.current_frame + self.pad_right + 1) >= self.video.total_length
+        )
         observation = self.get_observation(self)
 
         return observation, reward, done, info

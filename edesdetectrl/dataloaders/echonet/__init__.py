@@ -61,6 +61,7 @@ def _get_item_impl(filename: str, ed_frame: int, es_frame: int) -> dataloaders.D
     # Normalize pixel intensities (smallest always 0, biggest always 1)
     video = video - video.min()
     video = video / video.max()
+    video = video.astype(np.float32)
 
     ground_truth, start, end = lf.label_frames(video, ed_frame, es_frame)
 

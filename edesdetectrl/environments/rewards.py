@@ -42,6 +42,8 @@ def proximity_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float
     frame is 4 frames before the current frame then the reward is -3.
     If it was 5 frames before then the reward would be -4. Distance of 6
     gives -5, etc."""
+    if prediction not in (0, 1):
+        return 0.0
     ground_truth_frame = env.current_frame - env.video.ground_truth_start
     return proximity_reward_impl(prediction, ground_truth_frame, env.video.ground_truth)
 
