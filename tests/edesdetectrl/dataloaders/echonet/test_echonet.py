@@ -10,6 +10,4 @@ def test_loading_performance():
     data_iterator = Echonet("TRAIN").get_random_generator(rng_key)
     average_load_time_ms = timeit(lambda: next(data_iterator), number=1000)
 
-    # Without process-pool: 153.28 ms
-    # With process-pool: 29.25 ms
-    assert average_load_time_ms <= 35
+    assert average_load_time_ms <= 20

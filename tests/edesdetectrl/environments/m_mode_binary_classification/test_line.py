@@ -68,11 +68,11 @@ def test_bounds_shape():
 
 def test_moving_line_within_bounds():
     bounds = Bounds.from_shape((10, 10))
-    line = Line(5, 0, 5, 10)  # Horizontally centered in bounds
+    line = Line(5, 0, 5, 9.9)  # Horizontally centered in bounds
     assert bounds.is_within(line)
     assert not bounds.is_within(line.move_vertically(0.1))
     assert not bounds.is_within(line.move_vertically(-0.1))
-    assert bounds.is_within(line.move_horizontally(5))
+    assert bounds.is_within(line.move_horizontally(4.9))
     assert bounds.is_within(line.move_horizontally(-5))
-    assert not bounds.is_within(line.move_horizontally(5.1))
+    assert not bounds.is_within(line.move_horizontally(5))
     assert not bounds.is_within(line.move_horizontally(-5.1))
