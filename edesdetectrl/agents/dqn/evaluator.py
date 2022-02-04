@@ -41,11 +41,13 @@ class Evaluator(core.Worker):
         environment: dict,
         logger: base.Logger,
         counter: counting.Counter,
+        evaluator_counter_key: str,
     ):
         self.actor = actor
         self.environment = environment
         self.logger = logger
         self.counter = counter
+        self.evaluator_counter_key = evaluator_counter_key
 
     def run(self):
 
@@ -81,6 +83,11 @@ class Evaluator(core.Worker):
 
             self.logger.write(result)
 
+            # Synchronize evaluator steps with learner steps
+            previous_evaluator_steps = counts.get(self.evaluator_counter_key, 0)
+            diff = learner_steps - previous_evaluator_steps
+            self.counter.increment(**{self.evaluator_counter_key: diff})
+
 
 def get_evaluator_factory(
     # environment_factory returns two environments:
@@ -99,6 +106,7 @@ def get_evaluator_factory(
         random_key: networks_lib.PRNGKey,
         variable_source: core.VariableSource,
         counter: counting.Counter,
+        evaluator_counter_key: str,
     ):
         """The evaluation process."""
         gpu.disable_tensorflow_gpu_usage()
@@ -118,6 +126,6 @@ def get_evaluator_factory(
         else:
             logger = loggers.make_default_logger("evaluator", log_to_bigtable)
 
-        return Evaluator(actor, environment, logger, counter)
+        return Evaluator(actor, environment, logger, counter, evaluator_counter_key)
 
     return evaluator

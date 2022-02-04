@@ -16,7 +16,7 @@
 """DQN agent implementation."""
 
 import functools
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 
 import dm_env
 import reverb
@@ -27,7 +27,7 @@ from acme.agents.jax import actor_core as actor_core_lib
 from acme.agents.jax import normalization
 from acme.jax import networks as networks_lib
 from acme.jax import utils
-from acme.jax.layouts import distributed_layout
+from edesdetectrl.acme import distributed_layout
 from acme.utils import counting
 from edesdetectrl.agents.dqn import builder
 from edesdetectrl.agents.dqn import config as dqn_config
@@ -163,9 +163,14 @@ class DistributedDQN(distributed_layout.DistributedLayout):
             ),
         )
 
-    def coordinator(self, counter: counting.Counter, max_actor_steps: int):
+    def coordinator(
+        self,
+        counter: counting.Counter,
+        evaluator_counter_keys: List[str],
+        max_actor_steps: int,
+    ):
         gpu.disable_tensorflow_gpu_usage()
-        return super().coordinator(counter, max_actor_steps)
+        return super().coordinator(counter, evaluator_counter_keys, max_actor_steps)
 
     def counter(self):
         gpu.disable_tensorflow_gpu_usage()
