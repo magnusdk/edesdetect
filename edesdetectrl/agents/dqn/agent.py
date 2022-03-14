@@ -16,9 +16,10 @@
 """DQN agent implementation."""
 
 import functools
-from typing import Callable, Optional, List
+from typing import Callable, List, Optional
 
 import dm_env
+import edesdetectrl.environments.m_mode_binary_classification as m_mode_env
 import reverb
 import rlax
 from acme import core as acme_core
@@ -27,11 +28,13 @@ from acme.agents.jax import actor_core as actor_core_lib
 from acme.agents.jax import normalization
 from acme.jax import networks as networks_lib
 from acme.jax import utils
-from edesdetectrl.acme import distributed_layout
 from acme.utils import counting
+from edesdetectrl.acme import distributed_layout
 from edesdetectrl.agents.dqn import builder
 from edesdetectrl.agents.dqn import config as dqn_config
 from edesdetectrl.agents.dqn import evaluator, loggers, losses
+from edesdetectrl.agents.dqn.exploration import m_mode
+from edesdetectrl.environments.m_mode_binary_classification.line import MModeLine
 from edesdetectrl.util import gpu
 from jax import random
 
@@ -45,23 +48,58 @@ def make_inference_fn(
 ) -> actor_core_lib.FeedForwardPolicy:
     """Returns a function to be used for inference by a DQN actor."""
 
+    exploration_state = m_mode.ExplorationState.initial_exploration_state()
+    base_policy = lambda key, action_values: (
+        rlax.epsilon_greedy(config.epsilon).sample(key, action_values)
+    )
+    exploration_epsilon = 0.05  # TODO: Put in config
+    policy = m_mode.get_policy(
+        base_policy,
+        exploration_epsilon,
+        m_mode_env.STEP_SIZE,
+        m_mode_env.ROTATION_AMOUNT,
+    )
+
     def inference(
         params: networks_lib.Params,
         state: networks_lib.Params,
         key: networks_lib.PRNGKey,
         observation: networks_lib.Observation,
     ):
-        network_key, sample_key = random.split(key)
-        action_values, _ = network.apply(
-            params, state, network_key, observation, not evaluation  # Training
-        )
-
         if evaluation:
-            return rlax.greedy().sample(sample_key, action_values)
+            k1, k2 = random.split(key)
+            action_values, _ = network.apply(params, state, k1, observation, False)
+            return rlax.greedy().sample(k2, action_values)
         else:
-            return rlax.epsilon_greedy(config.epsilon).sample(sample_key, action_values)
+            # TODO: Select type of policy based on config (below is m-mode target exploration)
+            observation, m_mode_line = observation
+            k1, k2 = random.split(key)
+            action_values, _ = network.apply(params, state, k1, observation, True)
 
-    return inference
+            return policy(k2, exploration_state, m_mode_line)
+
+    # return inference
+
+    class Policy:
+        def init(self):
+            return m_mode.ExplorationState.initial_exploration_state()
+
+        def __call__(
+            self,
+            key,
+            policy_state,
+            network_params,
+            network_state,
+            observation,
+            mmode_line,
+        ):
+            k1, k2 = random.split(key)
+            action_values, _ = network.apply(
+                network_params, network_state, k1, observation, True
+            )
+            return policy(k2, action_values, policy_state, mmode_line)
+
+    return Policy()
 
 
 class DistributedDQN(distributed_layout.DistributedLayout):

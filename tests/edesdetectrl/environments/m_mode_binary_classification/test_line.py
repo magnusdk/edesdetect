@@ -1,6 +1,10 @@
+import random as std_random
+
 import numpy as np
 import numpy.testing as np_testing
+import pytest
 from edesdetectrl.environments.m_mode_binary_classification.line import Bounds, Line
+from jax import random
 
 
 def test_line_center_of_bounds():
@@ -19,6 +23,21 @@ def test_line_center_of_bounds():
         [line.x1, line.y1, line.x2, line.y2],
         [2, 0, 2, 10],
     )
+
+
+def test_line_random_within_bounds():
+    for _ in range(100):
+        key = random.PRNGKey(std_random.randint(0, 9999999))
+        bounds = Bounds.from_shape((10, 10))
+        line = Line.random_within_bounds(key, bounds, 5)
+        assert bounds.is_within(line)
+
+    for _ in range(100):
+        with pytest.raises(Exception):
+            key = random.PRNGKey(std_random.randint(0, 9999999))
+            # Can't possibly fit a line of length 5 in 3-by-3 bounds
+            bounds = Bounds.from_shape((3, 3))
+            line = Line.random_within_bounds(key, bounds, 5)
 
 
 def test_rotate_line():

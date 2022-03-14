@@ -73,7 +73,7 @@ def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
 
         if is_eval:  # Evaluation expects a dictionary with some additional information.
             return {
-                "num_samples": len(Echonet("VAL")),
+                "num_samples": 50,#len(Echonet("VAL")),
                 "env": env,
                 "split": split,
             }
@@ -131,7 +131,7 @@ def main():
             tracking_uri=tracking_id,
             experiment=experiment,
             run_id=run_id,
-            max_number_of_steps=4_000_000,
+            max_number_of_steps=4_000,
         ).build()
 
         # Launch experiment.

@@ -1,11 +1,12 @@
 # This namespace contains a re-implementation of acme.wrappers.GymWrapper
 # that also stores the info returned from a gym.Env object step function.
 
+from typing import Any, NamedTuple
+
 import gym
 from acme import types, wrappers
 
 import dm_env
-from typing import Any, NamedTuple
 
 
 class TimeStep(NamedTuple):
@@ -48,6 +49,13 @@ def truncation(reward, observation, info, discount=1.0):
 class GymWrapper(wrappers.GymWrapper):
     def __init__(self, environment: gym.Env):
         super().__init__(environment)
+
+    def reset(self) -> dm_env.TimeStep:
+        self._reset_next_step = False
+        observation = self._environment.reset()
+        # Reset the diagnostic information.
+        self._last_info = None
+        return dm_env.restart(observation)
 
     def step(self, action: types.NestedArray) -> TimeStep:
         """Steps the environment."""

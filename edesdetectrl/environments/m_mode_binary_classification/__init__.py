@@ -1,6 +1,7 @@
 from typing import Literal, Optional, Tuple, Union
 
 import gym
+import jax.numpy as jnp
 import numpy as np
 from edesdetectrl import dataloaders
 from edesdetectrl.environments import rewards
@@ -43,7 +44,7 @@ STEP_SIZE = 1
 ROTATION_AMOUNT = 0.1
 
 
-def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
+def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> jnp.ndarray:
     # M-mode data
     video_start = env.current_frame - N_PADDING
     video_end = env.current_frame + N_PADDING + 1
@@ -65,23 +66,23 @@ def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
     main_mmode_image = mmode_with_adjacent[main_mmode_index]
     # Use the difference from the main M-mode image for adjacent images
     mmode_with_adjacent = mmode_with_adjacent - main_mmode_image
-    mmode_with_adjacent[main_mmode_index] = main_mmode_image
+    mmode_with_adjacent = mmode_with_adjacent.at[main_mmode_index].set(main_mmode_image)
 
     return mmode_with_adjacent
 
 
 def get_overview_and_mmode_observation(
     env: "EDESMModeClassificationBase_v0",
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> Tuple[jnp.ndarray, jnp.ndarray]:
     """Return a tuple of 2 arrays:
     1. overview_data: An array with 2 channels that is the average pixel intensities in the video and the location of the line.
     2. mmode_data: An array with 9 channels that is the M-mode image of the current line and the 8 adjacent lines."""
     # Overview data
-    mean_image = np.mean(
+    mean_image = jnp.mean(
         env.video.video[:50], axis=0
     )  # Average of first 50 frames in video
     line_pixels = env.mmode_line.visualize_line()
-    overview_data = np.array([mean_image, line_pixels])
+    overview_data = jnp.array([mean_image, line_pixels])
 
     # M-mode data
     mmode_with_adjacent = get_mmode_observation(env)
@@ -107,7 +108,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
             N_PADDING, N_PADDING, get_overview_and_mmode_observation, get_reward
         )
         self.action_space = spaces.Discrete(N_ACTIONS)
-        self.action_space.dtype = np.int32
+        self.action_space.dtype = jnp.int32
 
         # Observations are tuples of:
         # 1. an averaged image of the video and the current line (2 channels)
@@ -156,6 +157,9 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     def render(self, mode="rgb_array"):
         assert mode == "rgb_array"
         mean_image_data, mmode_image = get_overview_and_mmode_observation(self)
+        # Convert to just regular numpy here because render_observation uses in-place
+        # editing of values in arrays.
+        mean_image_data, mmode_image = np.array(mean_image_data), np.array(mmode_image)
         return render_observation(mean_image_data, mmode_image)
 
 

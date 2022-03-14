@@ -23,8 +23,9 @@ import dm_env
 import jax
 import launchpad as lp
 import reverb
+from edesdetectrl.acme import environment_loop
 
-from acme import core, environment_loop, specs
+from acme import core, specs
 from acme.agents.jax import builders
 from acme.jax import networks as networks_lib
 from acme.jax import savers, types, utils

@@ -33,7 +33,7 @@ def render_observation(
         mmode_image_data.T,
     )
     mmode_image_data = f(
-        np.linspace(0, mmode_image_data.shape[0], mean_image.shape[0]*2),
+        np.linspace(0, mmode_image_data.shape[0], mean_image.shape[0] * 2),
         np.linspace(0, mmode_image_data.shape[1], mean_image.shape[1]),
     )
     mmode_image_data = gray_to_rgb(mmode_image_data)

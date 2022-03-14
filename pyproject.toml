@@ -38,6 +38,8 @@ jurigged = "^0.4.1"
 matplotlib = "^3.5.1"
 poetryup = "^0.4.3"
 pytest = "^5.4.3"
+gif = "^3.0.0"
+hypothesis = "^6.36.2"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
