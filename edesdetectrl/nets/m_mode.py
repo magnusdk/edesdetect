@@ -13,13 +13,16 @@ def overview_and_m_mode_nets(
 
         overview_f = hk.Sequential(
             [
-                hk.Conv2D(8, kernel_shape=8, stride=4),
+                # TODO: Fix pre-processing and re-add it here.
+                # pre_process_frames,
+                hk.Conv2D(16, kernel_shape=8, stride=4),
                 jax.nn.relu,
-                hk.Conv2D(16, kernel_shape=4, stride=2),
+                hk.Conv2D(32, kernel_shape=4, stride=2),
                 jax.nn.relu,
                 hk.Flatten(),
-                hk.Linear(64),
+                hk.Linear(256),
                 jax.nn.relu,
+                hk.Linear(env_spec.actions.num_values),
             ]
         )
         # Add batchnorm
@@ -27,24 +30,21 @@ def overview_and_m_mode_nets(
         # Experiment with mobilenet
         m_modes_f = hk.Sequential(
             [
-                hk.Conv2D(16, kernel_shape=3, stride=1),
+                # TODO: Fix pre-processing and re-add it here.
+                # pre_process_frames,
+                hk.Conv2D(16, kernel_shape=8, stride=4),
                 jax.nn.relu,
-                hk.Conv2D(32, kernel_shape=3, stride=2),
-                jax.nn.relu,
-                hk.Conv2D(64, kernel_shape=3, stride=3),
-                jax.nn.relu,
-                hk.Conv2D(128, kernel_shape=3, stride=4),
-                jax.nn.relu,
-                hk.Conv2D(256, kernel_shape=3, stride=1),
+                hk.Conv2D(32, kernel_shape=4, stride=2),
                 jax.nn.relu,
                 hk.Flatten(),
                 hk.Linear(256),
                 jax.nn.relu,
+                hk.Linear(env_spec.actions.num_values),
             ]
         )
 
         combined = jnp.concatenate([overview_f(overview), m_modes_f(m_modes)], axis=-1)
-        final_layer = hk.Linear(env_spec.actions.num_values, w_init=jnp.zeros)
+        final_layer = hk.Linear(env_spec.actions.num_values)
         return final_layer(combined)
 
     return feed_forward
