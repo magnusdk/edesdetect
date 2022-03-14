@@ -76,7 +76,6 @@ class DistributedDQN(distributed_layout.DistributedLayout):
         experiment,
         run_id,
         normalize_input: bool = False,
-        save_reverb_logs: bool = False,
         log_every: float = 10.0,
         max_number_of_steps: Optional[int] = None,
     ):
@@ -86,7 +85,6 @@ class DistributedDQN(distributed_layout.DistributedLayout):
             tracking_uri,
             experiment,
             run_id,
-            save_reverb_logs,
             time_delta=log_every,
             asynchronous=True,
             serialize_fn=utils.fetch_devicearray,
@@ -97,7 +95,6 @@ class DistributedDQN(distributed_layout.DistributedLayout):
             tracking_uri,
             experiment,
             run_id,
-            save_reverb_logs,
             time_delta=log_every,
             asynchronous=True,
             serialize_fn=utils.fetch_devicearray,
@@ -108,7 +105,6 @@ class DistributedDQN(distributed_layout.DistributedLayout):
             tracking_uri,
             experiment,
             run_id,
-            save_reverb_logs,
             time_delta=log_every,
             asynchronous=True,
             serialize_fn=utils.fetch_devicearray,
@@ -142,25 +138,21 @@ class DistributedDQN(distributed_layout.DistributedLayout):
                     network_factory=network_factory,
                     builder=dqn_builder,
                     policy_factory=eval_policy_factory,
-                    log_to_bigtable=save_reverb_logs,
                     logger_fn=val_evaluator_logger_fn,
+                    log_params_artifact=True,
                 ),
                 evaluator.get_evaluator_factory(
                     environment_factory=lambda: environment_factory(True, "TRAIN"),
                     network_factory=network_factory,
                     builder=dqn_builder,
                     policy_factory=eval_policy_factory,
-                    log_to_bigtable=save_reverb_logs,
                     logger_fn=train_evaluator_logger_fn,
                 ),
             ],
             num_actors=num_actors,
             prefetch_size=config.prefetch_size,
             max_number_of_steps=max_number_of_steps,
-            log_to_bigtable=save_reverb_logs,
-            actor_logger_fn=distributed_layout.get_default_logger_fn(
-                save_reverb_logs, log_every
-            ),
+            actor_logger_fn=distributed_layout.get_default_logger_fn(log_every),
         )
 
     def coordinator(

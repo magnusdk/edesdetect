@@ -2,6 +2,7 @@ import time
 from typing import Callable
 
 import dm_env
+import edesdetectrl.util.mlflow as util_mlflow
 import jax
 import numpy as np
 from acme import core, specs
@@ -42,12 +43,14 @@ class Evaluator(core.Worker):
         logger: base.Logger,
         counter: counting.Counter,
         evaluator_counter_key: str,
+        log_params_artifact: bool = False,
     ):
         self.actor = actor
         self.environment = environment
         self.logger = logger
         self.counter = counter
         self.evaluator_counter_key = evaluator_counter_key
+        self.log_params_artifact = log_params_artifact
 
     def run(self):
 
@@ -57,7 +60,7 @@ class Evaluator(core.Worker):
         )
         import time
 
-        time.sleep(120)
+        time.sleep(60)
         self.actor.update(wait=True)
         print("Starting to evaluate now.")
 
@@ -81,6 +84,8 @@ class Evaluator(core.Worker):
                 "learner_steps": learner_steps,
             }
 
+            if self.log_params_artifact:
+                util_mlflow.log_artifact(self.actor._params, f"params_{learner_steps}")
             self.logger.write(result)
 
             # Synchronize evaluator steps with learner steps
@@ -97,8 +102,8 @@ def get_evaluator_factory(
     network_factory: NetworkFactory,
     builder: builders.GenericActorLearnerBuilder,
     policy_factory: PolicyFactory,
-    log_to_bigtable: bool = False,
-    logger_fn=None,
+    logger_fn,
+    log_params_artifact:bool = False,
 ) -> types.EvaluatorFactory:
     """Returns a default evaluator process."""
 
@@ -121,11 +126,15 @@ def get_evaluator_factory(
         )
 
         # Create logger and counter.
-        if logger_fn:
-            logger = logger_fn()
-        else:
-            logger = loggers.make_default_logger("evaluator", log_to_bigtable)
+        logger = logger_fn()
 
-        return Evaluator(actor, environment, logger, counter, evaluator_counter_key)
+        return Evaluator(
+            actor,
+            environment,
+            logger,
+            counter,
+            evaluator_counter_key,
+            log_params_artifact=log_params_artifact,
+        )
 
     return evaluator

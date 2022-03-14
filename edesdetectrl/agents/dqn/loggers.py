@@ -8,6 +8,14 @@ from acme.utils.loggers import asynchronous as async_logger
 from acme.utils.loggers import base, csv, filters, terminal
 
 
+def extract(d: dict, key: str):
+    """Return the value of key from d (None if not in d), and remove key from d."""
+    val = d.get(key, None)
+    val = int(val) if isinstance(val, float) else val
+    d.pop(key, None)
+    return val
+
+
 class MlflowLogger(loggers.Logger):
     def __init__(
         self,
@@ -15,18 +23,18 @@ class MlflowLogger(loggers.Logger):
         experiment,
         run_id,
         step_key="learner_steps",
+        params_key="params",
     ):
         # A bit dirty to set these global state variables... Oh well.
         mlflow.set_tracking_uri(tracking_uri)
         mlflow.set_experiment(experiment)
         mlflow.start_run(run_id=run_id)
         self.step_key = step_key
+        self.params_key = params_key
 
     def write(self, values: loggers.LoggingData):
         values = {k: float(v) for k, v in values.items()}
-        step = values.get(self.step_key, None)
-        step = int(step) if isinstance(step, float) else step
-        values.pop(self.step_key, None)
+        step = extract(values, self.step_key)
         mlflow.log_metrics(values, step=step)
 
     def close(self):
