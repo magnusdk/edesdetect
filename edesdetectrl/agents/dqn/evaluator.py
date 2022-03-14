@@ -22,9 +22,6 @@ def evaluate_and_get_metrics(
     num_samples: int,
     environment: dm_env.Environment,
 ):
-    # Get the most updated parameters
-    actor.update()
-
     # Evaluate actor on all samples
     all_metrics = []
     for _ in range(num_samples):
@@ -72,6 +69,12 @@ class Evaluator(core.Worker):
             counts = self.counter.get_counts()
             learner_steps = counts.get("learner_steps", 0)
 
+            # Get the most updated parameters
+            self.actor.update()
+            # And possibly log them before evaluation
+            if self.log_params_artifact:
+                util_mlflow.log_artifact(self.actor._params, f"params_{learner_steps}")
+
             time_before = time.time()
             balanced_accuracy = evaluate_and_get_metrics(
                 self.actor, num_samples, environment
@@ -84,8 +87,6 @@ class Evaluator(core.Worker):
                 "learner_steps": learner_steps,
             }
 
-            if self.log_params_artifact:
-                util_mlflow.log_artifact(self.actor._params, f"params_{learner_steps}")
             self.logger.write(result)
 
             # Synchronize evaluator steps with learner steps
