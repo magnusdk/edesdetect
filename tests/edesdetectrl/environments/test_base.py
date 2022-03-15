@@ -11,6 +11,7 @@ def get_random_video_data_item(
 ) -> DataItem:
     ground_truth_length = video_length - pad_left - pad_right
     return DataItem.from_video_and_ground_truth(
+        "FILENAME",
         np.random.random((video_length, 10, 10)),
         [0 for _ in range(ground_truth_length)],
         pad_left,

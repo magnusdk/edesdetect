@@ -66,7 +66,7 @@ def _get_item_impl(filename: str, ed_frame: int, es_frame: int) -> dataloaders.D
     ground_truth, start, end = lf.label_frames(video, ed_frame, es_frame)
 
     return dataloaders.DataItem.from_video_and_ground_truth(
-        video, ground_truth, start, end
+        filename, video, ground_truth, start, end
     )
 
 

@@ -1,3 +1,4 @@
+import itertools
 from dataclasses import dataclass
 from itertools import count
 from typing import Any, Callable, Generator, Literal, Sequence, Tuple, Union
@@ -13,6 +14,8 @@ GroundTruth = Literal[0, 1]
 
 @dataclass
 class DataItem:
+    name: str  # Name/ID of the video
+
     video: np.ndarray  # Video data
     total_length: int  # Total length of the video
 
@@ -26,12 +29,14 @@ class DataItem:
 
     @staticmethod
     def from_video_and_ground_truth(
+        name: str,
         video: np.ndarray,
         ground_truth: Sequence[GroundTruth],
         ground_truth_start: int,
         ground_truth_end: int,
     ) -> "DataItem":
         return DataItem(
+            name=name,
             video=video,
             total_length=len(video),
             ground_truth=ground_truth,
@@ -81,14 +86,20 @@ class DataLoader:
 
         return generators.async_buffered(task_gen(), process_pool, 20)
 
-    def get_generator(self) -> Generator[DataItem, None, None]:
+    def get_generator(self, cycle=True, prefetch=20) -> Generator[DataItem, None, None]:
         """Return a generator that generates all items from dataloader, ordered by index.
 
-        The generator will generate indefinitely, cycling back to the start after all items have been generated."""
+        If cycle is True, then the generator will generate indefinitely, cycling back to
+        the start after all items have been generated."""
 
         def task_gen():
             for n in count():
                 index = n % len(self)
                 yield _safe_get_item(self, index)
 
-        return generators.async_buffered(task_gen(), process_pool, 20)
+        gen = generators.async_buffered(task_gen(), process_pool, prefetch)
+        # Stop once the last dataitem has been generated if cycle is False
+        if not cycle:
+            gen = itertools.islice(gen, len(self))
+
+        return gen

@@ -744,7 +744,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "jax"
-version = "0.2.27"
+version = "0.2.25"
 description = "Differentiate, compile, and transform Numpy code."
 category = "main"
 optional = false
@@ -752,22 +752,22 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 absl-py = "*"
-numpy = ">=1.19"
+numpy = ">=1.18"
 opt_einsum = "*"
 scipy = ">=1.2.1"
 typing_extensions = "*"
 
 [package.extras]
-cpu = ["jaxlib (==0.1.75)"]
-cuda = ["jaxlib (==0.1.75+cuda11.cudnn82)"]
-cuda11_cudnn805 = ["jaxlib (==0.1.75+cuda11.cudnn805)"]
-cuda11_cudnn82 = ["jaxlib (==0.1.75+cuda11.cudnn82)"]
-minimum-jaxlib = ["jaxlib (==0.1.74)"]
-tpu = ["jaxlib (==0.1.75)", "libtpu-nightly (==0.1.dev20211208)", "requests"]
+cpu = ["jaxlib (==0.1.73)"]
+cuda = ["jaxlib (==0.1.73+cuda11.cudnn82)"]
+cuda11_cudnn805 = ["jaxlib (==0.1.73+cuda11.cudnn805)"]
+cuda11_cudnn82 = ["jaxlib (==0.1.73+cuda11.cudnn82)"]
+minimum-jaxlib = ["jaxlib (==0.1.69)"]
+tpu = ["jaxlib (==0.1.73)", "libtpu-nightly (==0.1.dev20211018)", "requests"]
 
 [[package]]
 name = "jaxlib"
-version = "0.1.75+cuda11.cudnn805"
+version = "0.1.71+cuda111"
 description = "XLA library for JAX"
 category = "main"
 optional = false
@@ -781,7 +781,7 @@ scipy = "*"
 
 [package.source]
 type = "url"
-url = "https://storage.googleapis.com/jax-releases/cuda11/jaxlib-0.1.75+cuda11.cudnn805-cp38-none-manylinux2010_x86_64.whl"
+url = "https://storage.googleapis.com/jax-releases/cuda111/jaxlib-0.1.71+cuda111-cp38-none-manylinux2010_x86_64.whl"
 [[package]]
 name = "jedi"
 version = "0.18.1"
@@ -1881,6 +1881,22 @@ optional = false
 python-versions = ">= 3.5"
 
 [[package]]
+name = "tqdm"
+version = "4.63.0"
+description = "Fast, Extensible Progress Meter"
+category = "main"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[package.extras]
+dev = ["py-make (>=0.1.0)", "twine", "wheel"]
+notebook = ["ipywidgets (>=6)"]
+telegram = ["requests"]
+
+[[package]]
 name = "traitlets"
 version = "5.1.1"
 description = "Traitlets Python configuration system"
@@ -1998,7 +2014,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "167299d43542cf6b2dec55b379b6525f1b85966d4fb865975db13dbf79c7d0cc"
+content-hash = "fd7f2491382f36f46d6b075fd6559de7bb019e7db96e5fdc6de31f2f63ef259f"
 
 [metadata.files]
 absl-py = [
@@ -2415,7 +2431,7 @@ itsdangerous = [
     {file = "itsdangerous-2.0.1.tar.gz", hash = "sha256:9e724d68fc22902a1435351f84c3fb8623f303fffcc566a4cb952df8c572cff0"},
 ]
 jax = [
-    {file = "jax-0.2.27.tar.gz", hash = "sha256:3862d5e54c344d5465a2f2c457ee734684d9393fc3f61536c4c51aa9720de51c"},
+    {file = "jax-0.2.25.tar.gz", hash = "sha256:822e8d1e06257eaa0fdc4c0a0686c4556e9f33647fa2a766755f984786ae7446"},
 ]
 jaxlib = []
 jedi = [
@@ -3379,6 +3395,10 @@ tornado = [
     {file = "tornado-6.1-cp39-cp39-win32.whl", hash = "sha256:d3d20ea5782ba63ed13bc2b8c291a053c8d807a8fa927d941bd718468f7b950c"},
     {file = "tornado-6.1-cp39-cp39-win_amd64.whl", hash = "sha256:548430be2740e327b3fe0201abe471f314741efcb0067ec4f2d7dcfb4825f3e4"},
     {file = "tornado-6.1.tar.gz", hash = "sha256:33c6e81d7bd55b468d2e793517c909b139960b6c790a60b7991b9b6b76fb9791"},
+]
+tqdm = [
+    {file = "tqdm-4.63.0-py2.py3-none-any.whl", hash = "sha256:e643e071046f17139dea55b880dc9b33822ce21613b4a4f5ea57f202833dbc29"},
+    {file = "tqdm-4.63.0.tar.gz", hash = "sha256:1d9835ede8e394bb8c9dcbffbca02d717217113adc679236873eeaac5bc0b3cd"},
 ]
 traitlets = [
     {file = "traitlets-5.1.1-py3-none-any.whl", hash = "sha256:2d313cc50a42cd6c277e7d7dc8d4d7fedd06a2c215f78766ae7b1a66277e0033"},
