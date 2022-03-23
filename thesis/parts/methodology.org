@@ -1,0 +1,155 @@
+#+BIBLIOGRAPHY: ../main plain
+
+Overview of chapter and the various sections/subsections.
+
+* The Metric That We Wish To Optimize
+  When deciding on the methodology it is important to take a step back and look at what we are trying to achieve. Average Absolute Frame Difference (aaFD) is a widely used metric for measuring the performance of a model whose goal is to predict ED and ES events. A model that perfectly predicts the frames of every event will get an aaFD score of 0, while a model that predicts incorrectly will get an aaFD score larger than 0. aaFD is defined as in equation [[eqn:aafd]], where $N$ is the number of events in the dataset, $\hat{y}_t$ is the predicted timestep of event $t$, and $y$ is the ground truth timestep of event $t$.
+
+#+NAME: eqn:aafd
+\begin{equation}
+aaFD=\frac{1}{N}\sum^N_{t=1}|y_t-\hat{y}_t|
+\end{equation}
+
+* ED-/ES-Detection as a Classification Problem
+ED- and ES-detection is naturally a classification problem, though an unbalanced one. There are many more frames that are neither ED nor ES, than those that are. There exists a dual problem that avoids this unbalance, namely phase detection. If we know the phase for each frame we can very easily find the ED- and ES-frames as well by finding the frames that transition from one phase to the other. There is still a natural imbalance between the diastole and systole phase labels, but it is much more manageable than the "ED, ES, or neither" labels.
+
+TODO: Plot showing distribution between ED, ES, and Neither labels.
+TODO: Plot showing distribution between diastole and systole labels.
+
+* ED-/ES-Detection as a Regression Problem
+As we've seen under the previous work section (TODO: Link to section), ED-/ES-detection has been formulated as a regression problem where a value representing the volume of the heart is predicted.
+
+* ED-/ES-Detection as a Reinforcement Learning Problem
+For formulating ED-/ES-detection as a RL problem we have to define 4 components:
+1. The set of actions that the agent can perform.
+2. The environment and how it behaves in response to the agent's actions.
+3. The observation that the agent receives back from the environment after taking an action.
+4. The reward function that guides the agent's strategy.
+
+Two formulations are proposed in this thesis:
+1. A Binary Classification Environment formulation that closely mirrors standard binary classification problems in supervised learning.
+2. A modified version of the Binary Classification Environment that incorporates synthetic M-mode imaging and exploration.
+
+* Binary Classification Environment
+Taking inspiration from the phase classification formulation, we can design a reinforcement learning algorithm that learns to select the phase of the current frame. The core of this setup is that the RL agent can choose from two actions: "Mark current frame as Diastole" or "Mark current frame as Systole". Taking either action moves the current frame forwards one step. The episode ends when the agent has predicted the phase for every frame in the video.
+
+For predicting the phase of the current frame the agent needs access to temporal information from the observations. This was done by using a sliding window where, in addition to the current frame image, a number of preceding and succeeding frames are included in the observation. The number of previous and next frames, and the distances between them, are considered as hyper-parameters. An overview of the hyper-parameters that are experimented with can be found in table [[tbl:todo_me]]. /TODO: Why not use RNNs for capturing temporal information?/
+
+The reward function needs to differentiate between correct and incorrect predictions such that correct predictions are preferred. We could use the aaFD metric directly, but a big disadvantage of doing this is that the agent only receives a reward at the end of the episode. This is because we need to know the predictions for all events before calculating aaFD — for all we know, the final frame in the episode could be a predicted event. Instead, two reward functions are proposed, again taking inspiration from regular binary classification:
+
+The first reward function gives a reward of 1 on correct predictions and 0 on incorrect ones. The second also gives a reward of 1 on correct predictions, but on incorrect ones it gives a penalty proportional to how far away the predicted frame is. This means that an incorrect prediction of diastole on a frame that are 5 frames away from the nearest diastole frame, gives a penalty of $-5$. The idea behind this proximity based reward function is to bring it closer to that of of aaFD which gives a worse score when predictions are off by a lot.
+
+Equation [[eqn:bce_reward_1]] and [[eqn:bce_reward_2]] shows how the rewards are calculated, where $s$ is the phase of the current frame, $a$ is the predicted phase for the current frame, and $d(s, a)$ is a distance metric returning the number of frames to the closest frame that matches the prediction $a$.
+
+#+NAME: eqn:bce_reward_1
+\begin{equation}
+  R_1(s, a) \triangleq
+    \left\{
+	    \begin{array}{ll}
+		    1 & \mbox{if } s=a \\
+  	  	0 & \mbox{if } s\neq a
+	    \end{array}
+    \right\}
+\end{equation}
+
+#+NAME: eqn:bce_reward_2
+\begin{equation}
+  R_2(s, a) \triangleq -d(s, a)
+\end{equation}
+
+#+CAPTION: Visualization of the Binary Classification Environment loop. An agent sees the observation from the current frame and takes an action, either marking it as Diastole or as Systole, and gets back the reward and the observation for the next frame from the environment.
+#+NAME: fig:binary_classification_environment_loop
+[[../img/binary_classification_environment_loop.png]]
+
+
+** Reinforcement Learning Agent Architecture
+TODO: Write about why we chose DQN, what alternatives we considered, etc.
+TODO: Write about how DQN is simply a regression problem
+
+** Discussion
+TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
+
+* Incorporating Search
+RL is a tool meant for solving problems that require search, so in order to get any benefits from it we must transform the problem to one that requires search. This may sound like straightening a screw to make it work with a hammer, and the author sympathizes with this sentiment.
+
+We could let the agent search through frames to find the ED or ES frames. In this case the action set could be to move to the previous, move to the next frame, marking the current frame as ED, or marking it as ES, 4 actions in total. One problem with this formulation is that once the agent has marked one frame as ED or ES, it must know that this state can be ignored and that it should start to look for other ED or ES frames. One work-around to this problem that enforces that the agent visits all frames at least once is simply by initializing it at every frame, but this setup is just a slower, less robus version of the Binary Classification Environment.
+
+#+CAPTION: An agent moves to the previous or next frame and marks frames that it predicts to be ED os ES.
+#+NAME: fig:explore_frames_environment
+[[../img/explore_frames_environment.png]]
+
+Another option is to perform exploration in space, taking inspiration from papers like (TODO: add paper of RL landmark detection). This can be done by looking at just a small region of interest in the video, which the agent can move around before taking an action. In this way, the agent loses some global context depending on how small the region of interest is, but the smaller input size makes the model less computationally intensive, enabling us to include more temporal information.
+
+#+CAPTION: A Region Of Interest (ROI) is given to the agent which it can then move around in order to explore.
+#+NAME: fig:roi_exploration
+[[../img/roi_exploration.png]]
+
+Another version of the space-exploration scheme is to let the agent create a synthetic m-mode image from the video. Here, a line can be translated and rotated by the agent, forming the bases of the m-mode image. The pixels along the line for the current frame and some number of previous and next frames are concatenated together into one image. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
+
+#+CAPTION: An m-mode image is an intersecting plane in 3D "video space".
+#+NAME: fig:m_mode_cube
+[[../img/m_mode_cube.png]]
+
+** M-Mode Binary Classification Environment
+The set of actions remain the same as in the binary classification environment, but an additional 6 actions are added: rotating the m-mode line /clockwise/ and /anti-clockwise/, and translating the line /up/, /down/, /left/, or /right/. The rotation amount and step size are considered hyper parameters. Making them too big would make the line movement less precise, but making it too small would make both the training and inference slower, as well as further sparsifying direct reward signals. A decision also has to be made for whether the translation should be global or local. Global translation means that the line moves in a direction relative to the video, while local translation means that the line moves in a direction relative to where it is pointing towards.
+
+#+CAPTION: Global (to the left) versus local (to the right) translation. Local translation means that the movement depends on the direction of the m-mode line.
+#+NAME: fig:local_vs_global_mmode_translation
+[[../img/local_vs_global_mmode_translation.png]]
+
+Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, independent of rotation — it simply shifts the m-mode image down or up, respectively.
+
+TODO: Show how vertical translation (up or down) simply shifts the m-mode image.
+
+At the beginning of an episode the m-mode line is placed in the center of the video, vertically. TODO: This should be at a random position/rotation in the image. The observations returned from the environment is the synthetic m-mode image from the current line, by looking 15 frames in the past and 15 frames in the future, for a total of 31 frames. 8 additional channels are included for the synthetic m-mode images that result from rotating the line to the left and to the right, and moving it to the left and to the right. Synthetic m-mode images resulting from moving the line up or down are not included as channels, as they add very little new information, given that we use a neural network architecture with translational invariance, like CNNs. To counteract the big loss of global context when using synthetic m-mode images, two other channels are included in the observations as well: an average of up to 50 frames around the current frames and an image with the location of the current line drawn onto it. The averaged video image and the current line image adds information about the current line position and provides the agent with some additional context.
+
+TODO: Add image showing m-mode environment and example observations.
+
+The same reward functions are explored as in the regular binary classification environment. In practice, the agent will receive a sparser reward signal, since a reward may only be given when the agent selects to mark the current frame as diastole or systole, not when it only performs translation or rotation.
+
+** Reinforcement Learning Agent Architecture
+TODO: Same as before, DQN, but network must be adjusted to fit a tuple of observations (m-mode + overview).
+
+** TODO Discussion
+- Sparse reward signal may make the results worse. Can be counteracted by: what? n-step? Less dicsount (gamma closer to 1.0)? Using "advantage" for Q-function? Actor-critic network agent?
+
+
+
+
+* TODO Training Loop
+- JAX — forces reproducable RNG
+- Trained distributedly with reverb — not reproducable RNG as samples are sampled randomly and depends on timings of new samples
+  - Multiple actors, one learner.
+  
+   
+
+
+#+NAME: tbl:todo_me
+|   |   |
+|---+---|
+|   |   |
+
+
+
+
+
+
+* TODO run these experiments (NB: this is not a section in the thesis, just a ToDo-list)
+- [ ] Include experiments with different types of sliding windows (with stride, including more frames, etc.)
+- [ ] Proximity-based reward should not be $1-distance$, but simply $-distance$. I can't think of a good reason for why it should give 0 on an incorrect prediction that is adjacent to a correct one, instead of -1.
+- [ ] Try giving -1 on incorrect predictions for simple reward function instead of 0. What is the result?
+- [ ] Ablation study with using "global overview" channels in observation for m-mode env. Does it actually make a difference?
+
+
+
+
+
+
+
+
+
+
+
+
+
+

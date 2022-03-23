@@ -1,0 +1,154 @@
+%% Identification part:
+
+\NeedsTeXFormat{LaTeX2e}[1994/12/01]
+
+\ProvidesClass{uiomasterfp}[2022/02/03 v1.0 UiO front page class]
+
+%% Languages:
+
+\DeclareOption{american}{\def \uiomfp@lang {eng}}
+\DeclareOption{english}{\def \uiomfp@lang {eng}}
+\DeclareOption{UKenglish}{\def \uiomfp@lang {eng}}
+\DeclareOption{USenglish}{\def \uiomfp@lang {eng}}
+\DeclareOption{norsk}{\def \uiomfp@lang {bm}}
+\DeclareOption{nynorsk}{\def \uiomfp@lang {nn}}
+
+\newcommand{\uiomfp@fac@eng}{Faculty of Mathematics and Natural Sciences}
+\newcommand{\uiomfp@fac@bm}{Det matematisk-naturvitenskapelige fakultet}
+\newcommand{\uiomfp@fac@nn}{Det matematisk-naturvitenskaplege fakultet}
+
+\newcommand{\uiomfp@dept@eng}{Department of Informatics}
+\newcommand{\uiomfp@dept@bm}{Institutt for informatikk}
+\newcommand{\uiomfp@dept@nn}{Institutt for informatikk}
+
+\newcommand{\uiomfp@thesis@eng}{Master's thesis}
+\newcommand{\uiomfp@thesis@bm}{Masteroppgave}
+\newcommand{\uiomfp@thesis@nn}{Masteroppg\aa ve}
+
+\newcommand{\uiomfp@spname@eng}{study points}
+\newcommand{\uiomfp@spname@bm}{studiepoeng}
+\newcommand{\uiomfp@spname@nn}{studiepoeng}
+
+\ExecuteOptions{norsk}
+\ProcessOptions \relax
+
+\RequirePackage{color, eso-pic, graphicx, xifthen, keyval}
+\IfFileExists{type1cm.sty}{\RequirePackage{type1cm}}{}
+\IfFileExists{type1ec.sty}{\RequirePackage{type1ec}}{}
+
+%% Colours:
+
+\definecolor{uiomfp@blue}{rgb}{0.525, 0.643, 0.969}
+\definecolor{uiomfp@light@blue}{rgb}{0.957, 0.965, 1.000}
+\definecolor{uiomfp@pink}{rgb}{0.984, 0.400, 0.400}
+\definecolor{uiomfp@light@pink}{rgb}{1.000, 0.922, 0.851}
+\definecolor{uiomfp@green}{rgb}{0.180, 0.769, 0.514}
+\definecolor{uiomfp@light@green}{rgb}{0.937, 1.00, 0.965}
+\definecolor{uiomfp@gray}{gray}{0.700}
+\definecolor{uiomfp@grey}{gray}{0.700}
+\definecolor{uiomfp@light@gray}{gray}{0.912}
+\definecolor{uiomfp@light@grey}{gray}{0.912}
+
+%% The options:
+
+\define@key{uiomfp@keys}{author}{\def \uiomfp@author {#1}}
+\define@key{uiomfp@keys}{color}{\def \uiomfp@color {#1}}
+\define@key{uiomfp@keys}{colour}{\def \uiomfp@color {#1}}
+% \define@key{uiomfp@keys}{date}{\def \uiomfp@date {#1}}
+\define@key{uiomfp@keys}{dept}{\def \uiomfp@dept {#1}}
+\define@key{uiomfp@keys}{fac}{\def \uiomfp@fac {#1}}
+\define@key{uiomfp@keys}{kind}{\def \uiomfp@kind {#1}}
+\define@key{uiomfp@keys}{long}[60]{\def \uiomfp@sp {#1}}
+\define@key{uiomfp@keys}{nosp}[0]{\def \uiomfp@sp {#1}}
+\define@key{uiomfp@keys}{program}{\def \uiomfp@program{#1}}
+\define@key{uiomfp@keys}{short}[30]{\def \uiomfp@sp {#1}}
+\define@key{uiomfp@keys}{subtitle}{\def \uiomfp@subtitle {#1}}
+\define@key{uiomfp@keys}{title}{\def \uiomfp@title {#1}}
+
+\def \uiomfp@author {\@author}
+\def \uiomfp@color {blue}
+% \providecommand{\uiomfp@date}{\today}
+\def \uiomfp@dept {\csname uiomfp@dept@\uiomfp@lang \endcsname}
+\def \uiomfp@fac {\csname uiomfp@fac@\uiomfp@lang \endcsname}
+\def \uiomfp@kind {\csname uiomfp@thesis@\uiomfp@lang \endcsname}
+\providecommand{\uiomfp@program}{}
+\def \uiomfp@sp {60}
+\def \uiomfp@title {\@title}
+
+%% The main command:
+
+\newcommand{\uiomasterfp}[1][]{{%
+  \parindent = 0pt   \parskip = 0pt   \relax
+  \@ifundefined{hypersetup}{}{\hypersetup{pageanchor=false}}
+  \setkeys{uiomfp@keys}{#1}
+  \uiomfp@page@i
+  \if@twoside \uiomfp@blankpage \fi
+  \setcounter{page}{1}
+  \@ifundefined{hypersetup}{}{\hypersetup{pageanchor=true}}
+}}
+
+\newcommand{\uiomfp@page@i}{%
+  \begin{titlepage}
+    {\tiny .}  %% An invisible dot so the page is not empty.
+    \setlength{\unitlength}{1bp}
+    % Background colours:
+    \AddToShipoutPictureBG*{%
+      \put(0,0){\color{uiomfp@light@\uiomfp@color}%
+        \rule{21cm}{29.7cm}}
+      \put(0,581){\color{uiomfp@\uiomfp@color}%
+        \rule{21cm}{9.26cm}}}
+    % Add logo:
+    \AddToShipoutPictureFG*{%
+      \put(28,777){\includegraphics[height=12.8mm]{ifimaster/uio-fp-navn-\uiomfp@lang}}%
+      \setlength{\fboxsep}{3mm}%
+      \put(28,610){\colorbox{black}{\color{white}%
+          \fontfamily{\uiomfp@font}\fontencoding{T1}\selectfont
+          \textbf{~~\uiomfp@kind~~}}}%
+      \put(500,28){\includegraphics[width=23.7mm]{ifimaster/uio-fp-segl}}
+    % Add text
+      \put(28,28){\uiomfp@text}}
+  \end{titlepage}
+}
+
+%% The text:
+
+\newcommand{\uiomfp@font}{phv}  % Helvetica
+
+\newcommand{\uiomfp@text}{{%
+    \mbox{\vbox to 18cm{
+        \def \and {, }
+        \def \uiomfp@luft {\mbox{}\par}
+        \raggedright
+        \fontfamily{\uiomfp@font}\fontencoding{T1}\fontsize{32}{36pt}\selectfont
+        \uiomfp@title\par
+        \fontsize{12}{15pt}\selectfont 
+        \uiomfp@luft 
+        \ifthenelse{\equal{\uiomfp@subtitle}{}}
+          {}
+          {\uiomfp@subtitle \par}
+        \uiomfp@luft \uiomfp@luft
+        \textbf{\uiomfp@author}\par
+        \uiomfp@luft
+        \uiomfp@program\par
+        \ifthenelse{\uiomfp@sp>0}
+          {\uiomfp@sp~\csname uiomfp@spname@\uiomfp@lang\endcsname\par}
+          {}
+        \uiomfp@luft
+        \uiomfp@dept\par
+        \uiomfp@fac\par
+        \vfill
+}}}}
+
+%% Additional commands:
+
+\newcommand{\subtitle}[1]{\def \uiomfp@subtitle{#1}}
+\subtitle{}
+
+%% Other utilities:
+
+\newcommand{\uiomfp@blankpage}{%
+    \thispagestyle{empty}
+    \mbox{}
+    \newpage}
+
+\endinput

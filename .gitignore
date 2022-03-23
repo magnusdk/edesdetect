@@ -6,3 +6,10 @@ tensorboard/
 processed_labels.csv
 _checkpoints/
 .nfs*
+*.bbl
+*.lof
+*.lot
+*.blg
+*.el
+thesis/*.tex
+**/ltximg/**

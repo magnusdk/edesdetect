@@ -1,0 +1,60 @@
+#+BIBLIOGRAPHY: ../main plain
+
+TODO: This is copied from the essay.
+- [ ] Read through to confirm that it still makes sense
+- [ ] Re-add references
+- [ ] Double-check for plagiarization
+
+
+* Previous Work on End-Diastolic and End-Systolic Frame Detection
+
+One early attempt for detecting the ED and ES frames took advantage of the rapid mitral valve opening during early diastole \cite{kachenoura_automatic_2007}. By measuring the mean intensity variation over time in a small region of interest, one could capture the mitral valve opening and define the frame corresponding to peak intensity as ES. This signal was in some cases disturbed by early longitudinal motion of the heart, which led to falsely labeling frames as ES. The authors introduced another method in the same paper that took advantage of the left ventricle deformation during the cardiac cycle. With this method, ES was defined as the frame which had the lowest correlation with the ED frame. Because of little movement around systole, the correlation curve would flatten out, making the predictions more uncertain. The best results were achieved when using a combination of both methods. A small time window was selected around ES using the correlation method, and the mean intensity variation method was used to determine the final ES frame prediction.
+
+The main disadvantage with this approach is that it is only semi-automated. The first method requires the clinician to select multiple landmarks in order to define the correct region of interest around the mitral valve, and the second method assumed that the ED frame has already been found in order to compute the correlation between it and the other frames.
+
+It has become more common to apply end-to-end Machine Learning (ML) for fully automating tasks like this in recent times. ML is the study and development of algorithms that can learn from experience. If given enough examples, ML can approximate any mapping between input and output data \cite{zhang_dive_2020}. ML is generally divided into three categories:
+
+1. Supervised learning, where the algorithm learns a mapping between input and ground truth labels.
+2. Unsupervised learning, where the algorithm learns to recognize patterns in the input data without any explicit ground truth labels.
+3. Reinforcement learning, where the algorithm learns a strategy for solving a sequential task, given a reward signal.
+
+Gifani et al. (2010) employed manifold learning, an unsupervised learning algorithm that is used to map high-dimensional data onto a lower-dimensional manifold. Manifold learning tries to ensure that points that are similar in the high-dimensional space are projected close together in the low-dimensional space. The authors reduced the dimensionality of each frame down to two dimensions, followed by analyzing the density between the projected points to determine the ED and ES frames \cite{gifani_automatic_2010}. This method is based on the fact that there is no prominent change in ventricular volume during the three cardiac phases: isovolumetric contraction, isovolumetric relaxation, and reduced filling. Frames that lay close together, i.e., frames that lay in dense regions, are considered to be part of one of these three phases. The projected points move very little in these dense regions, and the three points that had the least movement were selected as representative of three phases. The ED and ES frames were then found by finding the pair of said frames with the minimum correlation. The manifold learning algorithm that the authors used is called Locally Linear Embedding (LLE). In a follow-up paper, they used Isomap instead \cite{gifani_noise_2011}, which yielded better results. When using Isomap, they defined the ED and ES frames as the projected points with the greatest distance between them.
+
+Non-negative Matrix Factorization (NMF) is another unsupervised learning method that has been employed to reduce the dimensionality of ultrasound videos \cite{yuan_machine_2017}. In this work, rank-2 NMF was used to generate two end-members from a cardiac ultrasound video. The end-members turn out to be quite similar to the ED and ES frames, and the end-member coefficient peaks can be used to find ED and ES. NMF was found to give predictions with less error than LLE and Isomap manifold learning.
+
+TODO: Re-add image from essay! Caption: Comparison between NMF, LLE and ISOMAP results for all 99 cases in the apical 4 view, taken from \cite{yuan_machine_2017}.
+
+Other methods use either image segmentation or speckle tracking to track the changes to the left ventricle volume, taking advantage of the fact that it is most expanded during ED and most contracted during ES \cite{barcaro_automatic_2008} \cite{darvishi_measuring_2013} \cite{a_automatic_2015}. However, these methods are prone to significant errors due to noise inherent in cardiac ultrasound or discontinuous edges.
+
+The most successful approaches to the task of ED and ES frame detection so far have been to use supervised learning methods. A 2D video consists of a sequence of 2D images and thus has two spatial dimensions and one temporal dimension. Convolutional Neural Networks (CNN) and Recurrent Neural Networks (RNN) are both supervised learning models that can extract spatial and temporal features, respectively. A basic CNN consists of one or more convolutional layers that each consists of a set of filters. The filters act as pattern-matchers and are applied to every part of the input image, and each subsequent convolutional layer can capture more high-level features of the image. A basic RNN consists of one or more processing units that are repeatedly applied to the items in the input sequence and can build up a memory of previous items.
+
+Due to the increase in computing power in the form of GPUs, it is possible to train CNNs with many convolutional layers, or RNNs with stacked processing units, creating deep networks that can learn increasingly complex image features. This architecture gives rise to the term “Deep Learning” and is what has made some supervised learning methods so successful.
+
+A CNN and an RNN were combined to do spatial and temporal feature extraction to detect the ED and ES frames by Kong et al. in 2016 \cite{kong_recognizing_2016}. The combined network was trained on cardiac MRI data, and it used a Zeiler-Fergus model \cite{zeiler_visualizing_2013} for the CNN and an LSTM \cite{hochreiter_long_1997} for the RNN. The problem was treated as a regression problem for a monotonically decreasing function during diastole and monotonically increasing during systole. Thus, the function being regressed is a latent space representation of the left ventricle volume as it expands and contracts, and the ED and ES frames can be found by finding the maximum peaks and minimum valleys of the DL model’s output. This approach was later improved by swapping out the CNN with a ResNet \cite{dezaki_deep_2017}, and then again by swapping it out for a DenseNet \cite{taheri_dezaki_cardiac_2019}, while different choices for the RNN did not significantly improve the performance of the model.
+
+Instead of treating the model’s output as a function regression, it has also been treated as a binary classification of either ED or ES \cite{fiorito_detection_2018}. The authors of this paper argued that treating it as a regression problem forced the model to learn a function that was not present in the data because the regressed function does not represent the actual left ventricle volume. They argued further that, in some cases of pathology, such as in the event of post-systolic contraction, the volume might not be smallest at the time of ES. Their model also uses a 3D CNN with a sliding window that does both spatial and temporal feature extraction on the data before being passed into an LSTM. A similar architecture has been used for finding the ED frames in cardiac spectral Doppler imaging \cite{jahren_estimation_2020}. Spectral Doppler is a technique that outputs a spectrogram representing the blood velocity over time. It thus has one spatial dimension and one temporal dimension. A CNN with a sliding window was used to extract spatial and temporal features, followed by a bidirectional GRU that further connects said features temporally. For each patch in the sliding window, the model predicts whether it contains an ED frame and which frame in the patch it is.
+
+The latest model iteration in this sequence of papers reverts back to a regression-based approach, countering the anti-regression argument by stating that a simple binary classification ignores high-level spatial and temporally related markers \cite{lane_multibeat_2021}. The authors explore multiple different architectures, but a ResNet50 followed by two layers of LSTM yielded the best results and is the current state-of-the-art. Lastly, they also provided a method for benchmarking different architectures by providing their patient dataset and models to the public and including performance reports on an independent external dataset.
+
+RL has not yet been applied to the problem of ED and ES detection, even though it has seen a similar increase in capabilities as supervising learning has in the last decade. RL has produced even better results than supervised learning methods for many tasks, including medical imaging tasks \cite{zhou_deep_2021}. The next section will introduce RL, and it is followed by some examples of how it has been applied to medical imaging.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

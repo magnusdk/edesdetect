@@ -1,0 +1,69 @@
+#+BIBLIOGRAPHY: ../main plain
+* Reinforcement Learning
+RL allows an agent to learn a strategy, called a policy, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
+
+This section gives a primer for basic RL and some of the many improvements that have enabled it to achieve super-human performance in more complex domains.
+
+** Reinforcement Learning Primer
+At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
+
+- The state space $S$
+- The action space $A$
+- The transition function $P(s_{t+1}|s_t, a_t)$
+- The reward function $R(s_t, a_t)$
+
+An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state st and returns the probability of taking an action at: $\pi(a|s)\in[0,1]$.
+
+The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards:
+\[G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T\]
+
+where $T$ marks the timestep where the episode ends. However, some tasks are not episodic, which means they can, in theory, run forever. For this reason, we apply discounting to the return, giving greater weight to more immediate rewards and less weight to rewards in the far future:
+\[G_t=r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots = \sum_{k=0}^\infty \gamma^k r_{t+k+1} = r_{t} + \gamma G_{t+1}\]
+
+where $\gamma$ is the discounting factor. Discounting ensures that the return, which we are trying to maximize, can not be infinite, even when, in theory, the agent could go on forever.
+
+To select a good next action, the policy needs to know the value of states and actions. For this we could use the state value function $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the state-action value function $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive. The “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy is one of the possibly many policies that yield the maximum amount of total reward if followed.
+
+One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration:
+\[V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]\]
+
+$(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward r_{t+1}, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t) is called the TD-error. The lower the TD-error is, the better the RL agent is to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
+
+To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning:
+\[Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]\]
+
+Here the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
+
+In TD-learning, as the agent explores the environment and encounters new states, it has to store those states and their associated values. The same is true for Q-learning, but it also has to take state-action pairs into account, meaning that it has to store up to a number of $\|S\| \times \|A\|$ entries. That is fine when the state space and the action space are small but become infeasible when they are too big.
+
+The described way of storing and updating the values is called tabular methods because we treat the states, or state-action pairs, as entries in a table. Tabular methods break down when the state space or the action space becomes very large or even continuous. Creating RL algorithms that can handle very large or continuous action spaces is challenging \cite{zhou_deep_2021}. However, there exist methods that can scale RL to handle very large or continuous state spaces.
+
+** Scaling Up Reinforcement Learning
+A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them. In practice, the vast majority of pixel permutations are not used, so we could ignore them, but the number of possible states would still be too high to explore exhaustively.
+
+The values of even such a large state space can be represented in much less data without losing much relevant information. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This allows the agent to generalize state value or state-action value functions to new not-before-seen states.
+
+A lot of today’s research into RL goes into scaling it up to a larger state space. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods", but they are not the only ones to do so. Policy gradient is another popular set of methods that is able to learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Only action-value methods are covered in this essay, but policy gradient methods will be considered for the final thesis.
+
+*** Deep Q-Network
+The modified Q-learning algorithm was termed Deep Q-Network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
+
+The original DQN algorithm takes the raw pixel values from an Atari game as input, followed by three convolutional layers and two fully connected layers. The final fully connected layer outputs one value for each possible action, approximating the expected value of taking each action given the state, i.e., $Q(s, a)$. An $\epsilon$-greedy policy then chooses either the action with the highest approximated value with probability $1 - \epsilon$ or a random action with probability $\epsilon$.
+
+The authors showed how the network is able to reduce the state space by applying a technique called "t-SNE" to the DQNs’ internal state representation. t-SNE is an unsupervised learning algorithm that maps high-dimensional data to points in a 2D or 3D map \cite{liao_artificial_2016}. As expected, the t-SNE algorithm tends to map the DQN representation of perceptually similar states to nearby points. Interestingly, it also maps representations that are perceptually dissimilar, but that are close in terms of expected rewards, to nearby points. This indicates that the network is able to learn a higher-level, but lower-dimensional, representation of the states in terms of expected reward. This is visualized in figure
+# [[fig:dqn_atari_t_sne]].
+
+Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, which leads to variance in the network updates. If a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target $y_j$ , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets $y_j$ in the Q-learning update.
+
+In experience replay, the agent’s experiences over multiple episodes are stored in a data set called the replay memory. Each experience item is a tuple consisting of the previous state, selected action, returned reward, and new state: $(s_t, a_t, r_t, s_{t+1})$. During training, randomly sampled batches from the replay memory are used to train the Q-network.
+
+Using a separate network for generating the targets $y_j$ in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets $y_j$, making the algorithm more stable and reducing the chance of oscillations or divergence.
+
+#+CAPTION:  From \cite{mnih_human-level_2015}: "Two-dimensional t-SNE embedding of the representations in the last hidden layer assigned by DQN to game states experienced while playing Space Invaders. The plot was generated by letting the DQN agent play for 2 h of real game time and running the t-SNE algorithm on the last hidden layer representations assigned by DQN to each experienced game state. The points are coloured according to the state values (V, maximum expected reward of a state) predicted by DQN for the corresponding game states (ranging from dark red (highest V) to dark blue (lowest V)). The screenshots corresponding to a selected number of points are shown. The DQN agent predicts high state values for both full (top right screenshots) and nearly complete screens (bottom left screenshots) because it has learned that completing a screen leads to a new screen full of enemy ships. Partially completed screens (bottom screenshots) are assigned lower state values because less immediate reward is available. The screens shown on the bottom right and top left and middle are less perceptually similar than the other examples but are still mapped to nearby representations and similar values because the orange bunkers do not carry great significance near the end of a level. With permission from Square Enix Limited."
+#+NAME: fig:dqn_atari_t_sne
+
+
+*** TODO re-add parts about improvements to DQN, but only those that we have used in the project.
+
+
+

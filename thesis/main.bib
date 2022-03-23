@@ -203,9 +203,9 @@ Weakness in recall - finding all objects in an image when there are many objects
 	title = {Robust {Multi}-scale {Anatomical} {Landmark} {Detection} in {Incomplete} {3D}-{CT} {Data}},
 	isbn = {978-3-319-66182-7},
 	doi = {10.1007/978-3-319-66182-7_23},
-	abstract = {Robust and fast detection of anatomical structures is an essential prerequisite for the next-generation automated medical support tools. While machine learning techniques are most often applied to address this problem, the traditional object search scheme is typically driven by suboptimal and exhaustive strategies. Most importantly, these techniques do not effectively address cases of incomplete data, i.e., scans taken with a partial field-of-view. To address these limitations, we present a solution that unifies the anatomy appearance model and the search strategy by formulating a behavior-learning task. This is solved using the capabilities of deep reinforcement learning with multi-scale image analysis and robust statistical shape modeling. Using these mechanisms artificial agents are taught optimal navigation paths in the image scale-space that can account for missing structures to ensure the robust and spatially-coherent detection of the observed anatomical landmarks. The identified landmarks are then used as robust guidance in estimating the extent of the body-region. Experiments show that our solution outperforms a state-of-the-art deep learning method in detecting different anatomical structures, without any failure, on a dataset of over 2300 3D-CT volumes. In particular, we achieve 0\% false-positive and 0\% false-negative rates at detecting the landmarks or recognizing their absence from the field-of-view of the scan. In terms of runtime, we reduce the detection-time of the reference method by 15−20 times to under 40 ms, an unmatched performance in the literature for high-resolution 3D-CT.},
+	abstract = {Robust and fast detection of anatomical structures is an essential prerequisite for the next-generation automated medical support tools. While machine learning techniques are most often applied to address this problem, the traditional object search scheme is typically driven by suboptimal and exhaustive strategies. Most importantly, these techniques do not effectively address cases of incomplete data, i.e., scans taken with a partial field-of-view. To address these limitations, we present a solution that unifies the anatomy appearance model and the search strategy by formulating a behavior-learning task. This is solved using the capabilities of deep reinforcement learning with multi-scale image analysis and robust statistical shape modeling. Using these mechanisms artificial agents are taught optimal navigation paths in the image scale-space that can account for missing structures to ensure the robust and spatially-coherent detection of the observed anatomical landmarks. The identified landmarks are then used as robust guidance in estimating the extent of the body-region. Experiments show that our solution outperforms a state-of-the-art deep learning method in detecting different anatomical structures, without any failure, on a dataset of over 2300 3D-CT volumes. In particular, we achieve 0\% false-positive and 0\% false-negative rates at detecting the landmarks or recognizing their absence from the field-of-view of the scan. In terms of runtime, we reduce the detection-time of the reference method by 15-20 times to under 40 ms, an unmatched performance in the literature for high-resolution 3D-CT.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Ghesu, Florin C. and Georgescu, Bogdan and Grbic, Sasa and Maier, Andreas K. and Hornegger, Joachim and Comaniciu, Dorin},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
@@ -318,7 +318,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	doi = {10.1007/978-3-319-66182-7_40},
 	abstract = {Robust image registration in medical imaging is essential for comparison or fusion of images, acquired from various perspectives, modalities or at different times. Typically, an objective function needs to be minimized assuming specific a priori deformation models and predefined or learned similarity measures. However, these approaches have difficulties to cope with large deformations or a large variability in appearance. Using modern deep learning (DL) methods with automated feature design, these limitations could be resolved by learning the intrinsic mapping solely from experience. We investigate in this paper how DL could help organ-specific (ROI-specific) deformable registration, to solve motion compensation or atlas-based segmentation problems for instance in prostate diagnosis. An artificial agent is trained to solve the task of non-rigid registration by exploring the parametric space of a statistical deformation model built from training data. Since it is difficult to extract trustworthy ground-truth deformation fields, we present a training scheme with a large number of synthetically deformed image pairs requiring only a small number of real inter-subject pairs. Our approach was tested on inter-subject registration of prostate MR data and reached a median DICE score of .88 in 2-D and .76 in 3-D, therefore showing improved results compared to state-of-the-art registration algorithms.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Krebs, Julian and Mansi, Tommaso and Delingette, Hervé and Zhang, Li and Ghesu, Florin C. and Miao, Shun and Maier, Andreas K. and Ayache, Nicholas and Liao, Rui and Kamen, Ali},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
@@ -335,7 +335,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	doi = {10.1007/978-3-319-66179-7_76},
 	abstract = {We present a novel methodology for the automated detection of breast lesions from dynamic contrast-enhanced magnetic resonance volumes (DCE-MRI). Our method, based on deep reinforcement learning, significantly reduces the inference time for lesion detection compared to an exhaustive search, while retaining state-of-art accuracy.This speed-up is achieved via an attention mechanism that progressively focuses the search for a lesion (or lesions) on the appropriate region(s) of the input volume. The attention mechanism is implemented by training an artificial agent to learn a search policy, which is then exploited during inference. Specifically, we extend the deep Q-network approach, previously demonstrated on simpler problems such as anatomical landmark detection, in order to detect lesions that have a significant variation in shape, appearance, location and size. We demonstrate our results on a dataset containing 117 DCE-MRI volumes, validating run-time and accuracy of lesion detection.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Maicas, Gabriel and Carneiro, Gustavo and Bradley, Andrew P. and Nascimento, Jacinto C. and Reid, Ian},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
@@ -425,7 +425,7 @@ Accurate identification of end-diastolic and end-systolic frames in echocardiogr
 Methods
 We have developed deep neural networks, trained and tested on multi-centre patient data, for the accurate identification of end-diastolic and end-systolic frames in apical four-chamber 2D multibeat cine loop recordings of arbitrary length. Seven experienced cardiologist experts independently labelled the frames of interest, thereby providing infallible annotations, allowing for observer variability measurements.
 Results
-When compared with the ground-truth, our model shows an average frame difference of −0.09 ± 1.10 and 0.11 ± 1.29 frames for end-diastolic and end-systolic frames, respectively. When applied to patient datasets from a different clinical site, to which the model was blind during its development, average frame differences of −1.34 ± 3.27 and −0.31 ± 3.37 frames were obtained for both frames of interest. All detection errors fall within the range of inter-observer variability: [-0.87, −5.51]±[2.29, 4.26] and [-0.97, −3.46]±[3.67, 4.68] for ED and ES events, respectively.
+When compared with the ground-truth, our model shows an average frame difference of -0.09 ± 1.10 and 0.11 ± 1.29 frames for end-diastolic and end-systolic frames, respectively. When applied to patient datasets from a different clinical site, to which the model was blind during its development, average frame differences of -1.34 ± 3.27 and -0.31 ± 3.37 frames were obtained for both frames of interest. All detection errors fall within the range of inter-observer variability: [-0.87, -5.51]±[2.29, 4.26] and [-0.97, -3.46]±[3.67, 4.68] for ED and ES events, respectively.
 Conclusions
 The proposed automated model can identify multiple end-systolic and end-diastolic frames in echocardiographic videos of arbitrary length with performance indistinguishable from that of human experts, but with significantly shorter processing time.},
 	language = {en},
@@ -669,7 +669,7 @@ Below is a summary of some notable methods for nonlinear dimensionality reductio
     
       
         i
-        −
+        -
         1
       
     
@@ -688,7 +688,7 @@ PCA is used in exploratory data analysis and for making predictive models. It is
     
       
         i
-        −
+        -
         1
       
     
@@ -908,23 +908,6 @@ The rewards are a sum of:- \${\textbackslash}mathcal\{R\}\_\{det\}\$: likelyhood
 	author = {Neller, T. and Lanctot, Marc},
 	year = {2013},
 	file = {Snapshot:/Users/magnus/Zotero/storage/N7FITHNP/0184855c7baafdbcadcab967d4bfa7d4f8b86285.html:text/html},
-}
-
-@misc{noauthor_kommisjon_nodate,
-	title = {Kommisjon 14},
-	url = {https://docs.google.com/spreadsheets/u/2/d/1M8nZQL23yE8G60r02Vx3lk2md8nAjb4cjBouP8aNYeQ/edit?usp=embed_facebook},
-	abstract = {Grading
-
-Max score,180,Average scores
-Points,Max.,Percentage,A,B,C,D,E
-Thresholds,Threads and processes,165,138,104,82,72
-Lower limit,Upper limit,Percent,Grade,Threads and processes 1,4,40,10,44,0\%,165,138,104,82,72
-165,180,91,67\%,A,Threads and processes 2,10,165,138,104,82,72
-138,164,9,76,67\%,B,...},
-	language = {no-NO},
-	urldate = {2021-06-11},
-	journal = {Google Docs},
-	file = {Snapshot:/Users/magnus/Zotero/storage/9N6Q3TEB/edit.html:text/html},
 }
 
 @article{silver_reward_2021,
@@ -1204,4 +1187,170 @@ Since ES and ED frames exist in iso-volumic phases of the cardiac cycle with min
 	author = {Szabo, Thomas L},
 	year = {2014},
 	note = {OCLC: 866931381},
+}
+
+@article{liao_efficient_2018,
+	title = {Efficient and accurate numerical simulation of acoustic wave propagation in a {2D} heterogeneous media},
+	volume = {321},
+	doi = {10.1016/j.amc.2017.10.052},
+	abstract = {In this paper, a compact fourth-order finite difference scheme is derived to solve the 2D acoustic wave equation in heterogenous media. The Padé approximation is used to obtain fourth-order accuracy in both temporal and spatial dimensions, and the alternating direction implicit (ADI) technique is used to reduce the computational cost. Due to the non-constant wave velocity, the conventional ADI method is hard to implement as the algebraic manipulation cannot be used here. A novel numerical strategy is proposed in this work so that the compact scheme still maintains fourth-order accuracy in time and space. The fourth-order convergence order was firstly proved by theoretical error analysis, then was confirmed by numerical examples. It was shown that the proposed method is conditionally stable with a Courant–Friedrichs–Lewy (CFL) condition that is comparable to other existing finite difference schemes. Several numerical examples were solved to demonstrate the efficiency and accuracy of the new algorithm.},
+	journal = {Applied Mathematics and Computation},
+	author = {Liao, Wenyuan and Yong, Peng and Dastour, Hatef and Huang, Jianping},
+	month = mar,
+	year = {2018},
+	pages = {1339--1351},
+	file = {Liao et al. - 2018 - Efficient and accurate numerical simulation of aco.pdf:/Users/magnus/Zotero/storage/NSTJCK37/Liao et al. - 2018 - Efficient and accurate numerical simulation of aco.pdf:application/pdf},
+}
+
+@article{ioffe_batch_2015,
+	title = {Batch {Normalization}: {Accelerating} {Deep} {Network} {Training} by {Reducing} {Internal} {Covariate} {Shift}},
+	shorttitle = {Batch {Normalization}},
+	url = {http://arxiv.org/abs/1502.03167},
+	abstract = {Training Deep Neural Networks is complicated by the fact that the distribution of each layer's inputs changes during training, as the parameters of the previous layers change. This slows down the training by requiring lower learning rates and careful parameter initialization, and makes it notoriously hard to train models with saturating nonlinearities. We refer to this phenomenon as internal covariate shift, and address the problem by normalizing layer inputs. Our method draws its strength from making normalization a part of the model architecture and performing the normalization for each training mini-batch. Batch Normalization allows us to use much higher learning rates and be less careful about initialization. It also acts as a regularizer, in some cases eliminating the need for Dropout. Applied to a state-of-the-art image classification model, Batch Normalization achieves the same accuracy with 14 times fewer training steps, and beats the original model by a significant margin. Using an ensemble of batch-normalized networks, we improve upon the best published result on ImageNet classification: reaching 4.9\% top-5 validation error (and 4.8\% test error), exceeding the accuracy of human raters.},
+	urldate = {2021-12-19},
+	journal = {arXiv:1502.03167 [cs]},
+	author = {Ioffe, Sergey and Szegedy, Christian},
+	month = mar,
+	year = {2015},
+	note = {arXiv: 1502.03167},
+	keywords = {Computer Science - Machine Learning},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/RY2ZPCLR/Ioffe and Szegedy - 2015 - Batch Normalization Accelerating Deep Network Tra.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/C5D668FG/1502.html:text/html},
+}
+
+@article{bronstein_geometric_2021,
+	title = {Geometric {Deep} {Learning}: {Grids}, {Groups}, {Graphs}, {Geodesics}, and {Gauges}},
+	shorttitle = {Geometric {Deep} {Learning}},
+	url = {http://arxiv.org/abs/2104.13478},
+	abstract = {The last decade has witnessed an experimental revolution in data science and machine learning, epitomised by deep learning methods. Indeed, many high-dimensional learning tasks previously thought to be beyond reach -- such as computer vision, playing Go, or protein folding -- are in fact feasible with appropriate computational scale. Remarkably, the essence of deep learning is built from two simple algorithmic principles: first, the notion of representation or feature learning, whereby adapted, often hierarchical, features capture the appropriate notion of regularity for each task, and second, learning by local gradient-descent type methods, typically implemented as backpropagation. While learning generic functions in high dimensions is a cursed estimation problem, most tasks of interest are not generic, and come with essential pre-defined regularities arising from the underlying low-dimensionality and structure of the physical world. This text is concerned with exposing these regularities through unified geometric principles that can be applied throughout a wide spectrum of applications. Such a 'geometric unification' endeavour, in the spirit of Felix Klein's Erlangen Program, serves a dual purpose: on one hand, it provides a common mathematical framework to study the most successful neural network architectures, such as CNNs, RNNs, GNNs, and Transformers. On the other hand, it gives a constructive procedure to incorporate prior physical knowledge into neural architectures and provide principled way to build future architectures yet to be invented.},
+	urldate = {2021-12-20},
+	journal = {arXiv:2104.13478 [cs, stat]},
+	author = {Bronstein, Michael M. and Bruna, Joan and Cohen, Taco and Veličković, Petar},
+	month = may,
+	year = {2021},
+	note = {arXiv: 2104.13478},
+	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning, Computer Science - Computational Geometry},
+	annote = {Comment: 156 pages. Work in progress -- comments welcome!},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/FTVLZQ25/Bronstein et al. - 2021 - Geometric Deep Learning Grids, Groups, Graphs, Ge.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/Q9AJMV42/2104.html:text/html},
+}
+
+@article{silver_mastering_2016-1,
+	title = {Mastering the game of {Go} with deep neural networks and tree search},
+	volume = {529},
+	issn = {0028-0836},
+	doi = {10.1038/nature16961},
+	abstract = {The game of Go has long been viewed as the most challenging of classic games for artificial intelligence owing to its enormous search space and the difficulty of evaluating board positions and moves. Here we introduce a new approach to computer Go that uses 'value networks' to evaluate board positions and 'policy networks' to select moves. These deep neural networks are trained by a novel combination of supervised learning from human expert games, and reinforcement learning from games of self-play. Without any lookahead search, the neural networks play Go at the level of state-of-the-art Monte Carlo tree search programs that simulate thousands of random games of self-play. We also introduce a new search algorithm that combines Monte Carlo simulation with value and policy networks. Using this search algorithm, our program AlphaGo achieved a 99.8\% winning rate against other Go programs, and defeated the human European Go champion by 5 games to 0. This is the first time that a computer program has defeated a human professional player in the full-sized game of Go, a feat previously thought to be at least a decade away.},
+	language = {eng},
+	number = {7587},
+	journal = {Nature (London)},
+	author = {Silver, David and Huang, Aja and Maddison, Chris J. and Guez, Arthur and Sifre, Laurent and Van Den Driessche, George and Schrittwieser, Julian and Antonoglou, Ioannis and Panneershelvam, Veda and Lanctot, Marc and Dieleman, Sander and Grewe, Dominik and Nham, John and Kalchbrenner, Nal and Sutskever, Ilya and Lillicrap, Timothy and Leach, Madeleine and Kavukcuoglu, Koray and Graepel, Thore and Hassabis, Demis},
+	year = {2016},
+	note = {Place: LONDON
+Publisher: NATURE PUBLISHING GROUP},
+	keywords = {Humans, Analysis, Computer games, Computers, Europe, Games, Recreational, Go (Game), Monte Carlo Method, Multidisciplinary Sciences, Neural networks, Neural Networks (Computer), Product development, Reinforcement (Psychology), Science \& Technology, Science \& Technology - Other Topics, Software, Supervised Machine Learning, Technology application},
+	pages = {484--489},
+	file = {Silver et al. - 2016 - Mastering the game of Go with deep neural networks.pdf:/Users/magnus/Zotero/storage/WTAGDHVE/Silver et al. - 2016 - Mastering the game of Go with deep neural networks.pdf:application/pdf},
+}
+
+@article{wang_deep_2021,
+	title = {Deep {Learning} for {Image} {Super}-{Resolution}: {A} {Survey}},
+	volume = {43},
+	issn = {1939-3539},
+	shorttitle = {Deep {Learning} for {Image} {Super}-{Resolution}},
+	doi = {10.1109/TPAMI.2020.2982166},
+	abstract = {Image Super-Resolution (SR) is an important class of image processing techniqueso enhance the resolution of images and videos in computer vision. Recent years have witnessed remarkable progress of image super-resolution using deep learning techniques. This article aims to provide a comprehensive survey on recent advances of image super-resolution using deep learning approaches. In general, we can roughly group the existing studies of SR techniques into three major categories: supervised SR, unsupervised SR, and domain-specific SR. In addition, we also cover some other important issues, such as publicly available benchmark datasets and performance evaluation metrics. Finally, we conclude this survey by highlighting several future directions and open issues which should be further addressed by the community in the future.},
+	number = {10},
+	journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
+	author = {Wang, Zhihao and Chen, Jian and Hoi, Steven C. H.},
+	month = oct,
+	year = {2021},
+	note = {Conference Name: IEEE Transactions on Pattern Analysis and Machine Intelligence},
+	keywords = {Deep learning, Animals, Benchmark testing, convolutional neural networks (CNN), deep learning, Degradation, Generative adversarial nets (GAN), Image super-resolution, Measurement},
+	pages = {3365--3387},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/I6ZNWIKC/Wang et al. - 2021 - Deep Learning for Image Super-Resolution A Survey.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/NQW2D7MV/9044873.html:text/html},
+}
+
+@article{kashani_deep_2022,
+	title = {Deep {Learning} {Interviews}: {Hundreds} of fully solved job interview questions from a wide range of key topics in {AI}},
+	shorttitle = {Deep {Learning} {Interviews}},
+	url = {http://arxiv.org/abs/2201.00650},
+	abstract = {The second edition of Deep Learning Interviews is home to hundreds of fully-solved problems, from a wide range of key topics in AI. It is designed to both rehearse interview or exam specific topics and provide machine learning MSc / PhD. students, and those awaiting an interview a well-organized overview of the field. The problems it poses are tough enough to cut your teeth on and to dramatically improve your skills-but they're framed within thought-provoking questions and engaging stories. That is what makes the volume so specifically valuable to students and job seekers: it provides them with the ability to speak confidently and quickly on any relevant topic, to answer technical questions clearly and correctly, and to fully understand the purpose and meaning of interview questions and answers. Those are powerful, indispensable advantages to have when walking into the interview room. The book's contents is a large inventory of numerous topics relevant to DL job interviews and graduate level exams. That places this work at the forefront of the growing trend in science to teach a core set of practical mathematical and computational skills. It is widely accepted that the training of every computer scientist must include the fundamental theorems of ML, and AI appears in the curriculum of nearly every university. This volume is designed as an excellent reference for graduates of such programs.},
+	urldate = {2022-01-05},
+	journal = {arXiv:2201.00650 [cs, math]},
+	author = {Kashani, Shlomo and Ivry, Amir},
+	month = jan,
+	year = {2022},
+	note = {arXiv: 2201.00650},
+	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Computer Science - Information Theory},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/F6YX6C4G/Kashani and Ivry - 2022 - Deep Learning Interviews Hundreds of fully solved.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/QRK2HWAG/2201.html:text/html},
+}
+
+@article{montaldo_coherent_2009,
+	title = {Coherent plane-wave compounding for very high frame rate ultrasonography and transient elastography},
+	volume = {56},
+	issn = {1525-8955},
+	doi = {10.1109/TUFFC.2009.1067},
+	abstract = {The emergence of ultrafast frame rates in ultrasonic imaging has been recently made possible by the development of new imaging modalities such as transient elastography. Data acquisition rates reaching more than thousands of images per second enable the real-time visualization of shear mechanical waves propagating in biological tissues, which convey information about local viscoelastic properties of tissues. The first proposed approach for reaching such ultrafast frame rates consists of transmitting plane waves into the medium. However, because the beamforming process is then restricted to the receive mode, the echographic images obtained in the ultrafast mode suffer from a low quality in terms of resolution and contrast and affect the robustness of the transient elastography mode. It is here proposed to improve the beamforming process by using a coherent recombination of compounded plane-wave transmissions to recover high-quality echographic images without degrading the high frame rate capabilities. A theoretical model is derived for the comparison between the proposed method and the conventional B-mode imaging in terms of contrast, signal-to-noise ratio, and resolution. Our model predicts that a significantly smaller number of insonifications, 10 times lower, is sufficient to reach an image quality comparable to conventional B-mode. Theoretical predictions are confirmed by in vitro experiments performed in tissue-mimicking phantoms. Such results raise the appeal of coherent compounds for use with standard imaging modes such as B-mode or color flow. Moreover, in the context of transient elastography, ultrafast frame rates can be preserved while increasing the image quality compared with flat insonifications. Improvements on the transient elastography mode are presented and discussed.},
+	number = {3},
+	journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	author = {Montaldo, Gabriel and Tanter, Mickaël and Bercoff, Jérémy and Benech, Nicolas and Fink, Mathias},
+	month = mar,
+	year = {2009},
+	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	keywords = {Ultrasonic imaging, Array signal processing, Biological tissues, Data acquisition, Data visualization, Elasticity, Image quality, Image resolution, Ultrasonography, Viscosity},
+	pages = {489--506},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/J7WI6NHN/Montaldo et al. - 2009 - Coherent plane-wave compounding for very high fram.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/BB25E96X/4816058.html:text/html},
+}
+
+@article{rodriguez-molares_angular_2015,
+	title = {The angular apodization in coherent plane-wave compounding [{Correspondence}]},
+	volume = {62},
+	issn = {1525-8955},
+	doi = {10.1109/TUFFC.2015.007183},
+	abstract = {This article describes the relation between apodization in conventional focused imaging and apodization in coherent plane-wave compounding (CPWC). We pose the hypothesis that equivalent transmit beams can be produced with both methods if the transmit apodization is adequately transformed. We derive a relation between apodization in CPWC and in synthetic transmit aperture imaging (STAI), which we argue to be equivalent to conventional optimal multifocus imaging. We find that under certain conditions, the transformation of the apodization becomes trivial and the same window used in STAI can be applied for CPWC but extended to the whole angle sequence. We test the hypothesis with in silico data and find that the transformed apodization accurately mimics the objective transmit apodization, with differences in the lateral resolution between 3\% and 6\%.},
+	number = {11},
+	journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	author = {Rodriguez-Molares, Alfonso and Torp, Hans and Denarie, Bastien and Løvstakken, Lasse},
+	month = nov,
+	year = {2015},
+	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	keywords = {Acoustics, Apertures, Arrays, Bandwidth, Frequency control, Imaging, Transducers},
+	pages = {2018--2023},
+	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/CBPWXPYV/Rodriguez-Molares et al. - 2015 - The angular apodization in coherent plane-wave com.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/88ILEGSS/7321709.html:text/html},
+}
+
+@misc{noauthor_delay_nodate,
+	title = {The {Delay} {Multiply} and {Sum} {Beamforming} {Algorithm} in {Ultrasound} {B}-{Mode} {Medical} {Imaging} {\textbar} {IEEE} {Journals} \& {Magazine} {\textbar} {IEEE} {Xplore}},
+	url = {https://ieeexplore-ieee-org.ezproxy.uio.no/document/6960091},
+	urldate = {2022-02-13},
+}
+
+@misc{noauthor_delay_nodate-1,
+	title = {The {Delay} {Multiply} and {Sum} {Beamforming} {Algorithm} in {Ultrasound} {B}-{Mode} {Medical} {Imaging} {\textbar} {IEEE} {Journals} \& {Magazine} {\textbar} {IEEE} {Xplore}},
+	url = {https://ieeexplore-ieee-org.ezproxy.uio.no/document/6960091},
+	urldate = {2022-02-13},
+}
+
+@misc{noauthor_delay_nodate-2,
+	title = {The {Delay} {Multiply} and {Sum} {Beamforming} {Algorithm} in {Ultrasound} {B}-{Mode} {Medical} {Imaging} {\textbar} {IEEE} {Journals} \& {Magazine} {\textbar} {IEEE} {Xplore}},
+	url = {https://ieeexplore-ieee-org.ezproxy.uio.no/document/6960091},
+	urldate = {2022-02-13},
+}
+
+@misc{noauthor_delay_nodate-3,
+	title = {The {Delay} {Multiply} and {Sum} {Beamforming} {Algorithm} in {Ultrasound} {B}-{Mode} {Medical} {Imaging} {\textbar} {IEEE} {Journals} \& {Magazine} {\textbar} {IEEE} {Xplore}},
+	url = {https://ieeexplore-ieee-org.ezproxy.uio.no/document/6960091},
+	urldate = {2022-02-13},
+	file = {The Delay Multiply and Sum Beamforming Algorithm i.pdf:/Users/magnus/Zotero/storage/VSZUCPVS/The Delay Multiply and Sum Beamforming Algorithm i.pdf:application/pdf;The Delay Multiply and Sum Beamforming Algorithm in Ultrasound B-Mode Medical Imaging | IEEE Journals & Magazine | IEEE Xplore:/Users/magnus/Zotero/storage/P9Q7MBUS/6960091.html:text/html},
+}
+
+@misc{ouyang_echonet-dynamic_2019,
+	title = {{EchoNet}-{Dynamic}: a {Large} {New} {Cardiac} {Motion} {Video} {Data} {Resource} for {Medical} {Machine} {Learning}},
+	shorttitle = {{EchoNet}-{Dynamic}},
+	url = {https://www.semanticscholar.org/paper/EchoNet-Dynamic%3A-a-Large-New-Cardiac-Motion-Video-Ouyang-He/44bfcf2409c0826584c7c409b6a2fcf8c9910c88},
+	abstract = {This is the largest labeled medical video dataset made available publicly to researchers and medical professionals and first public report of video-based 3D convolutional architectures to assess cardiac function. Machine learning analysis of biomedical images has seen significant recent advances. In contrast, there has been much less work on medical videos, despite the fact that videos are routinely used in many clinical settings. A major bottleneck for this is the the lack of openly available and well annotated medical video data. Computer vision has benefited greatly from many open databases which allow for collaboration, comparison, and creation of medical task specific architectures. We present the EchoNet-Dynamic Dataset of 10,036 echocardiography videos, spanning the range of typical echocardiography lab imaging conditions, with corresponding labeled measurements including ejection fraction, left ventricular volume at end-systole and end-diastole, and human expert tracings of the left ventricle as an aid in studying automated approaches to evaluate cardiac function. We additionally present the performance of three 3D convolutional architectures for video classification used to assess ejection fraction to near-expert human performance and as a benchmark for further collaboration, comparison, and creation of task-specific architectures. To the best of our knowledge, this is the largest labeled medical video dataset made available publicly to researchers and medical professionals and first public report of video-based 3D convolutional architectures to assess cardiac function.},
+	language = {en},
+	urldate = {2022-03-04},
+	author = {Ouyang, David and He, B. and Ghorbani, Amirata and Lungren, M. and Ashley, E. and Liang, D. and Zou, James Y.},
+	year = {2019},
+	file = {Snapshot:/Users/magnus/Zotero/storage/V4GLCPK2/44bfcf2409c0826584c7c409b6a2fcf8c9910c88.html:text/html;Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:/Users/magnus/Zotero/storage/TEAIW94U/Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:application/pdf},
 }

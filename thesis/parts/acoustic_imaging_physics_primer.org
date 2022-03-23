@@ -1,0 +1,56 @@
+* What Is Sound?
+What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
+
+#+NAME: fig:pressure_wave_propagation
+#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
+[[../img/pressure_wave_propagation.png]]
+
+A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
+
+#+NAME: fig:amp_freq_phase
+#+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
+[[../img/amp_freq_phase.png]]
+
+A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum. *TODO: Add comparison between piano and clarinet playing the same note in frequency spectrum*.
+
+#+NAME: fig:freq_spectrum
+#+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
+[[../img/freq_spectrum.png]]
+
+# [[Image of frequency spectrum of piano and clarinet note]]
+
+The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
+
+#+NAME: fig:conveyor_belt_speed_change
+#+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
+[[../img/conveyor_belt_speed_change.png]]
+
+
+#+NAME: fig:nonlinearity
+#+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
+[[../img/nonlinearity.png]]
+
+
+An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
+
+#+NAME: eqn:acoustic_impedance
+\begin{equation}
+Z=\rho\times c
+\end{equation}
+
+#+NAME: eqn:reflection_factor
+\begin{equation} 
+RF=\frac{Z_2-Z_1}{Z_2+Z_1}
+\end{equation}
+
+# [[Image showing that wave is reflected with same amount when going from air to water, or water to air.]]
+
+How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance. 
+# TODO: Add table of the acoustic impedance of various human tissues.
+
+*How can we use this to our advantage?*
+- Basic ultrasound
+- Non-linearity, listening to second harmonic frequency.
+
+*Limitations*
+- attentuaion, resolution, speckles, shadowing, side-lobes 
