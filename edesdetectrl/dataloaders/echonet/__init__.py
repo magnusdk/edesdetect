@@ -1,46 +1,12 @@
 import os
-from typing import Any, Callable, List, Literal, Tuple, Type, Union
+from typing import List, Literal, Optional, Union
 
-import cv2
+import edesdetectrl.dataloaders.echonet.label_frames as lf
 import numpy as np
 import pandas as pd
 from edesdetectrl import dataloaders
 from edesdetectrl.config import config
-import edesdetectrl.dataloaders.echonet.label_frames as lf
-
-
-def loadvideo(filename: str) -> np.ndarray:
-    # Copied and modified from https://github.com/echonet/dynamic/blob/f6d9b342ffd6e5129bcf15a994e1734fc31003f6/echonet/utils/__init__.py#L16
-    """Loads a video from a file.
-    Args:
-        filename (str): filename of video
-    Returns:
-        A np.ndarray with dimensions (frames, height, width). The values
-        will be uint8's ranging from 0 to 255.
-    Raises:
-        FileNotFoundError: Could not find `filename`
-        ValueError: An error occurred while reading the video
-    """
-
-    if not os.path.exists(filename):
-        raise FileNotFoundError(filename)
-    capture = cv2.VideoCapture(filename)
-
-    frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
-    frame_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
-    v = np.zeros((frame_count, frame_height, frame_width), np.uint8)
-
-    for count in range(frame_count):
-        ret, frame = capture.read()
-        if not ret:
-            raise ValueError("Failed to load frame #{} of {}.".format(count, filename))
-
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # Use grayscale images
-        v[count, :, :] = frame
-
-    return v
+from edesdetectrl.dataloaders.common import loadvideo
 
 
 def _ensure_file_extension(filename):
@@ -71,7 +37,7 @@ def _get_item_impl(filename: str, ed_frame: int, es_frame: int) -> dataloaders.D
 
 
 class Echonet(dataloaders.DataLoader):
-    def __init__(self, split: Literal["TRAIN", "VAL", "TEST"]):
+    def __init__(self, split: Optional[Literal["TRAIN", "VAL", "TEST"]]):
         self.filelist_csv_file = config["data"]["filelist_path"]
         self.volumetracings_df = pd.read_csv(
             config["data"]["volumetracings_path"], index_col="FileName"
