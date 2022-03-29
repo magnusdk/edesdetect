@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Video visualizer</title>
+</head>
+
+<body>
+    <h1 id="videoName"></h1>
+    <video autoplay loop type="video/mp4" width="400" height="400" id="video" src=""></video>
+    <br>
+    <button onclick="prevVideo()">Previous video</button>
+    <button onclick="nextVideo()">Next video</button>
+
+    <script>
+        function updateVideo(res) {
+            document.getElementById("videoName").innerText = res.video.name
+            document.getElementById("video").src = "data:video/mp4;base64," + res.video.data;
+        }
+
+        function prevVideo() {
+            req = new Request("prev_video", {
+                method: 'POST'
+            });
+            fetch(req).then((response) => response.json()).then(updateVideo);
+        }
+
+        function nextVideo() {
+            req = new Request("next_video", {
+                method: 'POST'
+            });
+            fetch(req).then((response) => response.json()).then(updateVideo);
+        }
+    </script>
+</body>
+
+</html>

@@ -7,6 +7,7 @@ version = "0.1.0"
 [tool.poetry.dependencies]
 SimpleITK = "^2.1.1"
 absl-py = "^0.12.0"
+bokvev = {git = "https://github.com/magnusdk/bokvev.git", rev = "main"}
 chex = "^0.0.8"
 dm-acme = "^0.3.0"
 dm-haiku = "^0.0.5"
