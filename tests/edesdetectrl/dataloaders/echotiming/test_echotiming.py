@@ -1,3 +1,6 @@
+import random
+
+import jax
 import numpy as np
 from edesdetectrl.dataloaders.echotiming import EchoTiming
 
@@ -32,3 +35,9 @@ def test_keys():
     assert np.allclose(
         len(test_avi_names_keys) / total_num, 0.2
     ), "TEST split is roughly 20%"
+
+
+def test_echotiming_dataloader():
+    # Mostly ensure that nothing crashes and burns.
+    for item in EchoTiming(None).get_generator(cycle=False):
+        assert item.video.ndim == 3

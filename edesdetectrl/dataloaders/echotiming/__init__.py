@@ -6,11 +6,9 @@ import cv2
 import numpy as np
 import pandas as pd
 from edesdetectrl import dataloaders
+from edesdetectrl.config import config
 from edesdetectrl.dataloaders import DataItem, GroundTruth
 from edesdetectrl.dataloaders.common import loadvideo
-
-data_dir = "/Users/magnus/research/data/EchoTiming/"
-timings_xlsx_path = data_dir + "FileList_Timing.xlsx"
 
 
 @dataclass
@@ -53,11 +51,17 @@ def get_item_impl(echotiming_data_item: EchoTimingDataItem) -> DataItem:
     all_events = echotiming_data_item.es_events + echotiming_data_item.ed_events
     first_event = min(all_events)
     last_event = max(all_events)
-    raw_video = loadvideo(data_dir + "Videos/" + echotiming_data_item.avi_name + ".avi")
-    raw_video = raw_video[first_event:last_event+1]
-    video = np.empty((raw_video.shape[0],) + (300, 300))
+    raw_video = loadvideo(
+        config["data"]["echotiming_dir"]
+        + "Videos/"
+        + echotiming_data_item.avi_name
+        + ".avi"
+    )
+    size = 112
+    raw_video = raw_video[first_event : last_event + 1]
+    video = np.empty((raw_video.shape[0],) + (size, size))
     for i, frame in enumerate(raw_video):
-        video[i] = cv2.resize(frame, dsize=(300, 300), interpolation=cv2.INTER_CUBIC)
+        video[i] = cv2.resize(frame, dsize=(size, size), interpolation=cv2.INTER_CUBIC)
     ground_truth_labels = get_ground_truth_labels(echotiming_data_item)
     return DataItem(
         name=echotiming_data_item.avi_name,
@@ -89,7 +93,9 @@ class EchoTiming(dataloaders.DataLoader):
             for operator in ["op1", "op2"]
         ]
         timings_df = pd.read_excel(
-            timings_xlsx_path, names=header_names, skiprows=[0, 1]
+            config["data"]["echotiming_dir"] + "FileList_Timing.xlsx",
+            names=header_names,
+            skiprows=[0, 1],
         )
 
         self.op1: Dict[str, EchoTimingDataItem] = {}
@@ -144,7 +150,7 @@ class EchoTiming(dataloaders.DataLoader):
         filename = key if isinstance(key, str) else self.keys[key]
         operator_data = self.op1 if self.operator_number == 1 else self.op2
         echonet_timing_data_item = operator_data[filename]
-        return get_item_impl, echonet_timing_data_item
+        return get_item_impl, (echonet_timing_data_item,)
 
 
 # TODO: Code stuff
