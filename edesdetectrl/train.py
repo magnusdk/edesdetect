@@ -20,14 +20,15 @@ import gym
 import jax
 import launchpad as lp
 import mlflow
-from acme import specs
 from launchpad.nodes.python.local_multi_processing import PythonProcess
 
-import edesdetectrl.agents.dqn.config as dqn_config
 import edesdetectrl.config as general_config
 import edesdetectrl.util.dm_env as util_dm_env
+from acme import specs
 from edesdetectrl.agents.dqn import agent
+from edesdetectrl.agents.dqn.config import DQNConfig
 from edesdetectrl.dataloaders.echonet import Echonet
+from edesdetectrl.dataloaders.echotiming import EchoTiming
 from edesdetectrl.nets import (
     mobilenet,
     overview_and_m_mode_nets,
@@ -38,6 +39,8 @@ from edesdetectrl.nets import (
 
 @dataclasses.dataclass
 class ExperimentConfig:
+    experiment_name: str
+
     environment: Literal[
         "VanillaBinaryClassification-v0",
         "EDESMModeClassification-v0",
@@ -54,6 +57,11 @@ class ExperimentConfig:
         "proximity",
     ] = "simple"
 
+    dataloader: Literal[
+        "echonet",
+        "echotiming",
+    ] = "echonet"
+
 
 def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
     def environment_factory(is_eval: bool, split="TRAIN"):
@@ -62,10 +70,14 @@ def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
         elif experiment_config.environment == "EDESMModeClassification-v0":
             import edesdetectrl.environments.m_mode_binary_classification
 
+        if experiment_config.dataloader == "echonet":
+            dataloader = Echonet(split)
+        elif experiment_config.dataloader == "echotiming":
+            dataloader = EchoTiming(split)
         env = util_dm_env.GymWrapper(
             gym.make(
                 experiment_config.environment,
-                dataloader=Echonet(split),
+                dataloader=dataloader,
                 get_reward=experiment_config.reward_spec,
                 rng_key=rng_key if split == "TRAIN" else None,
             )
@@ -73,7 +85,7 @@ def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
 
         if is_eval:  # Evaluation expects a dictionary with some additional information.
             return {
-                "num_samples": 100,#len(Echonet("VAL")),
+                "num_samples": 50,  # len(Echonet("VAL")),
                 "env": env,
                 "split": split,
             }
@@ -95,43 +107,27 @@ def get_network_factory(experiment_config: ExperimentConfig):
     return network_factory
 
 
-def main():
+def main(experiment_config: ExperimentConfig, dqn_config: DQNConfig):
     mlflow.set_tracking_uri(general_config.config["mlflow"]["tracking_uri"])
-    mlflow.set_experiment("dqn_distributed")
+    mlflow.set_experiment(experiment_config.experiment_name)
     with mlflow.start_run() as run:
         run_id = run.info.run_id
         tracking_id = general_config.config["mlflow"]["tracking_uri"]
-        experiment = "dqn_distributed"
 
-        seed = 42
-        config = dqn_config.DQNConfig(
-            epsilon=0.2,
-            learning_rate=1e-3,
-            discount=0.97,
-            n_step=5,
-            num_sgd_steps_per_step=8,
-            seed=seed,
-        )
-        experiment_config = ExperimentConfig(
-            environment="EDESMModeClassification-v0",
-            network="m_mode_simple",
-            reward_spec="proximity",
-        )
-        mlflow.log_params(dataclasses.asdict(config))
+        mlflow.log_params(dataclasses.asdict(dqn_config))
         mlflow.log_params(dataclasses.asdict(experiment_config))
-
         program = agent.DistributedDQN(
             environment_factory=get_environment_factory(
-                experiment_config, jax.random.PRNGKey(seed + 1)
+                experiment_config, jax.random.PRNGKey(dqn_config.seed + 1)
             ),
             network_factory=get_network_factory(experiment_config),
-            config=config,
-            seed=seed,
-            num_actors=6,
+            config=dqn_config,
+            seed=dqn_config.seed,
+            num_actors=dqn_config.num_actors, # Default was 6
             tracking_uri=tracking_id,
-            experiment=experiment,
+            experiment=experiment_config.experiment_name,
             run_id=run_id,
-            max_number_of_steps=4_000_000,
+            max_number_of_steps=100_000,
         ).build()
 
         # Launch experiment.
@@ -149,4 +145,48 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(
+        ExperimentConfig(
+            experiment_name="VanillaBinaryClassification",
+            environment="VanillaBinaryClassification-v0",
+            network="mobilenet",
+            reward_spec="simple",
+            dataloader="echonet",
+        ),
+        DQNConfig(
+            epsilon=1,
+            learning_rate=1e-3,
+            discount=0,
+            n_step=1,
+            min_replay_size=10000,
+            num_sgd_steps_per_step=8,
+            batch_size=1024,
+            seed=42,
+            num_actors=8,
+        ),
+    )
+
+
+"""
+
+* Experiment 1:
+- Binary Classification Environment
+- Simple DQN network
+- Simple rewards
+
+* Experiment 2:
+- Binary Classification Environment
+- MobileNet DQN network
+- Simple rewards
+
+* Experiment 3:
+- Binary Classification Environment
+- Simple DQN network
+- Proximity rewards
+
+* Experiment 4:
+- Binary Classification Environment
+- MobileNet DQN network
+- Proximity rewards
+
+"""
