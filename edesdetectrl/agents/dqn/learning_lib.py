@@ -199,11 +199,7 @@ class SGDLearner(acme.Learner):
     def step(self):
         """Takes one SGD step on the learner."""
         with jax.profiler.StepTraceAnnotation("step", step_num=self._state.steps):
-            print("Getting next batch...")
-            before = time.time()
             batch = next(self._data_iterator)
-            after = time.time()
-            print(f"Next batch got! (time: {after-before:.1f}s)")
             self._state, extra = self._sgd_step(self._state, batch)
 
             # Compute elapsed time.
