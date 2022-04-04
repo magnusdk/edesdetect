@@ -42,7 +42,7 @@ class DQNLearner(learning_lib.SGDLearner):
                iterator: Iterator[reverb.ReplaySample],
                optimizer: optax.GradientTransformation,
                random_key: networks_lib.PRNGKey,
-               max_abs_reward: float = 1.,
+               max_abs_reward: float = 10.,
                huber_loss_parameter: float = 1.,
                replay_client: Optional[reverb.Client] = None,
                replay_table_name: str = adders.DEFAULT_PRIORITY_TABLE,
