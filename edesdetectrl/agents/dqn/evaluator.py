@@ -55,9 +55,6 @@ class Evaluator(core.Worker):
         print(
             "TODO: This is too hacky. How to ensure that state is not all zeros before starting to evaluate?"
         )
-        import time
-
-        time.sleep(60)
         self.actor.update(wait=True)
         print("Starting to evaluate now.")
 
