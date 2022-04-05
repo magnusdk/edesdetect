@@ -10,15 +10,7 @@
 	year = {2019},
 	note = {arXiv: 1907.00318},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition},
-	annote = {\# OverviewThe authors proposes a network for doing multiple landmark detection using machine learning. Specifically they use multi-agent reinforcement learnig (MARL), where each agent learns to detect a single landmark, but they share a lot of the convolutional layers. On top of the conv layers they use individual fully-connected networks which specializes in finding just one landmark using the information from the previous shared layers. The layer-sharing acts as a type of regularization for the network, because it has to support search-usecases for all different landmarks. Using such a collaborative network between agents increases accuracy by 50\%, but also speeds up the training.
-The hypothesis that argues in favor of a multi-agent approach is that the position of a single landmark is a good indication of where other landmarks are. i.e.: anatomical landmarks positions are dependent on each other.
-\# MethodsIt is s multi-agent reinforcement learning network (MARL). The environment is a 3D scan of the human anatomy. The state is a region-of-interest around the location of an actor. The action-set consists of taking a step in any direction. The rewards are relative distance gained between agent position and target (landmark ground truth) position. Each agent thus has its own state and its own reward.
-There's some stuff about how to make the network work with the assumptions needed for a Markov Decision Process formulation
-Termination in training is when the agent is very close to its landmark. Termination in testing is when the agent start showing oscillating behavior or exceed a defined macimum number of frames.
-If one agent reached the landmark before the others its weights are no longer updated for the remainder of the episode.
-Performance is mean distance in mm to targets.},
-	annote = {Comment: Accepted in MICCAI 2019, Camera Ready Version},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/MF8JXCDR/1907.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/NY7P94AG/Vlontzos et al. - 2019 - Multiple Landmark Detection using Multi-Agent Rein.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/NY7P94AG/Vlontzos et al. - 2019 - Multiple Landmark Detection using Multi-Agent Rein.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/MF8JXCDR/1907.html:text/html},
 }
 
 @article{alansary_evaluating_2019,
@@ -36,14 +28,7 @@ Performance is mean distance in mm to targets.},
 	year = {2019},
 	keywords = {Automatic landmark detection, Deep learning, DQN, Reinforcement learning},
 	pages = {156--164},
-	annote = {The authors tried multiple different reinforcement learning techniques for doing landmark detection of various anatomical structures (heart ultrasound and MR, and brain MR). They are working on 3D images, thus having x, y, and z dimensions.
-They formulate the RL problem as having:- Environment E being input images- Action-set A being a step in one of 6 directions (-x, +x, -y, +y, -z, +z)- State S being a 3D region of interest (a zoomed in image of the environment). It also has a frame history buffer of the last 4 states to stabilize search trajectories.- Reward function R being how much closer the agent got to the target since last state. They explained the problem of finding the reward function R as difficult.- Terminal state in training data when the agent is close enough to the target. Terminal state in testing data when we start seeing oscillating behavior (it goes around the target and don't really move much).
-They test out 4 different RL architectures:- DQN (deep Q-network)- DDQN (double deep Q-network)- Duel DQN (duel deep Q-network)- Duel DDQN (duel double deep Q-network)The performance of these were very similar, but if referncing this reread the results because it is not clear whether there is a better choice or not.
-The state changes over time. In the beginning the agent sees a large portion of the environment and is able to take coarse decisions on where to step next. Later the region of interest (ROI) shrinks and the agent should be able to take finer-grained decisions.
-The starting points of the agent are random. **Maybe we can improve this by teaching another network the ideal starting position for an agent?**
-They state that finding the target landmarks in ultrasound images are difficult because of artifacts such as shadowing, mirror images, refraction, and motion in the medium.
-Multiscale search improves performance and speed up the searching process by a factor of 4-5 times.},
-	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/TBRQB77V/S1361841518306121.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/S8DYX8I7/Alansary et al. - 2019 - Evaluating reinforcement learning agents for anato.pdf:application/pdf},
+	file = {ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/S8DYX8I7/Alansary et al. - 2019 - Evaluating reinforcement learning agents for anato.pdf:application/pdf;ScienceDirect Snapshot:/Users/magnus/Zotero/storage/TBRQB77V/S1361841518306121.html:text/html},
 }
 
 @article{mnih_human-level_2015,
@@ -63,33 +48,7 @@ Multiscale search improves performance and speed up the searching process by a f
 	note = {Number: 7540
 Publisher: Nature Publishing Group},
 	pages = {529--533},
-	annote = {First mention of DQN
-
-Uses CNN to approximate the optimal action-value function Q*
-Store trajectories in Experience Replay
-
-Improves stability because CNN learns froms randomly sampled state-action-reward tuples.
-Greater sample efficiency, because same sample is used multiple times.
-Fixes problem of too-correlated data between tuples close in time and big changes in CNN as effect to small changes to Q. Tsitsiklis, J. \& Roy, B. V. An analysis of temporal-difference learning with function approximation. IEEE Trans. Automat. Contr. 42, 674–690 (1997)
-
-
-Iterative update, only periodically updated Q. This means that en episode is played using a policy \$\${\textbackslash}pi\_i\$\$ and it is not updated until after the episode has ended, resulting in \$\${\textbackslash}pi\_\{i+1\}\$\$.
-Evaluated on Atari games
-
-Take only raw pixels as input, 210x160 pixels with 128 colours.
-
-
-Maps state+history to predicted value of each action, instead of having one action as input. Speeds up algorithm
-Model-free and off-policy algorithm
-Using separate networks for target and updating. Only one is updated at a time, and which one it is is swapped every C updated. This fixes issue where when an action is good the network will be overly optimistic about that one and create bias int rajctory for this action.
-Clipping of error term to -1 and 1. Increasing stability. This ensures that the biggest step one could take is one step in the direction of gradient.
-Notes:
-
-Updating “surprising” Q-values are slow, because after training a while they occur rarely because of low exploration. This is fixed in later articles, I think. This was acknowledged and article references Moore, A. \& Atkeson, C. Prioritized sweeping: reinforcement learning with less data and less real time. Mach. Learn. 13, 103–130 (1993)
-
-
-},
-	file = {Snapshot:/Users/magnus/Zotero/storage/SVMTJBPG/nature14236.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/44GDK6B5/Mnih et al. - 2015 - Human-level control through deep reinforcement lea.pdf:application/pdf},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/44GDK6B5/Mnih et al. - 2015 - Human-level control through deep reinforcement lea.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/SVMTJBPG/nature14236.html:text/html},
 }
 
 @inproceedings{coates_learning_2008,
@@ -139,43 +98,6 @@ Updating “surprising” Q-values are slow, because after training a while they
 	note = {ISSN: 2380-7504},
 	keywords = {Computational modeling, History, Learning (artificial intelligence), Prediction algorithms, Proposals, Search problems, Transforms},
 	pages = {2488--2496},
-	annote = {Object localization with RL.
-Actions set: Move bounding box
-
-left or right
-up or down
-make it smaller or bigger
-increase or decrease aspect ratio
-trigger (meaning terminate/localized)
-
-Will paint a black cross on the image in the center of the bounding box, and the agent will be reset to another part of the image (a corner). The image is shrunk by 75\%.
-
-
-
-State set:
-
-feature vector of observed region
-history of taken actions vector
-
-This makes it more stable to train and yields 3 percent better precision.
-Stops the agent from going around in circles.
-History of actions instead of history of feature vectors because it has much lower dimensionality and produces better results.
-
-
-
-Reward function:
-
-Sign of Intersection-over-union between selected bounding box and ground truth object.
-Except for trigger action, which has reward 3 if a certain threshold of the object is within the bounding box, or penalty of 3 (-3) if it is not.
-
-Uses Q-learning, DQN.
-Initialized using Inverse RL (IRL).
-Weakness in recall - finding all objects in an image when there are many objects.
- 
- 
- 
- 
- },
 	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/C2W8MNUF/7410643.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/LF3GVLBD/Caicedo and Lazebnik - 2015 - Active Object Localization with Deep Reinforcement.pdf:application/pdf},
 }
 
@@ -194,7 +116,7 @@ Weakness in recall - finding all objects in an image when there are many objects
 	year = {2018},
 	keywords = {Deep learning, Deep reinforcement learning, Incomplete 3D-data, M-estimator sample consensus, Multi-scale detection, Real-time detection, Robust statistical shape-modeling, Scale-space modeling},
 	pages = {203--213},
-	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/FNR3PMDX/S1361841518304092.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/498GGVUP/Ghesu et al. - 2018 - Towards intelligent robust detection of anatomical.pdf:application/pdf},
+	file = {ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/498GGVUP/Ghesu et al. - 2018 - Towards intelligent robust detection of anatomical.pdf:application/pdf;ScienceDirect Snapshot:/Users/magnus/Zotero/storage/FNR3PMDX/S1361841518304092.html:text/html},
 }
 
 @inproceedings{ghesu_robust_2017,
@@ -203,31 +125,14 @@ Weakness in recall - finding all objects in an image when there are many objects
 	title = {Robust {Multi}-scale {Anatomical} {Landmark} {Detection} in {Incomplete} {3D}-{CT} {Data}},
 	isbn = {978-3-319-66182-7},
 	doi = {10.1007/978-3-319-66182-7_23},
-	abstract = {Robust and fast detection of anatomical structures is an essential prerequisite for the next-generation automated medical support tools. While machine learning techniques are most often applied to address this problem, the traditional object search scheme is typically driven by suboptimal and exhaustive strategies. Most importantly, these techniques do not effectively address cases of incomplete data, i.e., scans taken with a partial field-of-view. To address these limitations, we present a solution that unifies the anatomy appearance model and the search strategy by formulating a behavior-learning task. This is solved using the capabilities of deep reinforcement learning with multi-scale image analysis and robust statistical shape modeling. Using these mechanisms artificial agents are taught optimal navigation paths in the image scale-space that can account for missing structures to ensure the robust and spatially-coherent detection of the observed anatomical landmarks. The identified landmarks are then used as robust guidance in estimating the extent of the body-region. Experiments show that our solution outperforms a state-of-the-art deep learning method in detecting different anatomical structures, without any failure, on a dataset of over 2300 3D-CT volumes. In particular, we achieve 0\% false-positive and 0\% false-negative rates at detecting the landmarks or recognizing their absence from the field-of-view of the scan. In terms of runtime, we reduce the detection-time of the reference method by 15-20 times to under 40 ms, an unmatched performance in the literature for high-resolution 3D-CT.},
+	abstract = {Robust and fast detection of anatomical structures is an essential prerequisite for the next-generation automated medical support tools. While machine learning techniques are most often applied to address this problem, the traditional object search scheme is typically driven by suboptimal and exhaustive strategies. Most importantly, these techniques do not effectively address cases of incomplete data, i.e., scans taken with a partial field-of-view. To address these limitations, we present a solution that unifies the anatomy appearance model and the search strategy by formulating a behavior-learning task. This is solved using the capabilities of deep reinforcement learning with multi-scale image analysis and robust statistical shape modeling. Using these mechanisms artificial agents are taught optimal navigation paths in the image scale-space that can account for missing structures to ensure the robust and spatially-coherent detection of the observed anatomical landmarks. The identified landmarks are then used as robust guidance in estimating the extent of the body-region. Experiments show that our solution outperforms a state-of-the-art deep learning method in detecting different anatomical structures, without any failure, on a dataset of over 2300 3D-CT volumes. In particular, we achieve 0\% false-positive and 0\% false-negative rates at detecting the landmarks or recognizing their absence from the field-of-view of the scan. In terms of runtime, we reduce the detection-time of the reference method by 15−20 times to under 40 ms, an unmatched performance in the literature for high-resolution 3D-CT.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Ghesu, Florin C. and Georgescu, Bogdan and Grbic, Sasa and Maier, Andreas K. and Hornegger, Joachim and Comaniciu, Dorin},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
 	year = {2017},
 	pages = {194--202},
-	annote = {RL for landmark detection in 3D CT scan volumes.
-Some structures in CT scan may be missing because of unknown FOV.
-State:
-
-Region of interest around point
-
-Actions
-
-Move in one of the basis vector directions
-
-Reward
-
-Relative change in distance to landmark
-
-Multiple models are trained for multiple scales. Start at coarsest scale level and each time the agent converges go to the next scale level until convergence on the finest scale.
-Convergence when the agent starts oscillating around a point. The center of the oscillation circle is the convergence point.
-Trained explicitly on images where the landmark is outside of the frame.},
 	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/HWHLX8BR/Ghesu et al. - 2017 - Robust Multi-scale Anatomical Landmark Detection i.pdf:application/pdf},
 }
 
@@ -246,30 +151,6 @@ Trained explicitly on images where the landmark is outside of the frame.},
 	year = {2016},
 	keywords = {Experience Replay, Image Parsing, Landmark Detection, Network Response Function, Parameter Search Strategy},
 	pages = {229--237},
-	annote = {"We propose a new learning method following a fundamentally different paradigm by simultaneously modeling both the object appearance and the parameter search strategy as a unified behavioral task for an artificial agent."
-"The method significantly outperforms state-of-the-art machine learning and deep learning approaches both in terms of accuracy and speed on 2D magnetic resonance images, 2D ultrasound and 3D CT images, achieving average detection errors of 1-2 pixels, while also recognizing the absence of an object from the image."
-State:
-
-Region of interest around point
-
-Actions
-
-Move in one of four directions for 2D image
-
-Reward
-
-Relative change in distance to landmark
-
- 
-DQN with deep CNN for function approximation.
-Reference update delay (dual DQN?)
-Experience Replay
-Agent starts in random position and runs until oscillation.
-Can detect objects not in image
-90\% converges to solution
-Much faster than other (then state-of-the-art) methods. 80x speed improvement for 2D and 3100x(!!) for 3D.
- 
-Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	file = {Springer Full Text PDF:/Users/magnus/Zotero/storage/WRZI8KG4/Ghesu et al. - 2016 - An Artificial Agent for Anatomical Landmark Detect.pdf:application/pdf},
 }
 
@@ -285,8 +166,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	year = {2021},
 	note = {arXiv: 2103.05115},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Electrical Engineering and Systems Science - Image and Video Processing},
-	annote = {Comment: 39 pages, 20 figures},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/U6GZKVTK/2103.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6LEPDE2B/Zhou et al. - 2021 - Deep reinforcement learning in medical imaging A .pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6LEPDE2B/Zhou et al. - 2021 - Deep reinforcement learning in medical imaging A .pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/U6GZKVTK/2103.html:text/html},
 }
 
 @misc{noauthor_zotero_nodate,
@@ -306,7 +186,6 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	year = {2016},
 	note = {arXiv: 1611.10336},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition},
-	annote = {Comment: To appear in AAAI Conference 2017},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/RIL2BX2Y/Liao et al. - 2016 - An Artificial Agent for Robust Image Registration.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/SE4QVVL8/1611.html:text/html},
 }
 
@@ -318,7 +197,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	doi = {10.1007/978-3-319-66182-7_40},
 	abstract = {Robust image registration in medical imaging is essential for comparison or fusion of images, acquired from various perspectives, modalities or at different times. Typically, an objective function needs to be minimized assuming specific a priori deformation models and predefined or learned similarity measures. However, these approaches have difficulties to cope with large deformations or a large variability in appearance. Using modern deep learning (DL) methods with automated feature design, these limitations could be resolved by learning the intrinsic mapping solely from experience. We investigate in this paper how DL could help organ-specific (ROI-specific) deformable registration, to solve motion compensation or atlas-based segmentation problems for instance in prostate diagnosis. An artificial agent is trained to solve the task of non-rigid registration by exploring the parametric space of a statistical deformation model built from training data. Since it is difficult to extract trustworthy ground-truth deformation fields, we present a training scheme with a large number of synthetically deformed image pairs requiring only a small number of real inter-subject pairs. Our approach was tested on inter-subject registration of prostate MR data and reached a median DICE score of .88 in 2-D and .76 in 3-D, therefore showing improved results compared to state-of-the-art registration algorithms.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Krebs, Julian and Mansi, Tommaso and Delingette, Hervé and Zhang, Li and Ghesu, Florin C. and Miao, Shun and Maier, Andreas K. and Ayache, Nicholas and Liao, Rui and Kamen, Ali},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
@@ -335,7 +214,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	doi = {10.1007/978-3-319-66179-7_76},
 	abstract = {We present a novel methodology for the automated detection of breast lesions from dynamic contrast-enhanced magnetic resonance volumes (DCE-MRI). Our method, based on deep reinforcement learning, significantly reduces the inference time for lesion detection compared to an exhaustive search, while retaining state-of-art accuracy.This speed-up is achieved via an attention mechanism that progressively focuses the search for a lesion (or lesions) on the appropriate region(s) of the input volume. The attention mechanism is implemented by training an artificial agent to learn a search policy, which is then exploited during inference. Specifically, we extend the deep Q-network approach, previously demonstrated on simpler problems such as anatomical landmark detection, in order to detect lesions that have a significant variation in shape, appearance, location and size. We demonstrate our results on a dataset containing 117 DCE-MRI volumes, validating run-time and accuracy of lesion detection.},
 	language = {en},
-	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} - {MICCAI} 2017},
+	booktitle = {Medical {Image} {Computing} and {Computer} {Assisted} {Intervention} − {MICCAI} 2017},
 	publisher = {Springer International Publishing},
 	author = {Maicas, Gabriel and Carneiro, Gustavo and Bradley, Andrew P. and Nascimento, Jacinto C. and Reid, Ian},
 	editor = {Descoteaux, Maxime and Maier-Hein, Lena and Franz, Alfred and Jannin, Pierre and Collins, D. Louis and Duchesne, Simon},
@@ -359,7 +238,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	note = {Conference Name: IEEE Transactions on Medical Imaging},
 	keywords = {Algorithm design and analysis, Cardiac image segmentation, Context, context-specific segmentation, Image segmentation, Learning, Muscles, reinforcement learning, Shape, statistical shape model, Vectors},
 	pages = {943--956},
-	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/5MCB4LEW/Wang et al. - 2013 - A General Framework for Context-Specific Image Seg.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/ZFCB462G/6479705.html:text/html},
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/ZFCB462G/6479705.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/5MCB4LEW/Wang et al. - 2013 - A General Framework for Context-Specific Image Seg.pdf:application/pdf},
 }
 
 @inproceedings{h_p_van_hasselt_hado_double_2010,
@@ -387,15 +266,7 @@ Dataset includes 2D MRI, 2D ultrasound, and 3D CT images.},
 	year = {2015},
 	note = {arXiv: 1509.06461},
 	keywords = {Computer Science - Machine Learning},
-	annote = {Comment: AAAI 2016},
-	annote = {
-Reduce over-optimistic value functions, based on the work of Double Q-learning: van Hasselt. Double Q-learning.Advances in Neural Informa-tion Processing Systems, 23:2613–2621, 2010[3]
-Over-optimistic because of approximating Q-values, and we use max\_a for “looking into the future”. If the value of an actions have a variance, but correct mean value, the value of the maximum value is always selected. This has a trickle-down effect for other value estimates.
-Shows that over-estimating DQN make poorer policies.
-Use one network to select the best action and another for evaluating how good taking that action would be.
-DQN can be turned into Double DQN by decomposing the target into an action-selector and an action-value estimator, and using different networks for them, but periodically copying the online network params into the target network params.
-},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/4SAWKFH8/1509.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/TF2YWAQN/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/TYNVKNNJ/1509.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/I7LYX5JX/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/TF2YWAQN/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/4SAWKFH8/1509.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/I7LYX5JX/van Hasselt et al. - 2015 - Deep Reinforcement Learning with Double Q-learning.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/TYNVKNNJ/1509.html:text/html},
 }
 
 @article{mada_razvan_o_how_2015,
@@ -411,7 +282,7 @@ DQN can be turned into Double DQN by decomposing the target into an action-selec
 	year = {2015},
 	note = {Publisher: American College of Cardiology Foundation},
 	pages = {148--157},
-	file = {Snapshot:/Users/magnus/Zotero/storage/HLQ5XGMJ/j.jcmg.2014.10.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/97X3IJTM/Mada Razvan O. et al. - 2015 - How to Define End-Diastole and End-Systole.pdf:application/pdf},
+	file = {Full Text PDF:/Users/magnus/Zotero/storage/97X3IJTM/Mada Razvan O. et al. - 2015 - How to Define End-Diastole and End-Systole.pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/HLQ5XGMJ/j.jcmg.2014.10.html:text/html},
 }
 
 @article{lane_multibeat_2021,
@@ -425,7 +296,7 @@ Accurate identification of end-diastolic and end-systolic frames in echocardiogr
 Methods
 We have developed deep neural networks, trained and tested on multi-centre patient data, for the accurate identification of end-diastolic and end-systolic frames in apical four-chamber 2D multibeat cine loop recordings of arbitrary length. Seven experienced cardiologist experts independently labelled the frames of interest, thereby providing infallible annotations, allowing for observer variability measurements.
 Results
-When compared with the ground-truth, our model shows an average frame difference of -0.09 ± 1.10 and 0.11 ± 1.29 frames for end-diastolic and end-systolic frames, respectively. When applied to patient datasets from a different clinical site, to which the model was blind during its development, average frame differences of -1.34 ± 3.27 and -0.31 ± 3.37 frames were obtained for both frames of interest. All detection errors fall within the range of inter-observer variability: [-0.87, -5.51]±[2.29, 4.26] and [-0.97, -3.46]±[3.67, 4.68] for ED and ES events, respectively.
+When compared with the ground-truth, our model shows an average frame difference of −0.09 ± 1.10 and 0.11 ± 1.29 frames for end-diastolic and end-systolic frames, respectively. When applied to patient datasets from a different clinical site, to which the model was blind during its development, average frame differences of −1.34 ± 3.27 and −0.31 ± 3.37 frames were obtained for both frames of interest. All detection errors fall within the range of inter-observer variability: [-0.87, −5.51]±[2.29, 4.26] and [-0.97, −3.46]±[3.67, 4.68] for ED and ES events, respectively.
 Conclusions
 The proposed automated model can identify multiple end-systolic and end-diastolic frames in echocardiographic videos of arbitrary length with performance indistinguishable from that of human experts, but with significantly shorter processing time.},
 	language = {en},
@@ -436,7 +307,7 @@ The proposed automated model can identify multiple end-systolic and end-diastoli
 	year = {2021},
 	keywords = {Deep learning, Cardiac imaging, Echocardiography, Phase detection},
 	pages = {104373},
-	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/EQDQCJJI/S0010482521001670.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/LK8CSIAR/Lane et al. - 2021 - Multibeat echocardiographic phase detection using .pdf:application/pdf},
+	file = {ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/LK8CSIAR/Lane et al. - 2021 - Multibeat echocardiographic phase detection using .pdf:application/pdf;ScienceDirect Snapshot:/Users/magnus/Zotero/storage/EQDQCJJI/S0010482521001670.html:text/html},
 }
 
 @article{mordi_efficacy_2017,
@@ -555,32 +426,6 @@ ESVI {\textgreater}25 mL/m2 is an independent predictor of hospitalization for H
 	year = {2017},
 	note = {arXiv: 1710.02298},
 	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence},
-	annote = {
-Combines many networks and performs ablation studies to find which matter the most
-The aggregate Rainbow DQN performs better than all of its components alone
-Uses:
-
-Double DQN
-Prioritized replay
-Dual DQN
-Multi-step learning
-Distributional RL
-Noisy Nets
-
-
-Removing Double and Dual showed the least amount of performance reduction.
-Prioritized replay and multi-step learning were most important
-Other networks not analysed:
-
-Policy-based algorithms such as PPO (Schulman et al. 2015)
-Actor-critic (Mnih et al. 2016; O’Donoghue et al. 2016)
-Asynchronous learning from parallel copies of the environment, as in A3C (Mnih et al. 2016), Gorila (Nair et al. 2015), or Evolution Strategies (Salimans et al. 2017)
-Hierarchical RL: h-DQN (Kulkarni et al. 2016a) and Feudal Networks (Vezhnevets et al. 2017)
-“The state representation could also be made more efficient by exploiting auxiliary tasks such as pixel control or feature control (Jaderberg et al. 2016), supervised predictions (Dosovitskiy and Koltun 2016) or successor features (Kulkarni et al. 2016b).”
-
-
-},
-	annote = {Comment: Under review as a conference paper at AAAI 2018},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/KEXIU79P/Hessel et al. - 2017 - Rainbow Combining Improvements in Deep Reinforcem.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/LTQEMKGV/1710.html:text/html},
 }
 
@@ -595,7 +440,6 @@ Hierarchical RL: h-DQN (Kulkarni et al. 2016a) and Feudal Networks (Vezhnevets e
 	year = {2016},
 	note = {arXiv: 1511.05952},
 	keywords = {Computer Science - Machine Learning},
-	annote = {Comment: Published at ICLR 2016},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/AXJTPJMN/Schaul et al. - 2016 - Prioritized Experience Replay.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/NRGWNM9V/1511.html:text/html},
 }
 
@@ -610,7 +454,6 @@ Hierarchical RL: h-DQN (Kulkarni et al. 2016a) and Feudal Networks (Vezhnevets e
 	year = {2016},
 	note = {arXiv: 1511.06581},
 	keywords = {Computer Science - Machine Learning},
-	annote = {Comment: 15 pages, 5 figures, and 5 tables},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/L5VHA48I/Wang et al. - 2016 - Dueling Network Architectures for Deep Reinforceme.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/2MEI64AU/1511.html:text/html},
 }
 
@@ -625,7 +468,6 @@ Hierarchical RL: h-DQN (Kulkarni et al. 2016a) and Feudal Networks (Vezhnevets e
 	year = {2017},
 	note = {arXiv: 1707.06887},
 	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning},
-	annote = {Comment: ICML 2017},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/M5CYSMIP/Bellemare et al. - 2017 - A Distributional Perspective on Reinforcement Lear.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/VIZUNELQ/1707.html:text/html},
 }
 
@@ -669,7 +511,7 @@ Below is a summary of some notable methods for nonlinear dimensionality reductio
     
       
         i
-        -
+        −
         1
       
     
@@ -688,7 +530,7 @@ PCA is used in exploratory data analysis and for making predictive models. It is
     
       
         i
-        -
+        −
         1
       
     
@@ -714,8 +556,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2017},
 	note = {arXiv: 1706.03762},
 	keywords = {Computer Science - Machine Learning, Computer Science - Computation and Language},
-	annote = {Comment: 15 pages, 5 figures},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/GXEJM4HJ/1706.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/FRBZ5AMQ/Vaswani et al. - 2017 - Attention Is All You Need.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/FRBZ5AMQ/Vaswani et al. - 2017 - Attention Is All You Need.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/GXEJM4HJ/1706.html:text/html},
 }
 
 @article{cho_learning_2014,
@@ -729,8 +570,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2014},
 	note = {arXiv: 1406.1078},
 	keywords = {Computer Science - Machine Learning, Statistics - Machine Learning, Computer Science - Computation and Language, Computer Science - Neural and Evolutionary Computing},
-	annote = {Comment: EMNLP 2014},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/9N7BTSAL/1406.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/7YKVUHJB/Cho et al. - 2014 - Learning Phrase Representations using RNN Encoder-.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/7YKVUHJB/Cho et al. - 2014 - Learning Phrase Representations using RNN Encoder-.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/9N7BTSAL/1406.html:text/html},
 }
 
 @article{huang_densely_2018,
@@ -744,8 +584,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2018},
 	note = {arXiv: 1608.06993},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
-	annote = {Comment: CVPR 2017},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/6DUQ25RW/1608.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/XJBHA79W/Huang et al. - 2018 - Densely Connected Convolutional Networks.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/XJBHA79W/Huang et al. - 2018 - Densely Connected Convolutional Networks.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/6DUQ25RW/1608.html:text/html},
 }
 
 @article{he_deep_2015,
@@ -759,8 +598,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2015},
 	note = {arXiv: 1512.03385},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition},
-	annote = {Comment: Tech report},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/NVDAJWKK/1512.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/DFE3P7CB/He et al. - 2015 - Deep Residual Learning for Image Recognition.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/DFE3P7CB/He et al. - 2015 - Deep Residual Learning for Image Recognition.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/NVDAJWKK/1512.html:text/html},
 }
 
 @article{fortunato_noisy_2019,
@@ -774,9 +612,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2019},
 	note = {arXiv: 1706.10295},
 	keywords = {Computer Science - Machine Learning, Statistics - Machine Learning},
-	annote = {Comment: ICLR 2018},
-	annote = {Comment: ICLR 2018},
-	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/W2RZBG7A/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/BQFBZ9CK/1706.html:text/html;arXiv.org Snapshot:/Users/magnus/Zotero/storage/IMVWW2J7/1706.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/YM7PCJPD/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/W2RZBG7A/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/YM7PCJPD/Fortunato et al. - 2019 - Noisy Networks for Exploration.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/BQFBZ9CK/1706.html:text/html;arXiv.org Snapshot:/Users/magnus/Zotero/storage/IMVWW2J7/1706.html:text/html},
 }
 
 @misc{quan_dqn_2020,
@@ -797,8 +633,7 @@ From either objective, it can be shown that the principal components are eigenve
 	year = {2016},
 	note = {arXiv: 1606.01868},
 	keywords = {Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning},
-	annote = {Notes how hard the ATARI game "Montezuma's Revenge" is.},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/7BW84ICW/1606.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6QN75R9U/Bellemare et al. - 2016 - Unifying Count-Based Exploration and Intrinsic Mot.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/6QN75R9U/Bellemare et al. - 2016 - Unifying Count-Based Exploration and Intrinsic Mot.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/7BW84ICW/1606.html:text/html},
 }
 
 @article{silver_mastering_2016,
@@ -876,12 +711,6 @@ Publisher: Nature Publishing Group},
 	year = {2020},
 	note = {arXiv: 2005.09531},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition},
-	annote = {** SummaryThe authors created an algorithm that summarizes a fetal ultrasound video. These videos vary in length between 15 to 65 minutes so they can be quite long.
-The network passes the frames through an encoder-decoder convolutional network. They use a Bi-LSTM to get information about future and past for a given frame. The RL network takes as input the latent scores from this previous network.
-The main benefit of using reinforcement learning in this case is the reward signal. The action space is binary, two possible actions, so there's not that much complex exploration going on. But a RL framework allows the authors to describe a pretty high-level set of rewards and the network automatically finds a way to fulfill them.
-The rewards are a sum of:- \${\textbackslash}mathcal\{R\}\_\{det\}\$: likelyhood of a selected frame being a standard diagnostic plane.- \${\textbackslash}mathcal\{R\}\_\{rep\}\$: rewards keeping the output frames as temporally cohesive as possible. It will optimize for selecting chunks of video.- \${\textbackslash}mathcal\{R\}\_\{div\}\$: rewards diversity of the selected frames. Rewards selecting frames that are very different, in hope that the summarized video will be more representative of the whole session.
-** Codehttps://github.com/Lorna-Liu/ultrasound\_vsumm\_RL},
-	annote = {Comment: Accepted by MICCAI'20},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/4GLQMC67/Liu et al. - 2020 - Ultrasound Video Summarization using Deep Reinforc.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/AEA3D9U4/2005.html:text/html},
 }
 
@@ -925,14 +754,13 @@ The rewards are a sum of:- \${\textbackslash}mathcal\{R\}\_\{det\}\$: likelyhood
 	year = {2021},
 	keywords = {Reinforcement learning, Artificial general intelligence, Artificial intelligence, Reward},
 	pages = {103535},
-	file = {ScienceDirect Snapshot:/Users/magnus/Zotero/storage/UBPR35JW/S0004370221000862.html:text/html;ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/E8WZAJI5/Silver et al. - 2021 - Reward is enough.pdf:application/pdf},
+	file = {ScienceDirect Full Text PDF:/Users/magnus/Zotero/storage/E8WZAJI5/Silver et al. - 2021 - Reward is enough.pdf:application/pdf;ScienceDirect Snapshot:/Users/magnus/Zotero/storage/UBPR35JW/S0004370221000862.html:text/html},
 }
 
 @book{zhang_dive_2020,
 	title = {Dive into {Deep} {Learning}},
 	author = {Zhang, Aston and Lipton, Zachary C. and Li, Mu and Smola, Alexander J.},
 	year = {2020},
-	annote = {https://d2l.ai},
 }
 
 @inproceedings{dezaki_deep_2017,
@@ -1012,7 +840,7 @@ The rewards are a sum of:- \${\textbackslash}mathcal\{R\}\_\{det\}\$: likelyhood
 	year = {2013},
 	note = {arXiv: 1311.2901},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition},
-	file = {arXiv.org Snapshot:/Users/magnus/Zotero/storage/UZ89GNSM/1311.html:text/html;arXiv Fulltext PDF:/Users/magnus/Zotero/storage/35S855Y7/Zeiler and Fergus - 2013 - Visualizing and Understanding Convolutional Networ.pdf:application/pdf},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/35S855Y7/Zeiler and Fergus - 2013 - Visualizing and Understanding Convolutional Networ.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/UZ89GNSM/1311.html:text/html},
 }
 
 @article{darvishi_measuring_2013,
@@ -1147,19 +975,6 @@ Since ES and ED frames exist in iso-volumic phases of the cardiac cycle with min
 	pages = {4504--4507},
 }
 
-@article{cassirer_reverb_2021,
-	title = {Reverb: {A} {Framework} {For} {Experience} {Replay}},
-	shorttitle = {Reverb},
-	url = {https://arxiv.org/abs/2102.04736v1},
-	abstract = {A central component of training in Reinforcement Learning (RL) is Experience: the data used for training. The mechanisms used to generate and consume this data have an important effect on the performance of RL algorithms. In this paper, we introduce Reverb: an efficient, extensible, and easy to use system designed specifically for experience replay in RL. Reverb is designed to work efficiently in distributed configurations with up to thousands of concurrent clients. The flexible API provides users with the tools to easily and accurately configure the replay buffer. It includes strategies for selecting and removing elements from the buffer, as well as options for controlling the ratio between sampled and inserted elements. This paper presents the core design of Reverb, gives examples of how it can be applied, and provides empirical results of Reverb's performance characteristics.},
-	language = {en},
-	urldate = {2021-11-08},
-	author = {Cassirer, Albin and Barth-Maron, Gabriel and Brevdo, Eugene and Ramos, Sabela and Boyd, Toby and Sottiaux, Thibault and Kroiss, Manuel},
-	month = feb,
-	year = {2021},
-	file = {Snapshot:/Users/magnus/Zotero/storage/G8NI7VD7/2102.html:text/html;Full Text PDF:/Users/magnus/Zotero/storage/F3UM4G72/Cassirer et al. - 2021 - Reverb A Framework For Experience Replay.pdf:application/pdf},
-}
-
 @article{srinivas_curl_2020,
 	title = {{CURL}: {Contrastive} {Unsupervised} {Representations} for {Reinforcement} {Learning}},
 	shorttitle = {{CURL}},
@@ -1172,7 +987,6 @@ Since ES and ED frames exist in iso-volumic phases of the cardiac cycle with min
 	year = {2020},
 	note = {arXiv: 2004.04136},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
-	annote = {Comment: First two authors contributed equally, website: https://mishalaskin.github.io/curl code: https://github.com/MishaLaskin/curl},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/V354ESL6/Srinivas et al. - 2020 - CURL Contrastive Unsupervised Representations for.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/9IT9L77L/2004.html:text/html},
 }
 
@@ -1229,7 +1043,6 @@ Since ES and ED frames exist in iso-volumic phases of the cardiac cycle with min
 	year = {2021},
 	note = {arXiv: 2104.13478},
 	keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Computer Science - Artificial Intelligence, Statistics - Machine Learning, Computer Science - Computational Geometry},
-	annote = {Comment: 156 pages. Work in progress -- comments welcome!},
 	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/FTVLZQ25/Bronstein et al. - 2021 - Geometric Deep Learning Grids, Groups, Graphs, Ge.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/Q9AJMV42/2104.html:text/html},
 }
 
@@ -1266,7 +1079,7 @@ Publisher: NATURE PUBLISHING GROUP},
 	note = {Conference Name: IEEE Transactions on Pattern Analysis and Machine Intelligence},
 	keywords = {Deep learning, Animals, Benchmark testing, convolutional neural networks (CNN), deep learning, Degradation, Generative adversarial nets (GAN), Image super-resolution, Measurement},
 	pages = {3365--3387},
-	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/I6ZNWIKC/Wang et al. - 2021 - Deep Learning for Image Super-Resolution A Survey.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/NQW2D7MV/9044873.html:text/html},
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/NQW2D7MV/9044873.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/I6ZNWIKC/Wang et al. - 2021 - Deep Learning for Image Super-Resolution A Survey.pdf:application/pdf},
 }
 
 @article{kashani_deep_2022,
@@ -1298,7 +1111,7 @@ Publisher: NATURE PUBLISHING GROUP},
 	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
 	keywords = {Ultrasonic imaging, Array signal processing, Biological tissues, Data acquisition, Data visualization, Elasticity, Image quality, Image resolution, Ultrasonography, Viscosity},
 	pages = {489--506},
-	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/J7WI6NHN/Montaldo et al. - 2009 - Coherent plane-wave compounding for very high fram.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/BB25E96X/4816058.html:text/html},
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/BB25E96X/4816058.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/J7WI6NHN/Montaldo et al. - 2009 - Coherent plane-wave compounding for very high fram.pdf:application/pdf},
 }
 
 @article{rodriguez-molares_angular_2015,
@@ -1315,7 +1128,7 @@ Publisher: NATURE PUBLISHING GROUP},
 	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
 	keywords = {Acoustics, Apertures, Arrays, Bandwidth, Frequency control, Imaging, Transducers},
 	pages = {2018--2023},
-	file = {IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/CBPWXPYV/Rodriguez-Molares et al. - 2015 - The angular apodization in coherent plane-wave com.pdf:application/pdf;IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/88ILEGSS/7321709.html:text/html},
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/88ILEGSS/7321709.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/CBPWXPYV/Rodriguez-Molares et al. - 2015 - The angular apodization in coherent plane-wave com.pdf:application/pdf},
 }
 
 @misc{noauthor_delay_nodate,
@@ -1352,5 +1165,68 @@ Publisher: NATURE PUBLISHING GROUP},
 	urldate = {2022-03-04},
 	author = {Ouyang, David and He, B. and Ghorbani, Amirata and Lungren, M. and Ashley, E. and Liang, D. and Zou, James Y.},
 	year = {2019},
-	file = {Snapshot:/Users/magnus/Zotero/storage/V4GLCPK2/44bfcf2409c0826584c7c409b6a2fcf8c9910c88.html:text/html;Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:/Users/magnus/Zotero/storage/TEAIW94U/Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:application/pdf},
+	file = {Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:/Users/magnus/Zotero/storage/TEAIW94U/Ouyang et al. - 2019 - EchoNet-Dynamic a Large New Cardiac Motion Video .pdf:application/pdf;Snapshot:/Users/magnus/Zotero/storage/V4GLCPK2/44bfcf2409c0826584c7c409b6a2fcf8c9910c88.html:text/html},
+}
+
+@article{rodriguez-molares_generalized_2020,
+	title = {The {Generalized} {Contrast}-to-{Noise} {Ratio}: {A} {Formal} {Definition} for {Lesion} {Detectability}},
+	volume = {67},
+	issn = {1525-8955},
+	shorttitle = {The {Generalized} {Contrast}-to-{Noise} {Ratio}},
+	doi = {10.1109/TUFFC.2019.2956855},
+	abstract = {In the last 30 years, the contrast-to-noise ratio (CNR) has been used to estimate the contrast and lesion detectability in ultrasound images. Recent studies have shown that the CNR cannot be used with modern beamformers, as dynamic range alterations can produce arbitrarily high CNR values with no real effect on the probability of lesion detection. We generalize the definition of CNR based on the overlap area between two probability density functions. This generalized CNR (gCNR) is robust against dynamic range alterations; it can be applied to all kind of images, units, or scales; it provides a quantitative measure for contrast; and it has a simple statistical interpretation, i.e., the success rate that can be expected from an ideal observer at the task of separating pixels. We test gCNR on several state-of-the-art imaging algorithms and, in addition, on a trivial compression of the dynamic range. We observe that CNR varies greatly between the state-of-the-art methods, with improvements larger than 100\%. We observe that trivial compression leads to a CNR improvement of over 200\%. The proposed index, however, yields the same value for compressed and uncompressed images. The tested methods showed mismatched performance in terms of lesion detectability, with variations in gCNR ranging from -0.08 to +0.29. This new metric fixes a methodological flaw in the way we study contrast and allows us to assess the relevance of new imaging algorithms.},
+	number = {4},
+	journal = {IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	author = {Rodriguez-Molares, Alfonso and Rindal, Ole Marius Hoel and D’hooge, Jan and Måsøy, Svein-Erik and Austeng, Andreas and Lediju Bell, Muyinatu A. and Torp, Hans},
+	month = apr,
+	year = {2020},
+	note = {Conference Name: IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control},
+	keywords = {Ultrasonic imaging, Acoustics, Imaging, Contrast, detection, Dynamic range, lesion, Lesions, probability, Probability density function, ultrasound},
+	pages = {745--759},
+	file = {IEEE Xplore Abstract Record:/Users/magnus/Zotero/storage/TTFJ7NER/8918059.html:text/html;IEEE Xplore Full Text PDF:/Users/magnus/Zotero/storage/6M3HDGKV/Rodriguez-Molares et al. - 2020 - The Generalized Contrast-to-Noise Ratio A Formal .pdf:application/pdf},
+}
+
+@article{hoffman_acme_2020,
+	title = {Acme: {A} {Research} {Framework} for {Distributed} {Reinforcement} {Learning}},
+	shorttitle = {Acme},
+	url = {http://arxiv.org/abs/2006.00979},
+	abstract = {Deep reinforcement learning has led to many recent-and groundbreaking-advancements. However, these advances have often come at the cost of both the scale and complexity of the underlying RL algorithms. Increases in complexity have in turn made it more difficult for researchers to reproduce published RL algorithms or rapidly prototype ideas. To address this, we introduce Acme, a tool to simplify the development of novel RL algorithms that is specifically designed to enable simple agent implementations that can be run at various scales of execution. Our aim is also to make the results of various RL algorithms developed in academia and industrial labs easier to reproduce and extend. To this end we are releasing baseline implementations of various algorithms, created using our framework. In this work we introduce the major design decisions behind Acme and show how these are used to construct these baselines. We also experiment with these agents at different scales of both complexity and computation-including distributed versions. Ultimately, we show that the design decisions behind Acme lead to agents that can be scaled both up and down and that, for the most part, greater levels of parallelization result in agents with equivalent performance, just faster.},
+	urldate = {2022-03-29},
+	journal = {arXiv:2006.00979 [cs]},
+	author = {Hoffman, Matt and Shahriari, Bobak and Aslanides, John and Barth-Maron, Gabriel and Behbahani, Feryal and Norman, Tamara and Abdolmaleki, Abbas and Cassirer, Albin and Yang, Fan and Baumli, Kate and Henderson, Sarah and Novikov, Alex and Colmenarejo, Sergio Gómez and Cabi, Serkan and Gulcehre, Caglar and Paine, Tom Le and Cowie, Andrew and Wang, Ziyu and Piot, Bilal and de Freitas, Nando},
+	month = jun,
+	year = {2020},
+	note = {arXiv: 2006.00979},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Machine Learning},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/7CDWZMZU/Hoffman et al. - 2020 - Acme A Research Framework for Distributed Reinfor.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/DV5RTRG3/2006.html:text/html},
+}
+
+@article{cassirer_reverb_2021,
+	title = {Reverb: {A} {Framework} {For} {Experience} {Replay}},
+	shorttitle = {Reverb},
+	url = {http://arxiv.org/abs/2102.04736},
+	abstract = {A central component of training in Reinforcement Learning (RL) is Experience: the data used for training. The mechanisms used to generate and consume this data have an important effect on the performance of RL algorithms. In this paper, we introduce Reverb: an efficient, extensible, and easy to use system designed specifically for experience replay in RL. Reverb is designed to work efficiently in distributed configurations with up to thousands of concurrent clients. The flexible API provides users with the tools to easily and accurately configure the replay buffer. It includes strategies for selecting and removing elements from the buffer, as well as options for controlling the ratio between sampled and inserted elements. This paper presents the core design of Reverb, gives examples of how it can be applied, and provides empirical results of Reverb's performance characteristics.},
+	urldate = {2022-03-29},
+	journal = {arXiv:2102.04736 [cs]},
+	author = {Cassirer, Albin and Barth-Maron, Gabriel and Brevdo, Eugene and Ramos, Sabela and Boyd, Toby and Sottiaux, Thibault and Kroiss, Manuel},
+	month = feb,
+	year = {2021},
+	note = {arXiv: 2102.04736},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing, Computer Science - Machine Learning},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/4CU7QZSZ/Cassirer et al. - 2021 - Reverb A Framework For Experience Replay.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/F3Z3CZJM/2102.html:text/html},
+}
+
+@article{yang_launchpad_2021,
+	title = {Launchpad: {A} {Programming} {Model} for {Distributed} {Machine} {Learning} {Research}},
+	shorttitle = {Launchpad},
+	url = {http://arxiv.org/abs/2106.04516},
+	abstract = {A major driver behind the success of modern machine learning algorithms has been their ability to process ever-larger amounts of data. As a result, the use of distributed systems in both research and production has become increasingly prevalent as a means to scale to this growing data. At the same time, however, distributing the learning process can drastically complicate the implementation of even simple algorithms. This is especially problematic as many machine learning practitioners are not well-versed in the design of distributed systems, let alone those that have complicated communication topologies. In this work we introduce Launchpad, a programming model that simplifies the process of defining and launching distributed systems that is specifically tailored towards a machine learning audience. We describe our framework, its design philosophy and implementation, and give a number of examples of common learning algorithms whose designs are greatly simplified by this approach.},
+	urldate = {2022-03-29},
+	journal = {arXiv:2106.04516 [cs]},
+	author = {Yang, Fan and Barth-Maron, Gabriel and Stańczyk, Piotr and Hoffman, Matthew and Liu, Siqi and Kroiss, Manuel and Pope, Aedan and Rrustemi, Alban},
+	month = jun,
+	year = {2021},
+	note = {arXiv: 2106.04516},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing, Computer Science - Machine Learning},
+	file = {arXiv Fulltext PDF:/Users/magnus/Zotero/storage/P3CPE6VE/Yang et al. - 2021 - Launchpad A Programming Model for Distributed Mac.pdf:application/pdf;arXiv.org Snapshot:/Users/magnus/Zotero/storage/QZCQ5ZGW/2106.html:text/html},
 }
