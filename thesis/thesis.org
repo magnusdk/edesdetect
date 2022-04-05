@@ -66,11 +66,11 @@ To export to a PDF, run these commands in a scratch buffer:
 
 \chapter{Methodology}
 #+INCLUDE: parts/methodology.org
+#+INCLUDE: parts/experiments.org
 
 \part{Conclusion}
 
 \chapter{Results}
-
 
 \backmatter{}
 
