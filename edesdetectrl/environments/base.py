@@ -33,10 +33,10 @@ class BinaryClassificationBaseEnv(gym.Env):
         observation = self.get_observation(self)
         return observation
 
-    def step(self, action):
+    def step(self, action, done=False, reward=None):
         assert self.is_ready(), "Video must be set."
 
-        reward = self.get_reward(self, action)
+        reward = reward if reward else self.get_reward(self, action)
         info = {
             "ground_truth": self.video.ground_truth[
                 self.current_frame - self.video.ground_truth_start
@@ -52,7 +52,8 @@ class BinaryClassificationBaseEnv(gym.Env):
         ):
             self.current_frame += 1
         done = (
-            self.current_frame >= self.video.ground_truth_end
+            done
+            or self.current_frame >= self.video.ground_truth_end
             or (self.current_frame + self.pad_right + 1) >= self.video.total_length
         )
         observation = self.get_observation(self)
