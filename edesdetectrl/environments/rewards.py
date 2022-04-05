@@ -2,6 +2,8 @@ from typing import Sequence
 
 from edesdetectrl.environments.base import BinaryClassificationBaseEnv
 
+MOVEMENT_REWARD = float(-0.1)
+
 
 def proximity_reward_impl(prediction: int, frame: int, ground_truth: Sequence[int]):
     # Find the frame difference between the current frame and the first ground truth that
@@ -43,7 +45,7 @@ def proximity_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float
     If it was 5 frames before then the reward would be -4. Distance of 6
     gives -5, etc."""
     if prediction not in (0, 1):
-        return 0.0
+        return MOVEMENT_REWARD
     ground_truth_frame = env.current_frame - env.video.ground_truth_start
     return proximity_reward_impl(prediction, ground_truth_frame, env.video.ground_truth)
 
@@ -51,4 +53,8 @@ def proximity_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float
 def simple_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float:
     """Return 1.0 if the prediction was correct, else 0.0."""
     ground_truth_frame = env.current_frame - env.video.ground_truth_start
-    return 1.0 if prediction == env.video.ground_truth[ground_truth_frame] else 0.0
+    return (
+        1.0
+        if prediction == env.video.ground_truth[ground_truth_frame]
+        else MOVEMENT_REWARD
+    )
