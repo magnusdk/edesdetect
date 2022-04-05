@@ -197,4 +197,5 @@ class EDESMModeClassification_v0(DataIteratorMixin, EDESMModeClassificationBase_
 gym.register(
     id="EDESMModeClassification-v0",
     entry_point="edesdetectrl.environments.m_mode_binary_classification:EDESMModeClassification_v0",
+    max_episode_steps=200,
 )
