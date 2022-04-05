@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Iterable, Optional, Tuple
 
 import numpy as np
+from jax import random
 
 
 @dataclass
@@ -193,6 +194,7 @@ class MModeLine:
 
     @staticmethod
     def from_shape(
+        rng_key: random.KeyArray,
         width: float,
         height: float,
         relative_line_length: float = 0.5,
@@ -205,6 +207,15 @@ class MModeLine:
         line_length = video_diag_length * relative_line_length
         bounds = Bounds.from_shape((width, height))
         line = Line.center_of_bounds(bounds, line_length)
+        for _ in range(1000):
+            rng_key, k1, k2 = random.split(rng_key, 3)
+            line = line.rotate(random.uniform(k1, minval=-np.pi, maxval=np.pi))
+            line = line.move_horizontally(
+                min(width, height) * random.uniform(k2, minval=-0.2, maxval=0.2)
+            )
+            if bounds.is_within(line):
+                break
+
         assert bounds.is_within(
             line
         ), "Line must be within the bounds of the video. Try adjusting relative_line_length."

@@ -14,6 +14,7 @@ from edesdetectrl.environments.m_mode_binary_classification.render import (
     render_observation,
 )
 from gym import spaces
+from jax import random
 from jax._src.random import KeyArray
 
 actions = {
@@ -95,6 +96,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     def __init__(
         self,
         get_reward: Union[RewardFn, Literal["simple", "proximity"]],
+        rng_key: KeyArray,
     ):
         get_reward = (
             rewards.simple_reward
@@ -106,6 +108,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         super().__init__(
             N_PADDING, N_PADDING, get_overview_and_mmode_observation, get_reward
         )
+        self.rng_key = rng_key
         self.action_space = spaces.Discrete(N_ACTIONS)
         self.action_space.dtype = np.int32
 
@@ -124,7 +127,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         self.observation_space = spaces.Tuple([overview_space, m_mode_space])
 
         self.mmode_line = MModeLine.from_shape(
-            WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
+            self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
         )
 
     def step(self, action):
@@ -149,8 +152,9 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
 
     def reset(self):
         self.mmode_line = MModeLine.from_shape(
-            WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
+            self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
         )
+        (self.rng_key,) = random.split(self.rng_key, 1)
         return BinaryClassificationBaseEnv.reset(self)
 
     def render(self, mode="rgb_array"):
@@ -164,10 +168,13 @@ class EDESMModeClassification_v0(DataIteratorMixin, EDESMModeClassificationBase_
         self,
         dataloader: Union[dataloaders.DataLoader, Literal["echonet"]],
         get_reward: Union[RewardFn, Literal["simple", "proximity"]],
-        rng_key: Optional[KeyArray] = None,
+        rng_key: KeyArray,
+        dataloader_rng_key: Optional[KeyArray] = None,
     ):
-        EDESMModeClassificationBase_v0.__init__(self, get_reward)
-        DataIteratorMixin.__init__(self, dataloader, N_PADDING, N_PADDING, rng_key)
+        EDESMModeClassificationBase_v0.__init__(self, get_reward, rng_key)
+        DataIteratorMixin.__init__(
+            self, dataloader, N_PADDING, N_PADDING, dataloader_rng_key
+        )
 
     def reset(self):
         self.next_video_and_labels()

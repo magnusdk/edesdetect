@@ -65,23 +65,34 @@ class ExperimentConfig:
 
 def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
     def environment_factory(is_eval: bool, split="TRAIN"):
-        if experiment_config.environment == "VanillaBinaryClassification-v0":
-            import edesdetectrl.environments.vanilla_binary_classification
-        elif experiment_config.environment == "EDESMModeClassification-v0":
-            import edesdetectrl.environments.m_mode_binary_classification
-
+        nonlocal rng_key
         if experiment_config.dataloader == "echonet":
             dataloader = Echonet(split)
         elif experiment_config.dataloader == "echotiming":
             dataloader = EchoTiming(split)
-        env = util_dm_env.GymWrapper(
-            gym.make(
+
+        if experiment_config.environment == "VanillaBinaryClassification-v0":
+            import edesdetectrl.environments.vanilla_binary_classification
+
+            env = gym.make(
                 experiment_config.environment,
                 dataloader=dataloader,
                 get_reward=experiment_config.reward_spec,
                 rng_key=rng_key if split == "TRAIN" else None,
             )
+        elif experiment_config.environment == "EDESMModeClassification-v0":
+            import edesdetectrl.environments.m_mode_binary_classification
+
+            rng_key, dataloader_rng_key = jax.random.split(rng_key)
+            env = gym.make(
+                experiment_config.environment,
+                dataloader=dataloader,
+                get_reward=experiment_config.reward_spec,
+                rng_key=rng_key,
+                dataloader_rng_key=dataloader_rng_key if split == "TRAIN" else None,
         )
+
+        env = util_dm_env.GymWrapper(env)
 
         if is_eval:  # Evaluation expects a dictionary with some additional information.
             return {
