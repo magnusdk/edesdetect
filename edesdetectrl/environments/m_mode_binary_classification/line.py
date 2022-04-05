@@ -84,6 +84,13 @@ class Line:
         top = half_height + half_line_length
         return Line(half_width, bottom, half_width, top)
 
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Line):
+            self_coords = (self.x1, self.y1, self.x2, self.y2)
+            other_coords = (other.x1, other.y1, other.x2, other.y2)
+            return isinstance(other, Line) and (self_coords == other_coords)
+
 
 @dataclass
 class Bounds:
