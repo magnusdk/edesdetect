@@ -133,6 +133,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     def step(self, action):
         action_name = iactions[action.tolist()]
 
+        old_line = self.mmode_line.line
         if action_name == "UP":
             self.mmode_line.move_vertically(-STEP_SIZE)
         elif action_name == "DOWN":
@@ -146,9 +147,21 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         elif action_name == "ROTATE_RIGHT":
             self.mmode_line.rotate(-ROTATION_AMOUNT)
 
+        # Move the line to a random position and give penalty if agent moves out of bounds
+        reward = None
+        if old_line == self.mmode_line.line and action_name not in (
+            "DIASTOLE",
+            "SYSTOLE",
+        ):
+            reward = float(-1)
+            self.mmode_line = MModeLine.from_shape(
+                self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
+            )
+            (self.rng_key,) = random.split(self.rng_key, 1)
+
         # Sanitize action value by converting to action_name and back to the canonical representation (integer)
         action = actions[action_name]
-        return BinaryClassificationBaseEnv.step(self, action)
+        return BinaryClassificationBaseEnv.step(self, action, reward=reward)
 
     def reset(self):
         self.mmode_line = MModeLine.from_shape(
