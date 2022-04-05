@@ -55,6 +55,9 @@ class Evaluator(core.Worker):
         print(
             "TODO: This is too hacky. How to ensure that state is not all zeros before starting to evaluate?"
         )
+        import time
+
+        time.sleep(5 * 60)  # 5 minutes
         self.actor.update(wait=True)
         print("Starting to evaluate now.")
 
@@ -101,7 +104,7 @@ def get_evaluator_factory(
     builder: builders.GenericActorLearnerBuilder,
     policy_factory: PolicyFactory,
     logger_fn,
-    log_params_artifact:bool = False,
+    log_params_artifact: bool = False,
 ) -> types.EvaluatorFactory:
     """Returns a default evaluator process."""
 

@@ -32,6 +32,7 @@ from edesdetectrl.dataloaders.echotiming import EchoTiming
 from edesdetectrl.nets import (
     mobilenet,
     overview_and_m_mode_nets,
+    overview_and_m_mode_nets_mmode,
     simple_dqn_network,
     transform,
 )
@@ -50,6 +51,7 @@ class ExperimentConfig:
         "simple",
         "mobilenet",
         "m_mode_simple",
+        "m_mode_mobilenet",
     ] = "mobilenet"
 
     reward_spec: Literal[
@@ -90,7 +92,7 @@ def get_environment_factory(experiment_config: ExperimentConfig, rng_key):
                 get_reward=experiment_config.reward_spec,
                 rng_key=rng_key,
                 dataloader_rng_key=dataloader_rng_key if split == "TRAIN" else None,
-        )
+            )
 
         env = util_dm_env.GymWrapper(env)
 
@@ -114,6 +116,8 @@ def get_network_factory(experiment_config: ExperimentConfig):
             return transform(env_spec, mobilenet(env_spec))
         elif experiment_config.network == "m_mode_simple":
             return transform(env_spec, overview_and_m_mode_nets(env_spec))
+        elif experiment_config.network == "m_mode_mobilenet":
+            return transform(env_spec, overview_and_m_mode_nets_mmode(env_spec))
 
     return network_factory
 
@@ -134,7 +138,7 @@ def main(experiment_config: ExperimentConfig, dqn_config: DQNConfig):
             network_factory=get_network_factory(experiment_config),
             config=dqn_config,
             seed=dqn_config.seed,
-            num_actors=dqn_config.num_actors, # Default was 6
+            num_actors=dqn_config.num_actors,  # Default was 6
             tracking_uri=tracking_id,
             experiment=experiment_config.experiment_name,
             run_id=run_id,
@@ -158,22 +162,22 @@ def main(experiment_config: ExperimentConfig, dqn_config: DQNConfig):
 if __name__ == "__main__":
     main(
         ExperimentConfig(
-            experiment_name="VanillaBinaryClassification",
-            environment="VanillaBinaryClassification-v0",
-            network="mobilenet",
-            reward_spec="simple",
+            experiment_name="MModeBinaryClassification2",
+            environment="EDESMModeClassification-v0",
+            network="m_mode_mobilenet",
+            reward_spec="proximity",
             dataloader="echonet",
         ),
         DQNConfig(
-            epsilon=1,
+            epsilon=0.2,
             learning_rate=1e-3,
-            discount=0,
-            n_step=1,
+            discount=0.95,
+            n_step=4,
             min_replay_size=10000,
             num_sgd_steps_per_step=8,
             batch_size=1024,
             seed=42,
-            num_actors=8,
+            num_actors=12,
         ),
     )
 

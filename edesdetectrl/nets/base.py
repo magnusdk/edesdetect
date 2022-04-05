@@ -43,7 +43,7 @@ def generate_dummy_observation(env_spec_observations):
     if isinstance(env_spec_observations, tuple):
         dummy_obs = [o.generate_value() for o in env_spec_observations]
         batched_dummy_obs = [jnp.expand_dims(o, 0) for o in dummy_obs]
-        return batched_dummy_obs
+        return tuple(batched_dummy_obs)
     else:
         dummy_obs = env_spec_observations.generate_value()
         batched_dummy_obs = jnp.expand_dims(dummy_obs, 0)
