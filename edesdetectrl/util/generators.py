@@ -29,6 +29,9 @@ def async_buffered(
     # Just a local helper function
     def async_put_next():
         next_item = next(task_gen)
+        while next_item == SKIP_ITEM:
+            next_item = next(task_gen)
+
         if next_item != SKIP_ITEM:
             task_fn, args = next_item
             future = task_executor.submit(task_fn, *args)
