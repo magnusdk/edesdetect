@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import numpy as np
 from edesdetectrl.dataloaders import GroundTruth
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage import gaussian_filter1d
 
 
 def next_peak(x, start_i):
@@ -43,10 +43,9 @@ def label_frames(video, ed_i, es_i, p=0.75) -> Tuple[List[GroundTruth], int, int
     higher weight means we will look further into the "unknown", further out towards the
     previous or next maximum difference from a keyframe.
     """
-    # Blur frames a bit to make difference more robust
-    video = [gaussian_filter(frame, sigma=2) for frame in video]
-    ed_i_diff = np.sum((video - video[ed_i]) ** 2, axis=(1, 2))
-    es_i_diff = np.sum((video - video[es_i]) ** 2, axis=(1, 2))
+    # Blur difference a bit to make it more robust
+    ed_i_diff = gaussian_filter1d(np.sum((video - video[ed_i]) ** 2, axis=(1, 2)), 5)
+    es_i_diff = gaussian_filter1d(np.sum((video - video[es_i]) ** 2, axis=(1, 2)), 5)
 
     # Either ED is labeled first, or ES is. The code logic is the same, but different
     # labels have to be returned -- i.e.: it's almost copy-paste in the two clauses below.
