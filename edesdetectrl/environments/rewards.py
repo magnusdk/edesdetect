@@ -2,7 +2,7 @@ from typing import Sequence
 
 from edesdetectrl.environments.base import BinaryClassificationBaseEnv
 
-MOVEMENT_REWARD = float(-0.1)
+MOVEMENT_REWARD = 0.0  # float(-0.1)
 
 
 def proximity_reward_impl(prediction: int, frame: int, ground_truth: Sequence[int]):
@@ -51,10 +51,9 @@ def proximity_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float
 
 
 def simple_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float:
-    """Return 1.0 if the prediction was correct, else 0.0."""
+    """Return 1.0 if the prediction was correct, else -1.0."""
     ground_truth_frame = env.current_frame - env.video.ground_truth_start
-    return (
-        1.0
-        if prediction == env.video.ground_truth[ground_truth_frame]
-        else MOVEMENT_REWARD
-    )
+    if prediction not in (0, 1):
+        return MOVEMENT_REWARD
+    return 1.0 if prediction == env.video.ground_truth[ground_truth_frame] else -1.0
+
