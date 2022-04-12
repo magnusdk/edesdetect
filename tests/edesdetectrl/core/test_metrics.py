@@ -27,3 +27,13 @@ def test_nearest_same_event():
     assert (7, 0) == metrics.nearest_same_event(
         e0, [Event(0, 0), Event(2, 1), Event(7, 0)]
     )
+
+
+def test_gaafd():
+    assert 0 == metrics.gaafd([], [])
+    assert 0 == metrics.gaafd([0, 0, 1, 1, 0, 0], [0, 0, 1, 1, 0, 0])
+    assert 1 == metrics.gaafd([0,1,0,1,0,1], [1,0,1,0,1,0])
+    assert 0 == metrics.gaafd([0], [])
+    assert 0 == metrics.gaafd([], [0])
+    assert 1.5 == metrics.gaafd([0,1,0], [])
+    assert 1.5 == metrics.gaafd([], [0,1,0])

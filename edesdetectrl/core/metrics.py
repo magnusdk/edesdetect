@@ -25,7 +25,9 @@ def get_events(labels):
             yield Event(index=i, label=l1)
 
 
-def dist(e0, e1):
+def dist(e0, e1, default=None):
+    if e0 is None or e1 is None:
+        return default
     return abs(e0.index - e1.index)
 
 
@@ -42,23 +44,25 @@ def nearest_same_event(e0, other_events):
     return closest_e
 
 
-# TODO: WIP!!
-def soft_average_absolute_frame_difference(ground_truths, predictions):
-    """Average Absoluted Frame Difference (aaFD) that also works when there are a different number of predictions and ground truths.
+def gaafd(ground_truths, predictions):
+    gt_events = list(get_events(ground_truths))
+    pred_events = list(get_events(predictions))
 
-    For every predicted event find the closest corresponding ground truth event.
-    Sum the frame differences.
-    Divide by the number of ground truth events.
+    if (len(gt_events) + len(pred_events)) == 0:
+        return 0.0
 
-    Pros: Having more falsely predicted events cause the aaFD to get higher (worse)
-    Cons: Having less predicted events that ground truth events causes the aaFD to approach zero (better). This is not right.
-    """
-    ground_truth_events = list(get_events(ground_truths))
-    prediction_events = list(get_events(predictions))
+    s = 0.0
+    for e in gt_events:
+        s += dist(
+            e,
+            nearest_same_event(e, pred_events),
+            min(e.index + 1, len(ground_truths) - e.index),
+        )
+    for e in pred_events:
+        s += dist(
+            e,
+            nearest_same_event(e, gt_events),
+            min(e.index + 1, len(predictions) - e.index),
+        )
 
-    sum_differences = 0
-    for event in prediction_events:
-        nearest = nearest_same_event(event, ground_truth_events)
-        sum_differences += dist(event, nearest)
-
-    return sum_differences / len(ground_truth_events)
+    return s / (len(gt_events) + len(pred_events))
