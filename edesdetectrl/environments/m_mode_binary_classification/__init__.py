@@ -96,7 +96,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     def __init__(
         self,
         get_reward: Union[RewardFn, Literal["simple", "proximity"]],
-        rng_key: KeyArray,
+        rng_key: Union[ int, KeyArray],
     ):
         get_reward = (
             rewards.simple_reward
@@ -105,6 +105,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
             if get_reward == "proximity"
             else get_reward
         )
+        rng_key = random.PRNGKey(rng_key) if isinstance(rng_key, int) else rng_key
         super().__init__(
             N_PADDING, N_PADDING, get_overview_and_mmode_observation, get_reward
         )
