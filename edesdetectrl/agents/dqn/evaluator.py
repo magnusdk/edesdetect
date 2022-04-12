@@ -14,6 +14,7 @@ from acme.utils import counting
 from acme.utils.loggers import base
 from edesdetectrl.agents.dqn import loggers
 from edesdetectrl.environments import generate_trajectory_using_actor
+from edesdetectrl.environments.m_mode_binary_classification import iactions
 from edesdetectrl.util import gpu
 
 
@@ -24,12 +25,19 @@ def evaluate_and_get_metrics(
 ):
     # Evaluate actor on all samples
     all_metrics = []
+    all_action_distributions = []
     for _ in range(num_samples):
         trajectory = generate_trajectory_using_actor(environment, actor)
         all_metrics.append(trajectory.balanced_accuracy())
+        all_action_distributions.append(trajectory.action_distribution())
 
     # Return averaged metrics
-    return np.mean(all_metrics)
+    action_distribution = {}
+    for distr in all_action_distributions:
+        for k, v in distr.items():
+            action_distribution[k] = v + action_distribution.get(k, 0)
+    action_distribution = {k: v / num_samples for k, v in action_distribution.items()}
+    return np.mean(all_metrics), action_distribution
 
 
 class Evaluator(core.Worker):
@@ -57,7 +65,7 @@ class Evaluator(core.Worker):
         )
         import time
 
-        time.sleep(5 * 60)  # 5 minutes
+        time.sleep(0.2 * 60)  # 5 minutes
         self.actor.update(wait=True)
         print("Starting to evaluate now.")
 
@@ -76,15 +84,23 @@ class Evaluator(core.Worker):
                 util_mlflow.log_artifact(self.actor._params, f"params_{learner_steps}")
 
             time_before = time.time()
-            balanced_accuracy = evaluate_and_get_metrics(
+            balanced_accuracy, action_distribution = evaluate_and_get_metrics(
                 self.actor, num_samples, environment
             )
+
+            # It's a code-smell to depend on m-mode env for getting the names of 
+            # actions, but deadline is approaching and this works.
+            presented_action_distribution = {
+                (split + "_" + iactions[k]): v for k, v in action_distribution.items()
+            }
+
             elapsed_seconds = time.time() - time_before
             result = {
                 (split + "_elapsed_seconds"): elapsed_seconds,
                 (split + "_episodes_per_second"): (2 * num_samples) / elapsed_seconds,
                 (split + "_balanced_accuracy"): balanced_accuracy,
                 "learner_steps": learner_steps,
+                **presented_action_distribution,
             }
 
             self.logger.write(result)
