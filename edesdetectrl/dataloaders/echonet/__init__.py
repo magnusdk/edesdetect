@@ -113,13 +113,24 @@ def _get_filenames(filelist_csv_file, split=None):
     ]
 
 
-def _get_item_impl(filename: str, ed_frame: int, es_frame: int) -> dataloaders.DataItem:
+def _get_item_impl(filename: str, tracing: pd.DataFrame) -> dataloaders.DataItem:
     video = loadvideo(filename)
     # Normalize pixel intensities (smallest always 0, biggest always 1)
     video = video - video.min()
     video = video / video.max()
     video = video.astype(np.float32)
 
+    # Calculate volume "proxies", i.e., not the actual volumes, but something that we
+    # can use to compare volumes to find the biggest one.
+    volume_proxies = []
+    for frame, lines in tracing.groupby("Frame"):
+        x1, y1, x2, y2 = lines["X1"], lines["Y1"], lines["X2"], lines["Y2"]
+        volume_proxy = np.sum(np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+        volume_proxies.append((frame, volume_proxy))
+    ed_frame = max(volume_proxies, key=lambda x: x[1])[0]
+    es_frame = min(volume_proxies, key=lambda x: x[1])[0]
+
+    # Label the frames of the video given the ED and ES frame
     ground_truth, start, end = lf.label_frames(video, ed_frame, es_frame)
 
     return dataloaders.DataItem.from_video_and_ground_truth(
@@ -145,10 +156,6 @@ class Echonet(dataloaders.DataLoader):
         filename = key if isinstance(key, str) else self.keys[key]
         traces = self.volumetracings_df.loc[filename]
 
-        # Traces are sorted by cross-sectional area (reference: https://github.com/echonet/dynamic/blob/master/echonet/datasets/echo.py#L213)
-        # Largest (diastolic) frame is first, smallest (systolic) frame is last
-        ed, es = int(traces.iloc[0]["Frame"]), int(traces.iloc[-1]["Frame"])
-
         task_fn = _get_item_impl
-        args = (self.videos_dir + filename, ed, es)
+        args = (self.videos_dir + filename, traces)
         return task_fn, args
