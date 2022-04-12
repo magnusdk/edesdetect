@@ -88,8 +88,9 @@ class DQNBuilder(builders.ActorLearnerBuilder):
             self._config.learning_rate,
             {
                 5000: 0.1,
-                10000: 0.1,
-                15000: 0.5,
+                15000: 0.1,
+                25000: 0.1,
+                35000: 0.1,
             },
         )
         optimizer = optax.adam(learning_rate_schedule)
