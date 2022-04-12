@@ -26,11 +26,11 @@ def proximity_reward_impl(prediction: int, frame: int, ground_truth: Sequence[in
 
     # Return the lowest frame difference.
     if closest_left is not None and closest_right is not None:
-        return float(1 - min(closest_left, closest_right))
+        return -float(min(closest_left, closest_right))
     elif closest_left is not None:
-        return float(1 - closest_left)
+        return -float(closest_left)
     elif closest_right is not None:
-        return float(1 - closest_right)
+        return -float(closest_right)
     else:  # There are no ground truth for the prediction in this sequence — give big penalty.
         return float(-len(ground_truth))
 
