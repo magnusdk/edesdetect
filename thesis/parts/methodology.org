@@ -70,18 +70,12 @@ The agent has a policy $\pi(a|s)$, which, given a state $s$ (which is just the o
 
 
 ** Agent Architecture
-The experiments in the next chapter all use a Deep Q-Network (DQN) RL architecture with Prioritized Replay, N-Step returns, and Double Q-Learning. It uses an $\epsilon$-greedy policy to facilitate exploration.
+The experiments in the next chapter all use a Deep Q-Network (DQN) RL architecture with Prioritized Replay, N-Step returns, and Double Q-Learning. It uses an $\epsilon$ greedy policy to facilitate exploration.
 
 For the Q-network, two architectures are explored:
 
 1. A simple CNN with few layers, inspired by the Atari DQN paper (TODO: citation).
 2. MobileNet-v1: a bigger and more complex CNN that uses batch normalization.
-
-
-- DQN with Prioritized replay and Double Q-learning.
-- Is offline policy so it is easy to scale up to distributed training
-- Neural network
-
 
 
 ** Distributed Training
@@ -100,6 +94,11 @@ Reverb helps maintain this balance through rate limiters. We use a rate limiter 
 TODO: Write about why we chose DQN, what alternatives we considered, etc.
 
 ** Discussion
+Under the hood, the DQN algorithm is solving a regression problem. Given a state, the model predicts the expected future returns after taking a given action. 
+
+
+
+
 TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
 - How is this similar to regular supervised learning classification problem?
   - DQN predicts expected future returns of taking an action. We can set up a supervised learning regression problem that predicts the same thing

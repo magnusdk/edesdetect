@@ -1,6 +1,5 @@
 #+BIBLIOGRAPHY: ../main plain
 
-* Reinforcement Learning in Medical Imaging
 RL has seen many medical imaging applications in the last decade, especially in the last five years \cite{zhou_deep_2021}. One of the main challenges of applying RL is formulating the problem to fit into the RL framework of states, actions, and transition and reward function. Out of these four elements, the reward function is usually the most difficult to get right.
 
 One way to formulate the problem is as a search through parameter space. Here, the actions are defined as taking a single step along one of the parameter dimensions. The reward function could be how much closer the agent got to the optimal solution after taking a step (the state and transition function definitions vary depending on the problem). This formulation has been applied to many different medical imaging problems, including that of landmark detection.
@@ -37,14 +36,6 @@ Not all problems fit into this formulation, however. Video summarization is the 
 - $\mathcal{R}_{div}$: the diversity of the frames, incentivizing selecting frames that are different from each other such that the summarization will be more representative of the whole session.
 
 The action space consists of only two actions: include the current frame or do not include the current frame in the video summary. By using this very simple action-space formulation, and a set of high-level rewards, the agent is still able to achieve good performance. The agent’s predicted summary scores $62.08$ in precision and $64.54$ in recall compared to a user annotated summary.
-
-
-
-
-TODOs:
-- [ ] Experiment with also including the m-mode line state from the previous 3 frames, to attempt to decrese chance of getting stuck in loops.
-
-
 
 
 

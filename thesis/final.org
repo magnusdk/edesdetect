@@ -1,0 +1,789 @@
+#+BEGIN_COMMENT
+To export to a PDF, run these commands in a scratch buffer:
+(add-to-list 'org-latex-classes
+  '("ifimaster"
+     "\\documentclass[UKenglish]{ifimaster/ifimaster}
+      \\usepackage[UKenglish]{ifimaster/uiomasterfp}
+      [NO-DEFAULT-PACKAGES]
+      [PACKAGES]
+      [EXTRA]"
+     ("\\section{%s}" . "\\section*{%s}")
+     ("\\subsection{%s}" . "\\subsection*{%s}")
+     ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
+(setq org-latex-with-hyperref nil)
+
+...followed by calling the command =org-latex-export-to-pdf=.
+#+END_COMMENT
+
+
+#+BIBLIOGRAPHY: main plain
+#+LATEX_CLASS: ifimaster
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[T1]{fontenc,url}
+#+LATEX_HEADER: \urlstyle{sf}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage{babel,textcomp,csquotes,graphicx}
+#+LATEX_HEADER: \usepackage[nospace]{varioref}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage[backend=biber,style=numeric-comp]{biblatex}
+#+LATEX_HEADER: \bibliography{main} 
+
+#+OPTIONS: toc:nil title:nil author:nil date:nil
+
+\uiomasterfp[
+  title=Exploring Reinforcement Learning for End-Diastolic and End-Systolic Frame Detection,
+  subtitle=or: How I Learned to Stop Worrying and Love the Bomb,
+  author=Magnus Dalen Kvalevåg,
+  fac=The Faculty of Mathematics and Natural Sciences,
+  dept=Department of Informatics,
+]
+
+\frontmatter{}
+\chapter*{Abstract}
+#+INCLUDE: parts/abstract.org
+
+\tableofcontents{}
+\listoffigures{}
+\listoftables{}
+
+\chapter*{Preface}
+
+
+\mainmatter{}
+
+
+
+\part{Introduction}
+\chapter{Introduction}
+
+* Motivation
+Cardiovascular disease is the number one cause of death globally, taking an estimated 17.9 million lives each year \cite{noauthor_cardiovascular_nodate}. It is important to make a timely diagnosis so that patients may receive early treatment or for risk factor management. One standard tool used for diagnosis is cardiac imaging; non-invasive imaging of the heart.
+
+In order to obtain images of the heart, clinicians use tools such as Magnetic Resonance Imaging (MRI), Computerized Tomography (CT) scans, or ultrasound. MRI and CT are not routinely used due to being expensive, having limited availability and a prolonged acquisition time, and using radiation for CT scans. Furthermore, both MRI and CT scans can not be performed if the patient has any metal in their body, such as a pacemaker or metal implants. Ultrasound, on the other hand, is cheap and flexible. There even exists handheld devices that can be carried by hand and brought on-site. Ultrasound does have a lower imaging quality compared to, for example, MRI \cite{mordi_efficacy_2017}, and the images can be difficult to interpret due to ultrasound-specific artifacts. Despite this, it is still preferable in many cases because of the aforementioned reasons.
+
+Many heart measurements depend on two key events in the cardiac cycle: End-Diastole (ED) and End-Systole (ES). Roughly speaking, ED is when the heart is the most relaxed, and ES is when it is the most contracted. Left ventricular ejection fraction is an example of an important measurement that is calculated using ED and ES.
+
+There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite{mada_razvan_o_how_2015}:
+1. Finding the frame with the maximum left ventricle volume (for ED) and the frame with the minimum left ventricle volume (for ES).
+2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
+3. Analyzing a simultaneously acquired Electrocardiogram (ECG) signal.
+
+Out of these three, using the ECG signal is the least preferable. This is because the methods for detecting the ED and ES frame may become unreliable when given an unconventional ECG signal, such as from patients with cardiomyopathy or regional wall motion abnormalities \cite{mada_razvan_o_how_2015}. Acquiring an ECG signal also requires applying electrodes to the patient, which is not ideal in emergency settings.
+
+The other two methods, examining the aortic valve closure and finding the frame of maximum and minimum left ventricle volume, are both visual tasks and can be very time-consuming and laborious if done manually. A recent study has reported that the average time taken for manually annotating ED and ES frames from a video of 1 to 3 heartbeats is 26 seconds, with a standard deviation of $\pm 11$ seconds \cite{lane_multibeat_2021}. Furthermore, because there is not much movement around these frames, the predicted ED and ES frames may differ between different operators. It may even differ for the same operator predicting on the same video at different times. For these reasons automating ED/ES frame detection is desirable because it reduces time and creates a more robust and deterministic result.
+
+Machine learning methods show promising results on several tasks within medical imaging, as is explored in the following chapter. For ED/ES frame detection, most recent methods revolve around the use of Supervised Deep Learning, a family of methods in which a computer program is shown examples of correct predictions and over time learns to make the correct predictions itself. Reinforcement Learning (RL) is another family of methods that has as of yet not been explored for the problem of ED/ES frame detection. RL is able to outperform humans in complex tasks, such as mastering the board game Go in 2016 \cite{silver_mastering_2016} or becoming among the 0.2% best players in the world in the video game Starcraft II \cite{vinyals_grandmaster_2019}. However, RL can do more than just play games, and many medical imaging applications also show promising potential \cite{zhou_deep_2021}.
+
+
+* Goal and Research Question
+The goal of this Master’s project is to explore the use of RL for automatically detecting the ED and ES frames from an ultrasound video. From a healthcare perspective it is interesting because it may open the doors for better automated tools. Yet, it is arguably more interesting from a research perspective because RL is not an obvious choice for this task. RL is built for tasks that require strategic reasoning, but ED/ES frame detection is fundamentally a classification problem. Of importance to all types of machine learning is formulating the problem in a way that makes it easier to learn for the computer. That is, optimizing the /inductive bias/ by incorporating human knowledge into the algorithm itself. Using RL for ED/ES frame detection may open up possibilities of seeing the problem from a new perspective, allowing us the add the right set of inductive bias.
+
+
+* Limitations of the Work
+
+
+* Thesis Structure
+What are in each chapter...
+
+
+
+\chapter{Background}
+* The Cardiac Cycle
+(Taken from Wikipedia, are there any good citations I could use, or is it even needed for something as fundamental as this?)
+
+The human heart is situated in the middle compartement of the chest, between the lungs. Blood is used for transporting oxygen and essential nutrients throughout the body and carry metabolic waste such as carbon dioxide to the lungs, and the heart is responsible for keeping the blood flowing by acting as a pump.
+
+The heart consists of two halves, the left heart and the right heart. The left heart pumps newly oxinated blood from the lungs out to the rest of the body and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, is where the blood first enters the heart, and the lower chambers, the ventricles is where the blood exits the heart. Each chamber also have valves which are opened and closed during a cardiac cycle to help keep the blood flowing in one direction. 
+
+#+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Source: [[https://en.wikipedia.org/wiki/Atrium_(heart)]]
+#+NAME: fig:heart_diagram
+[[./img/heart_diagram.png]]
+
+During a cardiac cycle the different chambers are filled at different times. At the start of a new cycle, the left and right ventricles relax and are filled with blood coming from their respective atria. As the ventricles are filled with blood, the pressure increases which causes the valves from the atria to close. After this, the ventricles start contracting, pushing blood out from the heart. As the ventricle pressure decreases and the pressure in the aorta increases, the valve going out of the ventricle is closed. Blood flows into the atria before the cycle starts over.
+
+#+CAPTION: The cardiac cycle illustrated with the direction of blood flow and pressure from and into the atria and ventricles. Source: [[https://en.wikipedia.org/wiki/Heart]]
+#+NAME: fig:cardiac_cycle_heart_illustration
+[[./img/cardiac_cycle_heart_illustration.jpeg]]
+
+
+- Phases of the heart
+  - Wiggers diagram
+
+- Definition of ED/ES
+  - Using this, clinicians can make measuremetns ....
+
+
+* Echocardiography
+/Seeing/ is the act of sensing photons with our eyes. We can see the color of a curtain because photons that hit it and are reflected back into our eyes. A heart, being inside a body and all, can not be seen because light does not penetrate that deep, and thus is not reflected back into our eyes. To see the heart we need a signal that can penetrate the body just enough to reach the heart, but not so much as to completely penetrate the heart without sending back a reflection. As luck would have it — sound is such a signal.
+
+** What is Sound?
+What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
+
+#+NAME: fig:pressure_wave_propagation
+#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
+[[./img/pressure_wave_propagation.png]]
+
+*** Attributes of a Sine Wave
+A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
+
+#+NAME: fig:amp_freq_phase
+#+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
+[[./img/amp_freq_phase.png]]
+
+A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
+
+#+NAME: fig:freq_spectrum
+#+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
+[[./img/freq_spectrum.png]]
+
+#+NAME: fig:piano_clarinet_freqs
+#+CAPTION: It's the overtones that makes two instruments sound different, even while they are playing the same notes. To the left is the frequency spectrum of a piano and a clarinet from 150 to 450 hertz. To the right is the same frequency spectrum from 0 to 5000 hertz, in log$_{10}$ scale. Both instruments are playing the Am7 chord which consists of four notes. You can see the notes clearly in the left image, all having relatively high amplitudes for both instruments.
+[[./img/piano_clarinet_freqs.png]]
+
+*** Attributes of the Medium
+The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
+
+#+NAME: fig:conveyor_belt_speed_change
+#+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
+[[./img/conveyor_belt_speed_change.png]]
+
+
+#+NAME: fig:nonlinearity
+#+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
+[[./img/nonlinearity.png]]
+
+
+An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
+
+#+NAME: eqn:acoustic_impedance
+\begin{equation}
+Z=\rho\times c
+\end{equation}
+
+#+NAME: eqn:reflection_factor
+\begin{equation} 
+RF=\frac{Z_2-Z_1}{Z_2+Z_1}
+\end{equation}
+
+
+** Creating Images From Sound
+
+#+BEGIN_SRC python
+THE FOLLOWING ARE NOTES FOR THIS SECTION
+
+Delay signal
+one receiver only knows distance, not actual position.
+multiple receivers, distance to object varies
+summed together to make an image
+more advanced techniques are not covered in this thesis.
+
+To increase image quality and resolution multiple transmits can be made.
+Common is to focus the sound wave in a direction, creating sector scan.
+- Can take a long time because we have to wait for one transmit do finish 
+  before sending another one.
+This is called B-mode imaging
+
+Can also send a focused beam in just one line to get very high temporal 
+  resolution image.
+This is called M-mode imaging
+
+The heart is in the rib cage so it is hidden behind bones which reflect a 
+  lot of energy
+There are some standard views, usually between the rib cage bones, but also 
+  down throat and from within
+2-chamber, 4-chamber, etc...
+
+Weakness of ultrasound
+- Shadowing, phantoms(?), attenuation, bones in the way of the heart, etc... 
+#+END_SRC
+
+
+
+How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance which causes sound waves to be reflected when it hits them. Using this, we can send out a sound wave and listen for the reflections. By measuring how much time it took from the sound signal was sent out until its reflection is received back, and given that we know the approximate speed of sound, we can calculate the distance that the sound wave travelled until it hit the reflector. See equation [[eqn:reflector_distance_by_delay]]. Likewise, if we want to create a full image from the received sound signals, where we know which positions to image beforehand, we can lookup the received signal based on the distance to a given position. If we want to image position $(3, 4)$, and assuming that the sound was sent from position $(0,0)$, we know that the distance would have had to travel $5$ units. By using equation [[eqn:reflector_delay_by_distance]] we can find which part of the received signal corresponds to that position.
+
+#+CAPTION: By measuring the time between sending a signal and receiving it back from a reflector we can approximate how far away the reflector is — given that we know the approximate speed of sound.
+#+NAME: fig:sound_tx_rx
+[[./img/sound_tx_rx.png]]
+
+#+NAME: eqn:reflector_distance_by_delay
+\begin{equation}
+\text{distance} = \text{delay} \times c 
+\end{equation}
+
+#+NAME: eqn:reflector_delay_by_distance
+\begin{equation}
+\text{delay} = \frac{\text{distance}}{c} 
+\end{equation}
+
+An ultrasound transducer consists of many different receivers [fn:: An ultrasound transducer also consists of many different individual transmitter elements, but that is irrelevant for now.] and thus we can repeat the process of delay the signal for each receiver depending on the distance from the point we want to image to the position of the receiver. If we sum all the resulting images we get a final image of different reflectors in the are. This algorithm is called Delay-And-Sum.
+
+# TODO: Add table of the acoustic impedance of various human tissues.
+
+*Limitations*
+- attentuaion, resolution, speckles, shadowing, side-lobes 
+
+
+* Deep Learning
+** Gradient Descent
+Based on gradient descent.
+- What is gradient descent... How can we build models...
+- Models and Loss
+Try to build models that makes the problem easy to learn. inductive bias
+
+** Deep Neural Networks
+Activation functions
+Fully connected layers
+Convolutional layers
+Batch normalization
+(++ more used in Mobilenet?)
+
+** Optimization Process
+- SGD
+- Optimizers like ADAM
+- Overfitting and regularizers.
+
+** Supervised and Unsupervised Learning
+Basically two families of loss functions
+
+* Reinforcement learning
+ RL allows an agent to learn a strategy, called a policy, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
+
+At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
+
+- The state space $S$
+- The action space $A$
+- The transition function $P(s_{t+1}|s_t, a_t)$
+- The reward function $R(s_t, a_t)$
+
+An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state st and returns the probability of taking an action at: $\pi(a|s)\in[0,1]$.
+
+The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards:
+\[G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T\]
+
+where $T$ marks the timestep where the episode ends. However, some tasks are not episodic, which means they can, in theory, run forever. For this reason, we apply discounting to the return, giving greater weight to more immediate rewards and less weight to rewards in the far future:
+\[G_t=r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots = \sum_{k=0}^\infty \gamma^k r_{t+k+1} = r_{t} + \gamma G_{t+1}\]
+
+where $\gamma$ is the discounting factor. Discounting ensures that the return, which we are trying to maximize, can not be infinite, even when, in theory, the agent could go on forever.
+
+To select a good next action, the policy needs to know the value of states and actions. For this we could use the state value function $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the state-action value function $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive. The “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy is one of the possibly many policies that yield the maximum amount of total reward if followed.
+
+One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration:
+\[V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]\]
+
+$(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward r_{t+1}, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t) is called the TD-error. The lower the TD-error is, the better the RL agent is to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
+
+To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning:
+\[Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]\]
+
+Here the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
+
+In TD-learning, as the agent explores the environment and encounters new states, it has to store those states and their associated values. The same is true for Q-learning, but it also has to take state-action pairs into account, meaning that it has to store up to a number of $\|S\| \times \|A\|$ entries. That is fine when the state space and the action space are small but become infeasible when they are too big.
+
+The described way of storing and updating the values is called tabular methods because we treat the states, or state-action pairs, as entries in a table. Tabular methods break down when the state space or the action space becomes very large or even continuous. Creating RL algorithms that can handle very large or continuous action spaces is challenging \cite{zhou_deep_2021}. However, there exist methods that can scale RL to handle very large or continuous state spaces.
+
+** Deep Reinforcement Learning
+A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them. In practice, the vast majority of pixel permutations are not used, so we could ignore them, but the number of possible states would still be too high to explore exhaustively.
+
+The values of even such a large state space can be represented in much less data without losing much relevant information. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This allows the agent to generalize state value or state-action value functions to new not-before-seen states.
+
+A lot of today’s research into RL goes into scaling it up to a larger state space. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods", but they are not the only ones to do so. Policy gradient is another popular set of methods that is able to learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Only action-value methods are covered in this essay, but policy gradient methods will be considered for the final thesis.
+
+*** Deep Q-Network
+The modified Q-learning algorithm was termed Deep Q-Network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
+
+The original DQN algorithm takes the raw pixel values from an Atari game as input, followed by three convolutional layers and two fully connected layers. The final fully connected layer outputs one value for each possible action, approximating the expected value of taking each action given the state, i.e., $Q(s, a)$. An $\epsilon$-greedy policy then chooses either the action with the highest approximated value with probability $1 - \epsilon$ or a random action with probability $\epsilon$.
+
+The authors showed how the network is able to reduce the state space by applying a technique called "t-SNE" to the DQNs’ internal state representation. t-SNE is an unsupervised learning algorithm that maps high-dimensional data to points in a 2D or 3D map \cite{liao_artificial_2016}. As expected, the t-SNE algorithm tends to map the DQN representation of perceptually similar states to nearby points. Interestingly, it also maps representations that are perceptually dissimilar, but that are close in terms of expected rewards, to nearby points. This indicates that the network is able to learn a higher-level, but lower-dimensional, representation of the states in terms of expected reward. This is visualized in figure [[fig:dqn_atari_t_sne]].
+
+#+CAPTION: From \cite{mnih_human-level_2015}: "Two-dimensional t-SNE embedding of the representations in the last hidden layer assigned by DQN to game states experienced while playing Space Invaders. The plot was generated by letting the DQN agent play for 2 h of real game time and running the t-SNE algorithm on the last hidden layer representations assigned by DQN to each experienced game state. The points are coloured according to the state values (V, maximum expected reward of a state) predicted by DQN for the corresponding game states (ranging from dark red (highest V) to dark blue (lowest V)). The screenshots corresponding to a selected number of points are shown. The DQN agent predicts high state values for both full (top right screenshots) and nearly complete screens (bottom left screenshots) because it has learned that completing a screen leads to a new screen full of enemy ships. Partially completed screens (bottom screenshots) are assigned lower state values because less immediate reward is available. The screens shown on the bottom right and top left and middle are less perceptually similar than the other examples but are still mapped to nearby representations and similar values because the orange bunkers do not carry great significance near the end of a level. With permission from Square Enix Limited."
+#+NAME: fig:dqn_atari_t_sne
+[[./img/rl_dqn_tsne.jpeg]]
+
+Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, which leads to variance in the network updates. If a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target $y_j$ , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets $y_j$ in the Q-learning update.
+
+In experience replay, the agent’s experiences over multiple episodes are stored in a data set called the replay memory. Each experience item is a tuple consisting of the previous state, selected action, returned reward, and new state: $(s_t, a_t, r_t, s_{t+1})$. During training, randomly sampled batches from the replay memory are used to train the Q-network.
+
+Using a separate network for generating the targets $y_j$ in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets $y_j$, making the algorithm more stable and reducing the chance of oscillations or divergence.
+
+
+
+
+*** Double Deep Q-Network
+Several improvements have been made to DQN over the years. Q-learning has been shown to produce overly optimistic action values as a result of using the maximum action value as approximation for the maximum expected action value\cite{h_p_van_hasselt_hado_double_2010}. Double Q-learning attempts to reduce this overestimation by decomposing the target into an action selector and an action value estimator. The regular Q-learning target is written as:
+
+\[r_{t+1} + \gamma max_a Q(s_{t+1},a)\]
+
+This can be rewritten as:
+
+\begin{equation}
+r_{t+1} + \gamma Q^A(s_{t+1},argmax_a Q^B(s_{t+1},a))
+\end{equation}
+
+Where $Q^A$ acts as an action value estimator and $Q^B$ acts as an action selector. If $Q^A=Q^B$ then this is just the regular Q-learning target. If we only update the action selector at each update, and randomly choose which of the two Q-functions should be used as the action selector at each update, then the overestimation is reduced. This also applies to DQN, and it has been shown that using a double DQN results in better policies than using a regular DQN\cite{van_hasselt_deep_2015}.
+
+*** Prioritized Replay
+Using experience replay, an agent isn’t forced to process transitions in the exact order that they are experienced. However, because we are sampling the transitions uniformly from the replay memory, all transitions are given equal priority. We might benefit from prioritizing transitions that have a high TD-error magnitude, which acts as a proxy-measure of how "surprising" a transition is to the agent\cite{schaul_prioritized_2016}.
+
+Prioritizing experience by the magnitude of the TD-error may introduce a lack of diversity. One of the reasons for this is that an experience that initially had a low TD-error, but that later becomes large as the network is trained, will continue to be de-prioritized because the TD-error is only updated when the transition is revisited — and because of its low prioritization, the probability that it will be visited again soon is low. To overcome this challenge, a stochastic sampling method that interpolates between pure greedy prioritization and uniform random sampling is introduced.
+
+Another problem with prioritized experience replay is that DQN optimizes for minimizing the expected TD-error squared, with respect to the network parameters $\theta$, assuming that the samples in the replay buffer corresponds to the same distribution as seen while exploring. Prioritized experience replay breaks this assumption, introducing a bias in the calculated gradient. This is fixed by using importance sampling, such that the less-sampled experiences are compensated for in the gradient. As the unbiased nature of the updates is most important near convergence at the end of training, the importance sampling is gradually added towards the end of training, with less importance sampling included at the start of training.
+
+Prioritized replay is found to speed up an agent’s ability to learn by a factor of 2.
+
+*** Dual Deep Q-Network
+In the dueling architecture, or Dual DQN, the network that approximates the Q-function is split into two parts: one for estimating the value of the current state, and one for measuring the so-called advantage of taking an action in this state\cite{wang_dueling_2016}. The combination of the state-value estimate and the advantage yields the Q values:
+
+\begin{equation}
+Q(s,a)=V(s)+A(s,a)
+\end{equation}
+
+But because the state value function $V(s)$ can be expressed in terms of the state-action value function $Q(s,a)$ by taking the mean of $Q(s,a)$ over all actions, then it means that the mean of the advantage function $A(s,a)$ over all actions equals zero. This is not necessarily the case because the networks are simply approximations. To fix this the authors also subtract the mean advantage from the equation. This change loses the original semantics of $V(s)$ and $A(s,a)$, but results in a more stable algorithm.
+
+\begin{equation}
+Q(s,a)=V(s)+A(s,a)-\frac{\sum_{a}A(s,a)}{N_{actions}}
+\end{equation}
+
+The dueling architecture lets the network train the state-value function and the advantage function separately.
+
+*** Multi-Step Learning
+We look only one step ahead when constructing the target in the Q-learning update, but this isn’t a requirement. We could extend it to look $N$ steps ahead if we wanted to, in which it is called N-step learning, or multi-step learning\cite{sutton_reinforcement_2018}.
+
+To use multi-step learning we must look at $N$ consecutive experiences for every update, and sum the appropriately discounted rewards and add it to an appropriately discounted value estimation of the final state in the sequence. The N-step target for a given state $s_t$ is given as:
+
+\begin{equation}
+\sum_{k=0}^{N-1}\gamma^k r_{t+k+1} + \gamma^N max_a(Q(s_{t+N}, a))
+\end{equation}
+
+If we set $N$ to be 1, then the algorithm would be equal to the regular Q-learning algorithm. As we increase $N$, the algorithm would become more and more similar to Monte Carlo method, which looks all the way until the agent hits a terminal state.
+
+
+\begin{equation}
+r_{t+1} + \gamma max_a Q(s_{t+1},a)
+= \sum_{k=0}^{n-1}\gamma^k r_{t+k+1} + \gamma^n max_a(Q(s_{t+n}, a))\textrm{, iff n=1}
+\end{equation}
+
+The best choice of $N$ usually lies somewhere between 1 and the length of an episode. This is because bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred. Another intuition for why it is better is that when we look further ahead into the future we depend less on our own estimates of the future.
+
+*** Distributional Reinforcement Learning
+The Q-function is an approximation of the /expected/ returns, but it is also possible to approximate the /distribution/ of returns instead\cite{bellemare_distributional_2017}. It makes sense to think about the returns as a distribution, even when the environment has deterministic rewards, because stochasticity is still introduced while training through various sources. Firstly, state aliasing, the conflation of two or more states into one representation, may cause different amounts of rewards to be observed even though the agent "sees" the same state. Secondly, because of bootstrapping, target values are nonstationary while training, and the return will seem to take on different values over time. Lastly, because we are approximating the Q-function, approximation errors will make the returns seem stochastic.
+
+Approximating the distribution of returns instead of the expected returns results in more stable learning targets.
+
+*** Noisy Deep Q-Network
+Exploration of the environment is often enabled by using an $\epsilon$ -greedy policy, where $\epsilon$ is gradually reduced. For particularly hard problems, like the Atari game "Montezuma’s Revenge", this technique become insufficient for exploration\cite{bellemare_unifying_2016}. $\epsilon$ -greedy explores with a fixed probability that is the same for every state. An alternative could be to let the network itself learn when it should explore, and for what states. 
+
+NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters\cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyper parameter tuning, but also to apply different amounts of exploration to different states.
+
+*** Rainbow Deep Q-Network
+Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such extensions:
+
+1. Double DQN\cite{van_hasselt_deep_2015}
+2. Prioritized replay\cite{schaul_prioritized_2016}
+3. Dual DQN\cite{wang_dueling_2016}
+4. Multi-step learning\cite{sutton_reinforcement_2018}
+5. Distributional RL\cite{bellemare_distributional_2017}
+6. Noisy DQN\cite{fortunato_noisy_2019}
+
+The authors are able to show that the combined algorithm performs much better than each extension alone, in terms of both learning speed and overall performance.
+
+They also performed an ablation study on the Rainbow algorithm to see how much each extension contributes to its overall performance. The study concludes that prioritized replay and multi-step learning contribute the most to the overall performance, as removing them from the algorithm reduces its performance the most. Distributional Q-learning ranked directly below, followed by Noisy DQN, and then Dual DQN. The benefit of using a Double DQN is not apparent, as removing it from the algorithm does not reduce its performance.
+
+#+CAPTION: From \cite{hessel_rainbow_2017}, figure 1: Median human-normalized performance across 57 Atari games. We compare our integrated agent (rainbowcolored) to DQN (grey) and six published baselines. Note that we match DQN’s best performance after 7M frames, surpass any baseline within 44M frames, and reach substantially improved final performance. Curves are smoothed with a moving average over 5 points.
+#+NAME: fig:dqn_rainbow_parts_perf
+[[./img/dqn_rainbow_parts_perf.png]]
+
+
+#+CAPTION: From \cite{hessel_rainbow_2017}, figure 3: Median human-normalized performance across 57 Atari games, as a function of time. We compare our integrated agent (rainbow-colored) to DQN (gray) and to six different ablations (dashed lines). Curves are smoothed with a moving average over 5 points.
+#+NAME: fig:dqn_rainbow_ablation
+[[./img/dqn_rainbow_ablation.png]]
+
+
+
+
+
+
+
+
+
+
+* Related Work
+** ED-/ES-Detection
+#+INCLUDE: parts/previous_work.org
+
+** Reinforcement Learning in Medical Imaging
+#+INCLUDE: parts/rl_in_medical_imaging.org
+
+
+
+
+
+
+
+
+
+
+
+
+\part{The Project}
+\chapter{Datasets}
+Overview of the chapter.
+Short description of the different datasets used.
+
+* Echonet-Dynamic Dataset
+The Echonet-Dynamic Dataset\cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and Respirometer-information, and downsampled from their original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
+
+The dataset consists of three parts: /FileList.csv/ contains general information about each video, its variables are listed in table [[tbl:echonet_filelist_variables]]. /VolumeTracings.csv/ contains the volume tracings and ED/ES frame index of each video, its variables are listed in table [[tbl:echonet_volumetracings_variables]]. And finally /Videos/, containing all the ultrasound videos in =.avi= format. Video frame samples can be seen in figure [[fig:echonet_samples]].
+
+#+CAPTION: Echonet video general information variables.
+#+NAME: tbl:echonet_filelist_variables
+| Variable       | Description                                                        |
+|----------------+--------------------------------------------------------------------|
+| FileName       | Hashed file name used to link videos, labels, and annotations      |
+| EF             | Ejection fraction calculated by ratio of ESV and EDV               |
+| ESV            | End systolic volume calculated by method of discs                  |
+| EDV            | End diastolic volume calculated by method of discs                 |
+| FrameHeight    | Video Height                                                       |
+| FrameWidth     | Video Width                                                        |
+| FPS            | Frames Per Second                                                  |
+| NumberOfFrames | Number of Frames in whole video                                    |
+| Split          | Classification of train/validation/test sets used for benchmarking |
+
+#+CAPTION: Echonet video volume tracing variables
+#+NAME: tbl:echonet_volumetracings_variables
+| Variable | Description                                                   |
+|----------+---------------------------------------------------------------|
+| FileName | Hashed file name used to link videos, labels, and annotations |
+| X1       | X coordinate of left most point of line segment               |
+| Y1       | Y coordinate of left most point of line segment               |
+| X2       | X coordinate of right most point of line segment              |
+| Y2       | Y coordinate of right most point of line segment              |
+| Frame    | Frame number of video on which tracing was performed          |
+
+
+#+CAPTION: The first frames of 15 randomly sampled videos from the Echonet dataset.
+#+NAME: fig:echonet_samples
+[[./img/echonet_samples.png]]
+
+** Getting ED/ES Frame Information
+To get the ED and ES frames we have to look at the volume tracings, whose variables are listed in table [[tbl:echonet_volumetracings_variables]]. The volume tracings is a list of line segments that together define the volume of the heart at a given frame. For each video there are two sets of line segments, one for ED and one for ES, but which one is which is not given explicitly. We can find this information by calculating the volume from the line segments for both frames and comparing them — the one with the biggest volume is ED and the other one is ES.
+
+** Extrapolating Diastole and Systole Labels
+As is explored in later chapters, we would also like to label the phase of each frame in the video, not just the frame which ends each phase. When we only have access to the end-frames of each phase, on of them will only have one labeled frame. For example, if the ED frame comes first then only the first frame will be labeled diastole as the rest will be systole, as visualized in figure [[fig:echonet_label_imbalance]].
+
+#+CAPTION: Class imbalance: only the first frame is marked with the phase of the first end-event (either ED or ES), all others are marked with the other phase.
+#+NAME: fig:echonet_label_imbalance
+[[./img/echonet_label_imbalance.png]]
+
+We can extract more frames before and after the labeled frames by exploiting the periodicity of the cardiac cycle. As the heart goes from one phase-end to another the image gradually gets more different, until it starts going back towards the starting position again. For example, the next frame with the biggest difference from the ED frame is likely to be close to the ES frame.
+
+#+CAPTION: The absolute frame difference of all frames in a video compared to frame 100. Notice that the difference for frame 100 is 0 as it (of course) equals itself.
+#+NAME: fig:frame_difference_plot
+[[./img/frame_difference_plot.png]]
+
+An optimistic approach would be to label all the frames until the previous or next peak difference. For example, if the first event is ED then we could label all previous frames up until the next peak difference as diastole. Likewise, if the final event is ES then we could label all following frames up until the next peak difference as diastole. The peak can be found by finding the first frame whose difference is less than the one preceding it, i.e. when the difference is no longer increasing. This risks labeling too few frames if there is a local peak due to noise, but this problem can be mitigated by smoothing the summed absolute difference values. A gaussian blur with a kernel standard deviation of 5 was used to smooth the values.
+
+We also risk labeling too many frames, adding wrongly labeled frames, because there are no guarantees that the peaks directly coincide with the change of phase. This problem can be mitigated by only including a certain percentage of frames leading up to the peak. We elect to include 75% of the frames leading up to the peaks.
+
+#+CAPTION: The same summed absolute frame difference plot as in figure [[fig:frame_difference_plot]], but smoothed using a gaussian blur with a kernel standard deviation of 5. The dashed lines represent phase-end events and the frames in the light blue area are frames with labeled phase. Notice how the labeled frames area only extend 75% towards the peak (the the right, the bottom valley on the left) instead of all the way. Also note that the gaussian blur causes the summed absolute frame difference for frame 100 to no longer be 0.
+#+NAME: fig:extrapolated_labels
+[[./img/extrapolated_labels.png]]
+
+
+** Removing Invalid Videos
+An assumption made when labeling the frames is that both events occur within the same cardiac cycle, though this is not always the case in the dataset. To filter out videos where the annotated end-phase events goes beyond a single cycle we again analyze the periodicity using a similar method to the one used in the previous section.
+
+The summed absolute frame difference should at most have one peak if the frames are from the same cardiac cycle. If it has two or more peaks then it suggests that the video contains more than one heartbeat and thus can not be properly labeled. There are 19 of such videos in total, and these are filtered out.
+
+#+CAPTION: The summed absolute frame difference between first end-phase event and the frames up ti the next end-phase event. This should only be a half cardiac cycle, so there should not be any peaks (or at most one peak). The upper plots show videos where the end-phase labels only cover one half cardiac cycle, while the bottom plots show videos with more than one cardiac cycle, and thus have incorrect labels.
+#+NAME: fig:phase_diff_plots
+[[./img/phase_diff_plots.png]]
+
+
+
+** Normalizing Videos
+The videos all already have the same size of 112-by-112, but the FPS differ. Luckily, most videos in the dataset have the same FPS — almost 80% of the videos have exactly 50 FPS. The smallest FPS is 18 and the higest FPS is 138. See figure [[fig:echonet_fps_histogram]] for a histogram (logarithmic scale on the y-axis) of the different FPS values.
+
+To normalize the videos with a much smaller FPS than 50 we would have to add information to them by inserting new frames. This may add unwanted bias to the data however, and it is not obvious how to label the interpolated frames when the video goes from one phase to another. To normalize the videos with a much higher FPS we would have to remove frames from them. Unless the FPS is a multiple of 50, we risk introducing varying FPS to the video which may confuse the model. For example, if a video has 75 FPS we could opt to remove every third frame to make it 50 FPS, but this would make it seem like the heart moves slightly faster every third frame.
+
+Because the Echonet dataset is so large, we opt to simply filter out all videos that have an FPS other than 50. Thus, we filter out another 2071 videos, leaving us with a total of 7946 videos.
+
+#+CAPTION: A histogram of the different FPS rates of the videos in the Echonet dataset. Note that the y-axis is in logarithmic scale — in fact, almost 80% of the videos have exactly 50 FPS.
+#+NAME: fig:echonet_fps_histogram
+[[./img/echonet_fps_histogram.png]]
+
+
+
+** Training, Validation, Test Split
+The dataset has already been split into three parts: one part for training the algorithm, one part for validation, and one for testing (i.e. presenting results). The percentage split is approximately 75% for training, 12.5% for the validation, and 12.5% for testing. This split remains after filtering out videos as explained in the previous two sections. We opt to also use this split in this project.
+
+
+
+* Dataset 2
+TOOD: Dataset by Elizabeth Lane.
+
+
+
+
+\chapter{Methodology}
+* Ed-/ES-Detection as a Reinforcement Learning Problem
+The goal of this thesis is to explore the potential of using deep RL in the task of ED-/ES-Detection. Thus, the main methods revolve around exploring different formulations of the problem as a RL problem and comparing them.
+
+The standard metric for this task is the Average Absolute Frame Difference (aaFD), as defined in equation [[eqn:aafd]]. aaFD measures the precision and accuracy of predictions by measuring the frame difference between each ground truth event $y_t$ and the corresponding prediction $\hat{y}_t$ generated by the model — a lower aaFD meaning that the model is making fewer errors. $t$ is the index of a specific event, of which there are $N$ in total.
+
+#+NAME: eqn:aafd
+\begin{equation}
+aaFD=\frac{1}{N}\sum^N_{t=1}|y_t-\hat{y}_t|
+\end{equation}
+
+One weakness of aaFD is that it is only defined when there are an equal number of predicted events as there are ground truth events. This is not always the case as an imperfect model may predict more or fewer events. A generalized aaFD ($GaaFD_1$) was considered for a metric instead, calculated as the average frame difference between each predicted event and its nearest ground truth event as in equation [[eqn:aafd_generalized_1]], having the property that it converges towards the true aaFD as the model becomes better. In equation [[eqn:aafd_generalized_1]] $\hat{N}$ is the number of predicted events and $\mathcal{C(y, \hat(y))}$ is the frame difference between the predicted event to the /closest/ ground truth event of the same type. For cases where there are more predicted events than there are ground truth events $GaaFD_1$ would, as is rational, give a worse score. But for cases where there are fewer predicted events than there are ground truth events $GaaFD_1$ would give a score that does not reflect its inability to predict all events.
+
+#+CAPTION: $\mathcal{C}(y, \hat{y}_t)$ is the closest ground truth event from the predicted event $\hat{y}_t$. $\hat{N}$ is the number of predicted events.
+#+NAME: eqn:aafd_generalized_1
+\begin{equation}
+GaaFD_1=\frac{1}{\hat{N}}\sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|
+\end{equation}
+
+If we instead calculate the average frame difference between each ground truth event and its nearest predicted event, $GaaFD_2$, as in equation [[eqn:aafd_generalized_2]], we get the opposite problem — too many predicted events are not reflected in the score.
+
+#+CAPTION: $\mathcal{C}(y_t, \hat{y})$ is the closest predicted event from the ground truth event $y_t$.
+#+NAME: eqn:aafd_generalized_2
+\begin{equation}
+GaaFD_2=\frac{1}{N}\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})|
+\end{equation}
+
+By combining $GaaFD_1$ and $GaaFD_2$ as in equation [[eqn:aafd_generalized]] we mitigate these problems while maintaining the convergence property.
+
+#+NAME: eqn:aafd_generalized
+\begin{equation}
+GaaFD = \frac{1}{N+\hat{N}}(\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})| + \sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|)
+\end{equation}
+
+Using GaaFD, or rather its inverse since we want to minimize the error, as a reward function for RL means that we are optimizing the agent directly for our main metric aaFD. It does have one final flaw, however: it is only defined on whole episodes. This means that the agent has to run an entire episode before getting a reward, making the reward signal sparse.
+
+We could instead frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either Diastole or Systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
+
+From this we can define a simple reward function $R_1$, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_1$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth. We can make the reward signal more similar to GaaFD by defining it in terms of the distance to the nearest predicted phase, as seen in equation [[eqn:proximity_reward]], where $d(s,a)$ is the distance from the current phase $s$ to the nearest predicted phase $a$.
+
+#+NAME: eqn:simple_reward
+\begin{equation}
+  R_1(s, a) \triangleq
+    \left\{
+	    \begin{array}{ll}
+		    1 & \mbox{if } s=a \\
+  	  	0 & \mbox{if } s\neq a
+	    \end{array}
+    \right\}
+\end{equation}
+
+#+NAME: eqn:proximity_reward
+\begin{equation}
+  R_2(s, a) \triangleq -d(s, a)
+\end{equation}
+
+For this thesis, we will be exploring the reward functions $R_1$ and $R_2$.
+
+** Simple Binary Classification Environment
+A simple baseline environment is defined as such: The agent, after observing the current and adjacent frames, takes an action predicting that the current frame is either of Diastole or Systole phase, and receives a reward dependent on its prediction before the environment moves the current frame one frame forwards. This environment is visualized in figure [[fig:binary_classification_environment_loop]].
+
+#+CAPTION: Visualization of the Binary Classification Environment loop. An agent sees the observation from the current frame and takes an action, either marking it as Diastole or as Systole, and gets back the reward and the observation for the next frame from the environment.
+#+NAME: fig:binary_classification_environment_loop
+[[./img/binary_classification_environment_loop.png]]
+
+More formally, the observation $o_t$ at time $t$ is an array of $(2N+1, W, H)$ grayscale pixel values normalized to be between 0 and 1, where $N$ is the number of adjacent frames on either side of the current frame and $W$ and $H$ are width and height, respectively. As a tentative first attempt $N$ is set to 3, making the number of channels of the observations be $3+1+3=7$, and the final shape of the observation be $(7, 112, 112)$, given that we set all videos to be 112-by-112 pixels. The number of adjacent frames is assumed to be an important hyper parameter because it is what gives the agent temporal information.
+
+The agent has a policy $\pi(a|s)$, which, given a state $s$ (which is just the observation in our case), returns probability of taking an action $a$. The goal of the agent is to find the policy $\pi^*$ that, if followed, maximizes our reward function $R$.
+
+
+** Agent Architecture
+The experiments in the next chapter all use a Deep Q-Network (DQN) RL architecture with Prioritized Replay, N-Step returns, and Double Q-Learning. It uses an $\epsilon$ greedy policy to facilitate exploration.
+
+For the Q-network, two architectures are explored:
+
+1. A simple CNN with few layers, inspired by the Atari DQN paper (TODO: citation).
+2. MobileNet-v1: a bigger and more complex CNN that uses batch normalization.
+
+
+** Distributed Training
+As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through Deepmind's library Acme\cite{hoffman_acme_2020}. At the center of Acme is another library by Deepmind called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step om the algorithm Reverb can be used as the communication point between the two. In this way one or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database and a learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner doesn't need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library, also by Deepmind, called Launchpad\cite{yang_launchpad_2021}.
+
+#+CAPTION: The distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is a inter-process function call facilitated by Launchpad.
+#+NAME: fig:distributed_rl_training
+[[./img/distributed_rl_training.png]]
+
+There is a balance to be made between how fast experience samples should be added to the experience replay and how fast they should be sampled by the learner. If the learner samples faster than the actors are able to generate new samples then the network will be trained using trajectories generated from outdated policies. If the actors generate new samples much faster than the learner is able to sample then we are arguably wasting computer resources.
+
+Reverb helps maintain this balance through rate limiters. We use a rate limiter that tries to maintain a specified ratio between insertions and samples, blocking either the actors from inserting new samples or the learner from sampling if the ratio starts to differ too much. Using 6 actors was found to be suffient for generating new experience samples fast enough. TODO: For cases where we use MobileNet also (don't we need less actors there since the learner takes more time)?
+
+
+
+TODO: Write about why we chose DQN, what alternatives we considered, etc.
+
+** Discussion
+Under the hood, the DQN algorithm is solving a regression problem. Given a state, the model predicts the expected future returns after taking a given action. 
+
+
+
+
+TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
+- How is this similar to regular supervised learning classification problem?
+  - DQN predicts expected future returns of taking an action. We can set up a supervised learning regression problem that predicts the same thing
+- We use epsilon=1 and discount=0 — implications?
+- Write about how DQN is simply a regression problem
+- Future work could be using Policy Gradient methods
+
+* Incorporating Search
+RL is a tool meant for solving problems that require search, so in order to get any benefits from it we must transform the problem to one that requires search. This may sound like straightening a screw to make it work with a hammer, and the author sympathizes with this sentiment.
+
+We could let the agent search through frames to find the ED or ES frames. In this case the action set could be to move to the previous, move to the next frame, marking the current frame as ED, or marking it as ES, 4 actions in total. One problem with this formulation is that once the agent has marked one frame as ED or ES, it must know that this state can be ignored and that it should start to look for other ED or ES frames. One work-around to this problem that enforces that the agent visits all frames at least once is simply by initializing it at every frame, but this setup is just a slower, less robus version of the Binary Classification Environment.
+
+#+CAPTION: An agent moves to the previous or next frame and marks frames that it predicts to be ED os ES.
+#+NAME: fig:explore_frames_environment
+[[./img/explore_frames_environment.png]]
+
+Another option is to perform exploration in space, taking inspiration from papers like (TODO: add paper of RL landmark detection). This can be done by looking at just a small region of interest in the video, which the agent can move around before taking an action. In this way, the agent loses some global context depending on how small the region of interest is, but the smaller input size makes the model less computationally intensive, enabling us to include more temporal information.
+
+#+CAPTION: A Region Of Interest (ROI) is given to the agent which it can then move around in order to explore.
+#+NAME: fig:roi_exploration
+[[./img/roi_exploration.png]]
+
+Another version of the space-exploration scheme is to let the agent create a synthetic m-mode image from the video. Here, a line can be translated and rotated by the agent, forming the bases of the m-mode image. The pixels along the line for the current frame and some number of previous and next frames are concatenated together into one image. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
+
+#+CAPTION: An m-mode image is an intersecting plane in 3D "video space".
+#+NAME: fig:m_mode_cube
+[[./img/m_mode_cube.png]]
+
+** M-Mode Binary Classification Environment
+The set of actions remain the same as in the binary classification environment, but an additional 6 actions are added: rotating the m-mode line /clockwise/ and /anti-clockwise/, and translating the line /up/, /down/, /left/, or /right/. The rotation amount and step size are considered hyper parameters. Making them too big would make the line movement less precise, but making it too small would make both the training and inference slower, as well as further sparsifying direct reward signals. A decision also has to be made for whether the translation should be global or local. Global translation means that the line moves in a direction relative to the video, while local translation means that the line moves in a direction relative to where it is pointing towards.
+
+#+CAPTION: Global (to the left) versus local (to the right) translation. Local translation means that the movement depends on the direction of the m-mode line.
+#+NAME: fig:local_vs_global_mmode_translation
+[[./img/local_vs_global_mmode_translation.png]]
+
+Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, independent of rotation — it simply shifts the m-mode image down or up, respectively.
+
+TODO: Show how vertical translation (up or down) simply shifts the m-mode image.
+
+At the beginning of an episode the m-mode line is placed in the center of the video, vertically. TODO: This should be at a random position/rotation in the image. The observations returned from the environment is the synthetic m-mode image from the current line, by looking 15 frames in the past and 15 frames in the future, for a total of 31 frames. 8 additional channels are included for the synthetic m-mode images that result from rotating the line to the left and to the right, and moving it to the left and to the right. Synthetic m-mode images resulting from moving the line up or down are not included as channels, as they add very little new information, given that we use a neural network architecture with translational invariance, like CNNs. To counteract the big loss of global context when using synthetic m-mode images, two other channels are included in the observations as well: an average of up to 50 frames around the current frames and an image with the location of the current line drawn onto it. The averaged video image and the current line image adds information about the current line position and provides the agent with some additional context.
+
+TODO: Add image showing m-mode environment and example observations.
+
+The same reward functions are explored as in the regular binary classification environment. In practice, the agent will receive a sparser reward signal, since a reward may only be given when the agent selects to mark the current frame as diastole or systole, not when it only performs translation or rotation.
+
+** Reinforcement Learning Agent Architecture
+TODO: Same as before, DQN, but network must be adjusted to fit a tuple of observations (m-mode + overview).
+
+** TODO Discussion
+- Sparse reward signal may make the results worse. Can be counteracted by: what? n-step? Less dicsount (gamma closer to 1.0)? Using "advantage" for Q-function? Actor-critic network agent?
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Experiments and Results}
+
+#+BEGIN_SRC python
+Notes for this chapter 
+
+ 
+  Supervised Binary Classificaiton of Frames as a baseline
+  - Using as many of the same hyper parameter / architecture choices as in the Simple Binary Classification Environment
+    - Simple network with stride and big kernels (from original DQN paper)
+    - MobileNet
+  
+  Simple Binary Classification Environment
+  - Studying the effect of the RL framework on this problem.
+    - Prioritized replay, epsilon, discount, N-step, reward spec
+
+  M-Mode environment
+  - How to make this work?
+  
+
+Sections below will be trashed and rewritten...
+  
+  
+#+END_SRC
+
+
+
+
+
+
+* Supervised Binary Classification With MobileNet
+
+
+
+* Simple Binary Classification Environment
+We do not expect the Binary Classification Environment (BCE) to perform any better than just a normal supervised learning classification task as this task does not require strategic planning. Regardless, and also to bring further evidence to this belief, we train the agent using this simple environment to see the results. Of interest is the effect of the exploration/exploitation ratio in the form of the $\epsilon$ hyper parameter, the amount of discounting, and the number $N$ steps of bootstrapping.
+
+A lower value of $\epsilon$ means that the agent will more often try to exploit its existing assumptions about the optimal policy. This can be good when the optimal policy consists of many steps and the agent can take better advantage of exploration in areas that it already knows are fruitful. However, in the case of BCE the current step is completely independent of all previous steps, so the most efficient learning strategy is presumably to always explore, i.e. always take a random action, i.e. $\epsilon=1$. Exploitation provides no additional value yet risk creating a sample imbalance where the presumed best step is taken over and over. 
+
+The discount hyper-parameter $\gamma$ determined how much it values future rewards. A value of $\gamma=0$ means that the agent will only try to maximize immediate rewards, and a value of $\gamma=1$ means that the agent will try to maximize all future rewards, as well as, and as much as, the immediate reward. Again, as future steps are completely independent of the current step, the best value for $\gamma$ is presumed to be $0$ for BCE. If not, then the estimated return of taking an action will also depend on the returns of taking an action in the succeding state, and as the agent is still learning, this may only add noise to the value without giving any advantages.
+
+N-step bootstrapping is a way to make to speed up the bootstrapping of value estimations. This is again not relevant in the case of BCE because the Q-values does not depend on future value estimations, and thus bootstrapping does not occur. A value of $N=1$ is presumed to be best for BCE, which is the same as not performing N-step bootstrapping at all, just simply Q-learning.
+
+To test these hypotheses, and to assure that the method of using DQN works in general, 4 experiments are conducted. First, an experiment utilizing "all" the RL machinery: $\epsilon$ -greedy policy with $\epsilon=0.2$, discounting with $\gamma=0.95$, and 4-step bootstrapping. Then another with the same setup, except that every action is random, i.e. $\epsilon=1$. Then another with the same setup, except that every action is random and there is no discounting, i.e. $\gamma=0$. And lastly, the same setup, except every action is random, no discounting, and no N-step bootstrapping.
+
+The results for each of these sets of hyper-parameters are plotted in figure [[fig:bce_final_ablation_metrics]]. The agent is evaluated on the validation part of the Echonet dataset.
+
+TODO: Make this a proper ablation study instead... It is hard to tell how each hyper-parameter affect the result.
+
+#+CAPTION: To the left: the balanced accuracy score of the agent's predictions on the Echonet validation split dataset. To the right: the GaaFD, likewise.
+#+NAME: fig:bce_final_ablation_metrics
+[[./img/bce_final_ablation_metrics.png]]
+
+#+CAPTION: To the left: the loss over the first 5000 learner steps. To the right: the loss over all 100K learner steps.
+#+NAME: fig:bce_final_ablation_loss
+[[./img/bce_final_ablaion_loss.png]]
+
+
+TODO: Also with and without Importance Sampling
+
+LOSS CURVE VARIANCE OF DIFFERENT EXPERIMENTS
+
+THE BEST OF THESE BUT WITH PROXIMITY REWARD
+
+THE BEST OF THESE BUT WITH MOBILENET
+
+THE BEST OF THESE BUT WITH MORE FRAMES/CHANNELS
+
+SHOW BEST PERFORMING IMAGES WITH Q-VALUES
+
+SHOW WORST PERFORMING IMAGES WITH Q-VALUES
+
+
+
+
+
+
+* M-Mode Binary Classification Environment
+
+
+
+
+
+
+
+
+
+
+
+
+\part{Conclusion}
+
+* Discussion
+
+
+* Conclusion and Further Work
+
+
+
+
+

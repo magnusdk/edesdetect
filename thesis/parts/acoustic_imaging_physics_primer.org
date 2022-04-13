@@ -43,14 +43,25 @@ Z=\rho\times c
 RF=\frac{Z_2-Z_1}{Z_2+Z_1}
 \end{equation}
 
-# [[Image showing that wave is reflected with same amount when going from air to water, or water to air.]]
+How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance which causes sound waves to be reflected when it hits them. Using this, we can send out a sound wave and listen for the reflections. By measuring how much time it took from the sound signal was sent out until its reflection is received back, and given that we know the approximate speed of sound, we can calculate the distance that the sound wave travelled until it hit the reflector. See equation [[eqn:reflector_distance_by_delay]]. Likewise, if we want to create a full image from the received sound signals, where we know which positions to image beforehand, we can lookup the received signal based on the distance to a given position. If we want to image position $(3, 4)$, and assuming that the sound was sent from position $(0,0)$, we know that the distance would have had to travel $5$ units. By using equation [[eqn:reflector_delay_by_distance]] we can find which part of the received signal corresponds to that position.
 
-How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance. 
+#+CAPTION: By measuring the time between sending a signal and receiving it back from a reflector we can approximate how far away the reflector is — given that we know the approximate speed of sound.
+#+NAME: fig:sound_tx_rx
+[[../img/sound_tx_rx.png]]
+
+#+NAME: eqn:reflector_distance_by_delay
+\begin{equation}
+\text{distance} = \text{delay} \times c 
+\end{equation}
+
+#+NAME: eqn:reflector_delay_by_distance
+\begin{equation}
+\text{delay} = /frac{\text{distance}}{c} 
+\end{equation}
+
+An ultrasound transducer consists of many different receivers [fn:: An ultraound transducer also consists of many different individual transmitter elements, but that is irrelevant for now.] and thus we can repeat the process of delay the signal for each receiver depending on the distance from the point we want to image to the position of the receiver. If we sum all the resulting images we get a final image of different reflectors in the are. This algorithm is called Delay-And-Sum.
+
 # TODO: Add table of the acoustic impedance of various human tissues.
-
-*How can we use this to our advantage?*
-- Basic ultrasound
-- Non-linearity, listening to second harmonic frequency.
 
 *Limitations*
 - attentuaion, resolution, speckles, shadowing, side-lobes 

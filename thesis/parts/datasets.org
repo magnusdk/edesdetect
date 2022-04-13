@@ -22,7 +22,7 @@ TODO: Information about how the data was recorded — who did it? Was it confirm
 | NumberOfFrames | Number of Frames in whole video                                    |
 | Split          | Classification of train/validation/test sets used for benchmarking |
 
-#+CAPTION: The first fram of 15 randomly sampled videos from the Echonet dataset.
+#+CAPTION: The first frames of 15 randomly sampled videos from the Echonet dataset.
 #+NAME: fig:echonet_samples
 [[../img/echonet_samples.png]]
 
@@ -34,7 +34,6 @@ The summed square difference should at most have one peak, peaks indicating that
 #+NAME: fig:phase_diff_plots
 [[../img/phase_diff_plots.png]]
 
-TODO: Talk with supervisors about these videos. Is this a good enough metric?
 
 The width and height of each video is the same for every video, but the frames-per-seconds (FPS) differs. Because we are dealing with temporal data, a differing FPS has a lot of the same effects as stretching or squeezing the width or height. Increasing the FPS means that there is less change between each frame, and decreasing it means that the changes are bigger. This means that the model has to learn about multiple possible structures at the same time, making the learning process more complex. Luckily, most videos in the dataset have the same FPS — almost 80% of the videos have exactly 50 FPS. The smallest FPS is 18 and the higest FPS is 138. See figure [[fig:echonet_fps_histogram]] for a histogram (logarithmic scale on the y-axis) of the different FPS values.
 
@@ -52,17 +51,11 @@ Because the Echonet dataset is so large, we opt to simply filter out all videos 
 
 
 ** Extrapolating Frame Labels
-In the dataset, the ED frame always comes first, followed by ES. This means that only one labeled frame in each video will be of diastole, the ED frame, while the rest is systole[fn:: The frame after ED is neccessarily systole, and the following frames are also systole, up until and including the ES frame.]. This obviously creates a heavy bias towards systole frames. To counteract this bias, some frame labels before ED and some frame labels after ES, were extrapolated from the known labels. This was done simply by taking the difference between the ED- or ES-frame and the preceding or following frames, and selecting the frame with the maximum difference. To reduce the effect of noise the images are blurred using gaussian blur with a sigma value of 1 (TODO: doublecheck number) before taking the difference. The frames between this maximum difference frame and the ED- or ES-frame can then be labeled as diastole (TODO: doublecheck that ED is always first in EchoNet) with some certainty. We can increase the certainty that we are correctly labeling frames by only including a certain percentage of the extrapolated labels.
+In the dataset, the ED frame always comes first, followed by ES. This means that only one labeled frame in each video will be of diastole, the ED frame, while the rest is systole[fn:: The frame after ED is neccessarily systole, and the following frames are also systole, up until and including the ES frame.]. This obviously creates a heavy bias towards systole frames. To counteract this bias, some frame labels before ED and some frame labels after ES, were extrapolated from the known labels. This was done simply by taking the difference between the ED- or ES-frame and the preceding or following frames, and selecting the frame with the maximum difference. To reduce the effect of noise the images are blurred using gaussian blur with a sigma value of 2 before taking the difference. The frames between this maximum difference frame and the ED- or ES-frame can then be labeled as diastole (TODO: doublecheck that ED is always first in EchoNet) with some certainty. We can increase the certainty that we are correctly labeling frames by only including a certain percentage of the extrapolated labels.
 
 TODO: Add figure showing difference plot
 TODO: Add figure showing increasing certainty by labeling all frames.
 TODO: Do we want to filter some images out?
-
-** Video Quality Metrics
-Perform image quality metrics based on industry standard metrics. Ask Ole Marius, maybe?
-
-
-** TODO Discuss bias in the dataset stemming from Age and Sex
 
 
 ** TODO [0/2]

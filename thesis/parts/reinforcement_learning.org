@@ -1,10 +1,6 @@
 #+BIBLIOGRAPHY: ../main plain
-* Reinforcement Learning
-RL allows an agent to learn a strategy, called a policy, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
+ RL allows an agent to learn a strategy, called a policy, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
 
-This section gives a primer for basic RL and some of the many improvements that have enabled it to achieve super-human performance in more complex domains.
-
-** Reinforcement Learning Primer
 At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
 
 - The state space $S$
@@ -63,7 +59,7 @@ Using a separate network for generating the targets $y_j$ in the Q-learning upda
 #+NAME: fig:dqn_atari_t_sne
 
 
-*** TODO re-add parts about improvements to DQN, but only those that we have used in the project.
+** TODO re-add parts about improvements to DQN, but only those that we have used in the project.
 
 
 
