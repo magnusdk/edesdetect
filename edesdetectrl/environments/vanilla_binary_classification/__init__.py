@@ -34,6 +34,7 @@ def get_observation(env: BinaryClassificationBaseEnv):
     observation = env.video.video[
         env.current_frame - N_PADDING : env.current_frame + N_PADDING + 1
     ]
+    observation = np.transpose(observation, (1, 2, 0))
     return observation.astype("float32")
 
 
@@ -49,6 +50,8 @@ class VanillaBinaryClassificationBase_v0(BinaryClassificationBaseEnv):
             if get_reward == "simple"
             else rewards.proximity_reward
             if get_reward == "proximity"
+            else rewards.gaafd_reward
+            if get_reward == "gaafd"
             else get_reward
         )
         super().__init__(N_PADDING, N_PADDING, get_observation, get_reward)
@@ -56,7 +59,7 @@ class VanillaBinaryClassificationBase_v0(BinaryClassificationBaseEnv):
         self.action_space = spaces.Discrete(N_ACTIONS)
         self.action_space.dtype = np.int32
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(N_CHANNELS, HEIGHT, WIDTH), dtype="float32"
+            low=0, high=1, shape=(HEIGHT, WIDTH, N_CHANNELS), dtype="float32"
         )
 
     def step(self, action):
