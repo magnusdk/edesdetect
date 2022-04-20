@@ -44,8 +44,8 @@ def label_frames(video, ed_i, es_i, p=0.75) -> Tuple[List[GroundTruth], int, int
     previous or next maximum difference from a keyframe.
     """
     # Blur difference a bit to make it more robust
-    ed_i_diff = gaussian_filter1d(np.sum((video - video[ed_i]) ** 2, axis=(1, 2)), 5)
-    es_i_diff = gaussian_filter1d(np.sum((video - video[es_i]) ** 2, axis=(1, 2)), 5)
+    ed_i_diff = gaussian_filter1d(np.sum(np.abs(video - video[ed_i]), axis=(1, 2)), 5, mode="nearest")
+    es_i_diff = gaussian_filter1d(np.sum(np.abs(video - video[es_i]), axis=(1, 2)), 5, mode="nearest")
 
     # Either ED is labeled first, or ES is. The code logic is the same, but different
     # labels have to be returned -- i.e.: it's almost copy-paste in the two clauses below.
