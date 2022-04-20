@@ -91,6 +91,9 @@ class Line:
             other_coords = (other.x1, other.y1, other.x2, other.y2)
             return isinstance(other, Line) and (self_coords == other_coords)
 
+    def __hash__(self):
+        return hash((float(self.x1), float(self.y1), float(self.x2), float(self.y2)))
+
 
 @dataclass
 class Bounds:
@@ -215,11 +218,15 @@ class MModeLine:
         bounds = Bounds.from_shape((width, height))
         line = Line.center_of_bounds(bounds, line_length)
         for _ in range(1000):
-            rng_key, k1, k2 = random.split(rng_key, 3)
-            line = line.rotate(random.uniform(k1, minval=-np.pi, maxval=np.pi))
-            line = line.move_horizontally(
-                min(width, height) * random.uniform(k2, minval=-0.2, maxval=0.2)
+            rng_key, k1, k2, k3 = random.split(rng_key, 4)
+            line = line.move_vertically(
+                height * random.uniform(k3, minval=-0.1, maxval=0.1)
             )
+            line = line.move_horizontally(
+                width * random.uniform(k2, minval=-0.1, maxval=0.1)
+            )
+            line = line.rotate(random.uniform(k1, minval=-np.pi / 2, maxval=np.pi / 2))
+
             if bounds.is_within(line):
                 break
 

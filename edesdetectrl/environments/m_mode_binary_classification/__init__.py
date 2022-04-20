@@ -1,3 +1,4 @@
+from collections import deque
 from typing import Literal, Optional, Tuple, Union
 
 import gym
@@ -71,6 +72,15 @@ def get_mmode_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
     return mmode_with_adjacent
 
 
+def get_action_history_observation(env: "EDESMModeClassificationBase_v0") -> np.ndarray:
+    a_hist_array = np.zeros((env.action_history.maxlen, 8), dtype="float32")
+    for i, action in enumerate(env.action_history):
+        # action is an int. We don't include the first two actions (diastole and
+        # systole) so we subtract those indices.
+        a_hist_array[i, action - 2] = 1.0
+    return a_hist_array
+
+
 def get_overview_and_mmode_observation(
     env: "EDESMModeClassificationBase_v0",
 ) -> Tuple[np.ndarray, np.ndarray]:
@@ -83,11 +93,16 @@ def get_overview_and_mmode_observation(
     )  # Average of first 50 frames in video
     line_pixels = env.mmode_line.visualize_line()
     overview_data = np.array([mean_image, line_pixels])
+    overview_data = np.transpose(overview_data, (1, 2, 0))
 
     # M-mode data
     mmode_with_adjacent = get_mmode_observation(env)
+    mmode_with_adjacent = np.transpose(mmode_with_adjacent, (1, 2, 0))
 
-    return overview_data, mmode_with_adjacent
+    # Action history data
+    action_history = get_action_history_observation(env)
+
+    return overview_data, mmode_with_adjacent, action_history
 
 
 class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
@@ -96,7 +111,7 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
     def __init__(
         self,
         get_reward: Union[RewardFn, Literal["simple", "proximity"]],
-        rng_key: Union[ int, KeyArray],
+        rng_key: Union[int, KeyArray],
     ):
         get_reward = (
             rewards.simple_reward
@@ -117,22 +132,31 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         # 1. an averaged image of the video and the current line (2 channels)
         # 2. and the M-mode image with adjacent lines (1+4 channels for 4 adjacent)
         overview_space = spaces.Box(
-            low=0, high=1, shape=(N_OVERVIEW_CHANNELS, HEIGHT, WIDTH), dtype="float32"
+            low=0, high=1, shape=(HEIGHT, WIDTH, N_OVERVIEW_CHANNELS), dtype="float32"
         )
         m_mode_space = spaces.Box(
             low=0,
             high=1,
-            shape=(N_MMODE_CHANNELS, N_FRAMES, LINE_LENGTH),
+            shape=(N_FRAMES, LINE_LENGTH, N_MMODE_CHANNELS),
             dtype="float32",
         )
-        self.observation_space = spaces.Tuple([overview_space, m_mode_space])
+        action_history_space = spaces.Box(low=0, high=1, shape=(5, 8), dtype="float32")
+        self.observation_space = spaces.Tuple(
+            [overview_space, m_mode_space, action_history_space]
+        )
 
         self.mmode_line = MModeLine.from_shape(
             self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
         )
+        self.action_history = deque(maxlen=5)
+        self.time_since_last_prediction = 0
+
+        self.prev_positions = set()
 
     def step(self, action):
+        # Sanitize action value by converting to action_name and back to the canonical representation (integer)
         action_name = iactions[action.tolist()]
+        action = actions[action_name]
 
         old_line = self.mmode_line.line
         if action_name == "UP":
@@ -148,6 +172,15 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
         elif action_name == "ROTATE_RIGHT":
             self.mmode_line.rotate(-ROTATION_AMOUNT)
 
+        if action_name not in ("DIASTOLE", "SYSTOLE"):
+            # If some kind of movement
+            self.time_since_last_prediction += 1
+            self.prev_positions.add(old_line)
+        else:
+            self.time_since_last_prediction = 0
+            self.action_history.append(action)
+            self.prev_positions = set()
+
         # Move the line to a random position and give penalty if agent moves out of bounds
         reward = None
         if old_line == self.mmode_line.line and action_name not in (
@@ -159,15 +192,27 @@ class EDESMModeClassificationBase_v0(BinaryClassificationBaseEnv):
                 self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
             )
             (self.rng_key,) = random.split(self.rng_key, 1)
+        else:
+            reward = self.get_reward(self, action)
+            # if action_name not in ("DIASTOLE", "SYSTOLE"):
+            #    reward /= (1+self.time_since_last_prediction*0.5)
 
-        # Sanitize action value by converting to action_name and back to the canonical representation (integer)
-        action = actions[action_name]
-        return BinaryClassificationBaseEnv.step(self, action, reward=reward)
+        done = False
+        if self.mmode_line.line in self.prev_positions:
+            reward = -1.0
+            self.rng_key, sub_key = random.split(self.rng_key, 2)
+            self.mmode_line = MModeLine.from_shape(
+                sub_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
+            )
+        return BinaryClassificationBaseEnv.step(self, action, reward=reward, done=done)
 
     def reset(self):
         self.mmode_line = MModeLine.from_shape(
             self.rng_key, WIDTH, HEIGHT, n_line_samples=LINE_LENGTH
         )
+        self.action_history = deque(maxlen=5)
+        self.time_since_last_prediction = 0
+        self.prev_positions = set()
         (self.rng_key,) = random.split(self.rng_key, 1)
         return BinaryClassificationBaseEnv.reset(self)
 
