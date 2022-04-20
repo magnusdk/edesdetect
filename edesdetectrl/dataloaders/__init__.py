@@ -5,7 +5,7 @@ from typing import Any, Callable, Generator, Literal, Sequence, Tuple, Union
 
 import edesdetectrl.util.generators as generators
 import numpy as np
-from edesdetectrl.util.concurrent_pool import process_pool
+from edesdetectrl.util.concurrent_pool import process_pool, thread_pool
 from jax import random
 from jax._src.random import KeyArray
 
@@ -84,7 +84,7 @@ class DataLoader:
                 index = random.randint(key2, (1,), 0, len(self))[0]
                 yield _safe_get_item(self, index)
 
-        return generators.async_buffered(task_gen(), process_pool, 20)
+        return generators.async_buffered(task_gen(), thread_pool, 1)
 
     def get_generator(self, cycle=True, prefetch=20) -> Generator[DataItem, None, None]:
         """Return a generator that generates all items from dataloader, ordered by index.
@@ -97,7 +97,7 @@ class DataLoader:
                 index = n % len(self)
                 yield _safe_get_item(self, index)
 
-        gen = generators.async_buffered(task_gen(), process_pool, prefetch)
+        gen = generators.async_buffered(task_gen(), thread_pool, prefetch)
         # Stop once the last dataitem has been generated if cycle is False
         if not cycle:
             gen = itertools.islice(gen, len(self))
