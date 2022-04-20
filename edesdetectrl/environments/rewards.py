@@ -1,8 +1,9 @@
 from typing import Sequence
 
+from edesdetectrl.core.metrics import gaafd
 from edesdetectrl.environments.base import BinaryClassificationBaseEnv
 
-MOVEMENT_REWARD = 0.0  # float(-0.1)
+MOVEMENT_REWARD = 0.0
 
 
 def proximity_reward_impl(prediction: int, frame: int, ground_truth: Sequence[int]):
@@ -57,3 +58,11 @@ def simple_reward(env: BinaryClassificationBaseEnv, prediction: int) -> float:
         return MOVEMENT_REWARD
     return 1.0 if prediction == env.video.ground_truth[ground_truth_frame] else -1.0
 
+
+def gaafd_reward(env: BinaryClassificationBaseEnv, _prediction: int) -> float:
+    """Return the gaafd score if the episode is just about to end."""
+    return (
+        -gaafd(env.video.ground_truth, env.episode_predictions) / 10
+        if (env.current_frame + 1) >= env.video.ground_truth_end
+        else 0.0
+    )

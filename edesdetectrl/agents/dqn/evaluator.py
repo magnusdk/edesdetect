@@ -25,10 +25,12 @@ def evaluate_and_get_metrics(
 ):
     # Evaluate actor on all samples
     all_metrics = []
+    all_gaafd = []
     all_action_distributions = []
     for _ in range(num_samples):
         trajectory = generate_trajectory_using_actor(environment, actor)
         all_metrics.append(trajectory.balanced_accuracy())
+        all_gaafd.append(trajectory.gaafd())
         all_action_distributions.append(trajectory.action_distribution())
 
     # Return averaged metrics
@@ -37,7 +39,7 @@ def evaluate_and_get_metrics(
         for k, v in distr.items():
             action_distribution[k] = v + action_distribution.get(k, 0)
     action_distribution = {k: v / num_samples for k, v in action_distribution.items()}
-    return np.mean(all_metrics), action_distribution
+    return np.mean(all_metrics), np.mean(all_gaafd), action_distribution
 
 
 class Evaluator(core.Worker):
@@ -65,7 +67,7 @@ class Evaluator(core.Worker):
         )
         import time
 
-        time.sleep(0.2 * 60)  # 5 minutes
+        time.sleep(0.5 * 60)  # 5 minutes
         self.actor.update(wait=True)
         print("Starting to evaluate now.")
 
@@ -84,7 +86,7 @@ class Evaluator(core.Worker):
                 util_mlflow.log_artifact(self.actor._params, f"params_{learner_steps}")
 
             time_before = time.time()
-            balanced_accuracy, action_distribution = evaluate_and_get_metrics(
+            balanced_accuracy, gaafd, action_distribution = evaluate_and_get_metrics(
                 self.actor, num_samples, environment
             )
 
@@ -99,6 +101,7 @@ class Evaluator(core.Worker):
                 (split + "_elapsed_seconds"): elapsed_seconds,
                 (split + "_episodes_per_second"): (2 * num_samples) / elapsed_seconds,
                 (split + "_balanced_accuracy"): balanced_accuracy,
+                (split + "_gaafd"): gaafd,
                 "learner_steps": learner_steps,
                 **presented_action_distribution,
             }

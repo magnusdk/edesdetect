@@ -24,11 +24,14 @@ class BinaryClassificationBaseEnv(gym.Env):
         self.get_observation = get_observation
         self._video: dataloaders.DataItem = None
 
+        self.episode_predictions = []
+
     def is_ready(self):
         return self.video is not None
 
     def reset(self):
         assert self.is_ready(), "Video must be set."
+        self.episode_predictions = []
         self.current_frame = self.video.ground_truth_start
         observation = self.get_observation(self)
         return observation
@@ -50,6 +53,7 @@ class BinaryClassificationBaseEnv(gym.Env):
             and self.current_frame < self.video.ground_truth_end
             and (self.current_frame + self.pad_right + 1) < self.video.total_length
         ):
+            self.episode_predictions.append(action)
             self.current_frame += 1
         done = (
             done

@@ -1,9 +1,10 @@
-from collections import namedtuple
+from collections import Counter, namedtuple
 
 import acme.core
 import dm_env
 import numpy as np
 import sklearn.metrics as metrics
+from edesdetectrl.core.metrics import gaafd
 
 TrajectoryItem = namedtuple("TrajectoryItem", ["s", "a", "r", "q_values", "env_info"])
 
@@ -13,6 +14,24 @@ def all_equal(xs):
         if x != xs[0]:
             return False
     return True
+
+
+def safe_index(l, i, default=None):
+    try:
+        return l[i]
+    except IndexError:
+        return default
+
+
+def closest_equal(a, value, index):
+    di = 0
+    while True:
+        if index - di < 0 and index + di >= len(a):
+            # There is no such value in a
+            return len(a)
+        if safe_index(a, index + di) == value or safe_index(a, index - di) == value:
+            return di
+        di += 1
 
 
 def safe_balanced_accuracy(ground_truths, actions):
@@ -92,6 +111,15 @@ class Trajectory(list):
         ground_truths, actions = self._labels_and_predictions()
         return metrics.f1_score(ground_truths, actions, labels=[0, 1], average="micro")
 
+    def action_distribution(self):
+        actions = [a.tolist() for a in self.actions()]
+        num_actions = len(actions)
+        return {k: v / num_actions for k, v in Counter(actions).items()}
+
+    def gaafd(self):
+        ground_truths, actions = self._labels_and_predictions()
+        return gaafd(ground_truths, actions)
+
     def all_metrics(self):
         return {
             "sum_rewards": self.sum_rewards(),
@@ -100,6 +128,7 @@ class Trajectory(list):
             "recall": self.recall(),
             "precision": self.precision(),
             "f1": self.f1(),
+            "gaafd": self.gaafd(),
         }
 
 

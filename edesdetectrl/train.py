@@ -57,6 +57,7 @@ class ExperimentConfig:
     reward_spec: Literal[
         "simple",
         "proximity",
+        "gaafd",
     ] = "simple"
 
     dataloader: Literal[
@@ -160,24 +161,25 @@ def main(experiment_config: ExperimentConfig, dqn_config: DQNConfig):
 
 
 if __name__ == "__main__":
+    num_sgd_steps_per_step = 4
     main(
         ExperimentConfig(
-            experiment_name="MModeBinaryClassification2",
-            environment="EDESMModeClassification-v0",
-            network="m_mode_mobilenet",
-            reward_spec="proximity",
+            experiment_name="VanillaBinaryClassification_gaafd",
+            environment="VanillaBinaryClassification-v0",
+            network="simple",
+            reward_spec="gaafd",
             dataloader="echonet",
         ),
         DQNConfig(
-            epsilon=0.2,
-            learning_rate=1e-3,
-            discount=0.95,
-            n_step=4,
+            epsilon=0.02,
+            learning_rate=1e-4,
+            discount=1.0,
+            n_step=200,
             min_replay_size=10000,
-            num_sgd_steps_per_step=8,
-            batch_size=1024,
+            num_sgd_steps_per_step=num_sgd_steps_per_step,
+            batch_size=num_sgd_steps_per_step * 128,
             seed=42,
-            num_actors=12,
+            num_actors=20,
         ),
     )
 
