@@ -64,6 +64,9 @@ In order to obtain images of the heart, clinicians use tools such as Magnetic Re
 
 Many heart measurements depend on two key events in the cardiac cycle: End-Diastole (ED) and End-Systole (ES). Roughly speaking, ED is when the heart is the most relaxed, and ES is when it is the most contracted. Left ventricular ejection fraction is an example of an important measurement that is calculated using ED and ES.
 
+
+
+
 There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite{mada_razvan_o_how_2015}:
 1. Finding the frame with the maximum left ventricle volume (for ED) and the frame with the minimum left ventricle volume (for ES).
 2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
@@ -89,325 +92,353 @@ What are in each chapter...
 
 
 \chapter{Background}
-* The Cardiac Cycle
-(Taken from Wikipedia, are there any good citations I could use, or is it even needed for something as fundamental as this?)
+* Creating Images of the Heart Using Sound
+** The Cardiac Cycle
+ (Based on Wikipedia articles; are there any good citations I could use or are citations even needed for something as fundamental as this?)
 
-The human heart is situated in the middle compartement of the chest, between the lungs. Blood is used for transporting oxygen and essential nutrients throughout the body and carry metabolic waste such as carbon dioxide to the lungs, and the heart is responsible for keeping the blood flowing by acting as a pump.
+ The human heart is situated in the middle compartement of the chest, between the lungs. Blood is used for transporting oxygen and essential nutrients throughout the body and carry metabolic waste such as carbon dioxide to the lungs, and the heart is responsible for keeping the blood flowing by acting as a pump.
 
-The heart consists of two halves, the left heart and the right heart. The left heart pumps newly oxinated blood from the lungs out to the rest of the body and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, is where the blood first enters the heart, and the lower chambers, the ventricles is where the blood exits the heart. Each chamber also have valves which are opened and closed during a cardiac cycle to help keep the blood flowing in one direction. 
+ The heart consists of two halves, the left heart and the right heart. The left heart pumps newly oxinated blood from the lungs out to the rest of the body and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, is where the blood first enters the heart, and the lower chambers, the ventricles is where the blood exits the heart. Each chamber also have valves which are opened and closed during a cardiac cycle to help keep the blood flowing in one direction. 
 
-#+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Source: [[https://en.wikipedia.org/wiki/Atrium_(heart)]]
-#+NAME: fig:heart_diagram
-[[./img/heart_diagram.png]]
+ #+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Source: [[https://en.wikipedia.org/wiki/Atrium_(heart)]].
+ #+NAME: fig:heart_diagram
+ [[./img/heart_diagram.png]]
 
-During a cardiac cycle the different chambers are filled at different times. At the start of a new cycle, the left and right ventricles relax and are filled with blood coming from their respective atria. As the ventricles are filled with blood, the pressure increases which causes the valves from the atria to close. After this, the ventricles start contracting, pushing blood out from the heart. As the ventricle pressure decreases and the pressure in the aorta increases, the valve going out of the ventricle is closed. Blood flows into the atria before the cycle starts over.
+ During a cardiac cycle the different chambers are filled at different times. At the start of a new cycle, the left and right ventricles relax and are filled with blood coming from their respective atria. As the ventricles are filled with blood, the pressure increases which causes the valves from the atria to close. After this, the ventricles start contracting, pushing blood out from the heart. As the ventricle pressure decreases and the pressure in the aorta increases, the valve going out of the ventricle is closed. Blood flows into the atria before the cycle starts over.
 
-#+CAPTION: The cardiac cycle illustrated with the direction of blood flow and pressure from and into the atria and ventricles. Source: [[https://en.wikipedia.org/wiki/Heart]]
-#+NAME: fig:cardiac_cycle_heart_illustration
-[[./img/cardiac_cycle_heart_illustration.jpeg]]
+ #+CAPTION: The cardiac cycle illustrated with the direction of blood flow and pressure from and into the atria and ventricles. Source: [[https://en.wikipedia.org/wiki/Heart]].
+ #+NAME: fig:cardiac_cycle_heart_illustration
+ [[./img/cardiac_cycle_heart_illustration.jpeg]]
 
 
-- Phases of the heart
-  - Wiggers diagram
+ A cardiac cycle consists of multiple events as visualized in the Wiggers diagram (figure [[fig:wiggers_diagram]]). ......
 
-- Definition of ED/ES
-  - Using this, clinicians can make measuremetns ....
+ #+CAPTION: The Wiggers diagram desccribes the different phases of the cardiac cycle, as well as what they represent in different measurements. Source [[https://en.wikipedia.org/wiki/Wiggers_diagram]].
+ #+NAME: fig:wiggers_diagram
+ [[./img/wiggers_diagram.png]]
 
 
-* Echocardiography
-/Seeing/ is the act of sensing photons with our eyes. We can see the color of a curtain because photons that hit it and are reflected back into our eyes. A heart, being inside a body and all, can not be seen because light does not penetrate that deep, and thus is not reflected back into our eyes. To see the heart we need a signal that can penetrate the body just enough to reach the heart, but not so much as to completely penetrate the heart without sending back a reflection. As luck would have it — sound is such a signal.
 
-** What is Sound?
-What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
+ - Phases of the heart
+   - Wiggers diagram
 
-#+NAME: fig:pressure_wave_propagation
-#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
-[[./img/pressure_wave_propagation.png]]
+ - Definition of ED/ES
+   - Using this, clinicians can make measuremetns ....
 
-*** Attributes of a Sine Wave
-A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
+** Echocardiography
+ /Seeing/ is the act of sensing photons with our eyes. We can see the color of a curtain because photons that hit it and are reflected back into our eyes. A heart, being inside a body and all, can not be seen because light does not penetrate that deep, and thus is not reflected back into our eyes. To see the heart we need a signal that can penetrate the body just enough to reach the heart, but not so much as to completely penetrate the heart without sending back a reflection. As luck would have it — sound is such a signal.
 
-#+NAME: fig:amp_freq_phase
-#+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
-[[./img/amp_freq_phase.png]]
+*** What is Sound?
+ What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
 
-A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
+ #+NAME: fig:pressure_wave_propagation
+ #+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
+ [[./img/pressure_wave_propagation.png]]
 
-#+NAME: fig:freq_spectrum
-#+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
-[[./img/freq_spectrum.png]]
+**** Attributes of a Sine Wave
+ A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
 
-#+NAME: fig:piano_clarinet_freqs
-#+CAPTION: It's the overtones that makes two instruments sound different, even while they are playing the same notes. To the left is the frequency spectrum of a piano and a clarinet from 150 to 450 hertz. To the right is the same frequency spectrum from 0 to 5000 hertz, in log$_{10}$ scale. Both instruments are playing the Am7 chord which consists of four notes. You can see the notes clearly in the left image, all having relatively high amplitudes for both instruments.
-[[./img/piano_clarinet_freqs.png]]
+ #+NAME: fig:amp_freq_phase
+ #+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
+ [[./img/amp_freq_phase.png]]
 
-*** Attributes of the Medium
-The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
+ A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
 
-#+NAME: fig:conveyor_belt_speed_change
-#+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
-[[./img/conveyor_belt_speed_change.png]]
+ #+NAME: fig:freq_spectrum
+ #+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
+ [[./img/freq_spectrum.png]]
 
+ #+NAME: fig:piano_clarinet_freqs
+ #+CAPTION: It's the overtones that makes two instruments sound different, even while they are playing the same notes. To the left is the frequency spectrum of a piano and a clarinet from 150 to 450 hertz. To the right is the same frequency spectrum from 0 to 5000 hertz, in log$_{10}$ scale. Both instruments are playing the Am7 chord which consists of four notes. You can see the notes clearly in the left image, all having relatively high amplitudes for both instruments.
+ [[./img/piano_clarinet_freqs.png]]
 
-#+NAME: fig:nonlinearity
-#+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
-[[./img/nonlinearity.png]]
+**** Attributes of the Medium
+ The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
 
+ #+NAME: fig:conveyor_belt_speed_change
+ #+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
+ [[./img/conveyor_belt_speed_change.png]]
 
-An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
 
-#+NAME: eqn:acoustic_impedance
-\begin{equation}
-Z=\rho\times c
-\end{equation}
+ #+NAME: fig:nonlinearity
+ #+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
+ [[./img/nonlinearity.png]]
 
-#+NAME: eqn:reflection_factor
-\begin{equation} 
-RF=\frac{Z_2-Z_1}{Z_2+Z_1}
-\end{equation}
 
+ An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
 
-** Creating Images From Sound
+ #+NAME: eqn:acoustic_impedance
+ \begin{equation}
+ Z=\rho\times c
+ \end{equation}
 
-#+BEGIN_SRC python
-THE FOLLOWING ARE NOTES FOR THIS SECTION
+ #+NAME: eqn:reflection_factor
+ \begin{equation} 
+ RF=\frac{Z_2-Z_1}{Z_2+Z_1}
+ \end{equation}
 
-Delay signal
-one receiver only knows distance, not actual position.
-multiple receivers, distance to object varies
-summed together to make an image
-more advanced techniques are not covered in this thesis.
 
-To increase image quality and resolution multiple transmits can be made.
-Common is to focus the sound wave in a direction, creating sector scan.
-- Can take a long time because we have to wait for one transmit do finish 
-  before sending another one.
-This is called B-mode imaging
+*** Creating Images From Sound
 
-Can also send a focused beam in just one line to get very high temporal 
-  resolution image.
-This is called M-mode imaging
+ #+BEGIN_SRC python
+ THE FOLLOWING ARE NOTES FOR THIS SECTION
 
-The heart is in the rib cage so it is hidden behind bones which reflect a 
-  lot of energy
-There are some standard views, usually between the rib cage bones, but also 
-  down throat and from within
-2-chamber, 4-chamber, etc...
+ Delay signal
+ one receiver only knows distance, not actual position.
+ multiple receivers, distance to object varies
+ summed together to make an image
+ more advanced techniques are not covered in this thesis.
 
-Weakness of ultrasound
-- Shadowing, phantoms(?), attenuation, bones in the way of the heart, etc... 
-#+END_SRC
+ To increase image quality and resolution multiple transmits can be made.
+ Common is to focus the sound wave in a direction, creating sector scan.
+ - Can take a long time because we have to wait for one transmit do finish 
+   before sending another one.
+ This is called B-mode imaging
 
+ Can also send a focused beam in just one line to get very high temporal 
+   resolution image.
+ This is called M-mode imaging
 
+ The heart is in the rib cage so it is hidden behind bones which reflect a 
+   lot of energy
+ There are some standard views, usually between the rib cage bones, but also 
+   down throat and from within
+ 2-chamber, 4-chamber, etc...
 
-How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance which causes sound waves to be reflected when it hits them. Using this, we can send out a sound wave and listen for the reflections. By measuring how much time it took from the sound signal was sent out until its reflection is received back, and given that we know the approximate speed of sound, we can calculate the distance that the sound wave travelled until it hit the reflector. See equation [[eqn:reflector_distance_by_delay]]. Likewise, if we want to create a full image from the received sound signals, where we know which positions to image beforehand, we can lookup the received signal based on the distance to a given position. If we want to image position $(3, 4)$, and assuming that the sound was sent from position $(0,0)$, we know that the distance would have had to travel $5$ units. By using equation [[eqn:reflector_delay_by_distance]] we can find which part of the received signal corresponds to that position.
+ Weakness of ultrasound
+ - Shadowing, phantoms(?), attenuation, bones in the way of the heart, etc... 
+ #+END_SRC
 
-#+CAPTION: By measuring the time between sending a signal and receiving it back from a reflector we can approximate how far away the reflector is — given that we know the approximate speed of sound.
-#+NAME: fig:sound_tx_rx
-[[./img/sound_tx_rx.png]]
 
-#+NAME: eqn:reflector_distance_by_delay
-\begin{equation}
-\text{distance} = \text{delay} \times c 
-\end{equation}
 
-#+NAME: eqn:reflector_delay_by_distance
-\begin{equation}
-\text{delay} = \frac{\text{distance}}{c} 
-\end{equation}
+ How can we use the physical properties of acoustic waves to our advantage? The body consists of tissues of varying acoustic impedance which causes sound waves to be reflected when it hits them. Using this, we can send out a sound wave and listen for the reflections. By measuring how much time it took from the sound signal was sent out until its reflection is received back, and given that we know the approximate speed of sound, we can calculate the distance that the sound wave travelled until it hit the reflector. See equation [[eqn:reflector_distance_by_delay]]. Likewise, if we want to create a full image from the received sound signals, where we know which positions to image beforehand, we can lookup the received signal based on the distance to a given position. If we want to image position $(3, 4)$, and assuming that the sound was sent from position $(0,0)$, we know that the distance would have had to travel $5$ units. By using equation [[eqn:reflector_delay_by_distance]] we can find which part of the received signal corresponds to that position.
 
-An ultrasound transducer consists of many different receivers [fn:: An ultrasound transducer also consists of many different individual transmitter elements, but that is irrelevant for now.] and thus we can repeat the process of delay the signal for each receiver depending on the distance from the point we want to image to the position of the receiver. If we sum all the resulting images we get a final image of different reflectors in the are. This algorithm is called Delay-And-Sum.
+ #+CAPTION: By measuring the time between sending a signal and receiving it back from a reflector we can approximate how far away the reflector is — given that we know the approximate speed of sound.
+ #+NAME: fig:sound_tx_rx
+ [[./img/sound_tx_rx.png]]
 
-# TODO: Add table of the acoustic impedance of various human tissues.
+ #+NAME: eqn:reflector_distance_by_delay
+ \begin{equation}
+ \text{distance} = \text{delay} \times c 
+ \end{equation}
 
-*Limitations*
-- attentuaion, resolution, speckles, shadowing, side-lobes 
+ #+NAME: eqn:reflector_delay_by_distance
+ \begin{equation}
+ \text{delay} = \frac{\text{distance}}{c} 
+ \end{equation}
 
+ An ultrasound transducer consists of many different receivers [fn:: An ultrasound transducer also consists of many different individual transmitter elements, but that is irrelevant for now.] and thus we can repeat the process of delay the signal for each receiver depending on the distance from the point we want to image to the position of the receiver. If we sum all the resulting images we get a final image of different reflectors in the are. This algorithm is called Delay-And-Sum.
 
-* Deep Learning
-** Gradient Descent
-Based on gradient descent.
-- What is gradient descent... How can we build models...
-- Models and Loss
-Try to build models that makes the problem easy to learn. inductive bias
+ # TODO: Add table of the acoustic impedance of various human tissues.
 
-** Deep Neural Networks
-Activation functions
-Fully connected layers
-Convolutional layers
-Batch normalization
-(++ more used in Mobilenet?)
+ *Limitations*
+ - attentuaion, resolution, speckles, shadowing, side-lobes 
 
-** Optimization Process
-- SGD
-- Optimizers like ADAM
-- Overfitting and regularizers.
 
-** Supervised and Unsupervised Learning
-Basically two families of loss functions
 
-* Reinforcement learning
- RL allows an agent to learn a strategy, called a policy, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
+* Data Processing Section (NAME TBD)
+** Deep Learning
 
-At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
 
-- The state space $S$
-- The action space $A$
-- The transition function $P(s_{t+1}|s_t, a_t)$
-- The reward function $R(s_t, a_t)$
 
-An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state st and returns the probability of taking an action at: $\pi(a|s)\in[0,1]$.
+*** Gradient Descent
+ The biggest deep learning innovations have all used a technique called gradient descent.
 
-The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards:
-\[G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T\]
+ Gradient descent is based on calculus. It takes advantage of the fact that even if we don't know the true nature of some function, given that it is differentiable, we can calculate its slope at a given point. This is called the gradient and it gives us information about thow to update its parameters in order to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e. reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, then we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters in the opposite direction is what's called gradient descent.
 
-where $T$ marks the timestep where the episode ends. However, some tasks are not episodic, which means they can, in theory, run forever. For this reason, we apply discounting to the return, giving greater weight to more immediate rewards and less weight to rewards in the far future:
-\[G_t=r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots = \sum_{k=0}^\infty \gamma^k r_{t+k+1} = r_{t} + \gamma G_{t+1}\]
+ #+NAME: fig:gradient_descent_simple
+ [[./img/gradient_descent_simple.png]]
 
-where $\gamma$ is the discounting factor. Discounting ensures that the return, which we are trying to maximize, can not be infinite, even when, in theory, the agent could go on forever.
+ Gradient descent also scales to functions that takes multiple parameters, so instead of just taking $x$ it may take an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually is some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least 10000 parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works.
 
-To select a good next action, the policy needs to know the value of states and actions. For this we could use the state value function $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the state-action value function $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive. The “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy is one of the possibly many policies that yield the maximum amount of total reward if followed.
+ We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as that of cats or of dogs. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called Stochastic Gradient Descent (SGD) and it is often better at generalizing on the dataset than regular gradient descent.
 
-One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration:
-\[V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]\]
 
-$(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward r_{t+1}, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t) is called the TD-error. The lower the TD-error is, the better the RL agent is to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
-To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning:
-\[Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]\]
+ The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to enable the model to be optimized using SGD. As long as both the model and the loss function is differentiable and convex then we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others and some loss functions may produce gradients that are easier to optimize with than others. Of great importance is to instill what's called inductive bias into the model — that is implicit knowledge about the task at hand. How to do this is still an ongoing research topic, but some of the most popular approaches are explored in the next section. 
 
-Here the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
+*** Deep Neural Networks
+ Activation functions
+ Fully connected layers
+ Convolutional layers
+ Batch normalization
+ (++ more used in Mobilenet?)
 
-In TD-learning, as the agent explores the environment and encounters new states, it has to store those states and their associated values. The same is true for Q-learning, but it also has to take state-action pairs into account, meaning that it has to store up to a number of $\|S\| \times \|A\|$ entries. That is fine when the state space and the action space are small but become infeasible when they are too big.
+*** Optimization Process
+ - SGD
+ - Optimizers like ADAM
+ - Overfitting and regularizers.
 
-The described way of storing and updating the values is called tabular methods because we treat the states, or state-action pairs, as entries in a table. Tabular methods break down when the state space or the action space becomes very large or even continuous. Creating RL algorithms that can handle very large or continuous action spaces is challenging \cite{zhou_deep_2021}. However, there exist methods that can scale RL to handle very large or continuous state spaces.
+*** Supervised and Unsupervised Learning
+ Basically two families of loss functions
 
-** Deep Reinforcement Learning
-A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them. In practice, the vast majority of pixel permutations are not used, so we could ignore them, but the number of possible states would still be too high to explore exhaustively.
+** Reinforcement learning
+  RL allows an agent to learn a strategy, called a /policy/, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
 
-The values of even such a large state space can be represented in much less data without losing much relevant information. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This allows the agent to generalize state value or state-action value functions to new not-before-seen states.
+ At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
 
-A lot of today’s research into RL goes into scaling it up to a larger state space. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods", but they are not the only ones to do so. Policy gradient is another popular set of methods that is able to learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Only action-value methods are covered in this essay, but policy gradient methods will be considered for the final thesis.
+ - The state space $S$
+ - The action space $A$
+ - The transition function $P(s_{t+1}|s_t, a_t)$
+ - The reward function $R(s_t, a_t)$
 
-*** Deep Q-Network
-The modified Q-learning algorithm was termed Deep Q-Network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
+ An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state $s_t$ and returns the probability of taking an action at: $\pi(a|s)\in[0,1]$.
 
-The original DQN algorithm takes the raw pixel values from an Atari game as input, followed by three convolutional layers and two fully connected layers. The final fully connected layer outputs one value for each possible action, approximating the expected value of taking each action given the state, i.e., $Q(s, a)$. An $\epsilon$-greedy policy then chooses either the action with the highest approximated value with probability $1 - \epsilon$ or a random action with probability $\epsilon$.
+ The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards:
+ \[G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T\]
 
-The authors showed how the network is able to reduce the state space by applying a technique called "t-SNE" to the DQNs’ internal state representation. t-SNE is an unsupervised learning algorithm that maps high-dimensional data to points in a 2D or 3D map \cite{liao_artificial_2016}. As expected, the t-SNE algorithm tends to map the DQN representation of perceptually similar states to nearby points. Interestingly, it also maps representations that are perceptually dissimilar, but that are close in terms of expected rewards, to nearby points. This indicates that the network is able to learn a higher-level, but lower-dimensional, representation of the states in terms of expected reward. This is visualized in figure [[fig:dqn_atari_t_sne]].
+ where $T$ marks the timestep where the episode ends. However, some tasks are not episodic, which means they can, in theory, run forever. For this reason, we apply discounting to the return, giving greater weight to more immediate rewards and less weight to rewards in the far future:
+\begin{align*}
+G_t &= r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots \\
+    &= \sum_{k=0}^\infty \gamma^k r_{t+k+1} \\
+    &= r_{t} + \gamma G_{t+1}
+\end{align*}
 
-#+CAPTION: From \cite{mnih_human-level_2015}: "Two-dimensional t-SNE embedding of the representations in the last hidden layer assigned by DQN to game states experienced while playing Space Invaders. The plot was generated by letting the DQN agent play for 2 h of real game time and running the t-SNE algorithm on the last hidden layer representations assigned by DQN to each experienced game state. The points are coloured according to the state values (V, maximum expected reward of a state) predicted by DQN for the corresponding game states (ranging from dark red (highest V) to dark blue (lowest V)). The screenshots corresponding to a selected number of points are shown. The DQN agent predicts high state values for both full (top right screenshots) and nearly complete screens (bottom left screenshots) because it has learned that completing a screen leads to a new screen full of enemy ships. Partially completed screens (bottom screenshots) are assigned lower state values because less immediate reward is available. The screens shown on the bottom right and top left and middle are less perceptually similar than the other examples but are still mapped to nearby representations and similar values because the orange bunkers do not carry great significance near the end of a level. With permission from Square Enix Limited."
-#+NAME: fig:dqn_atari_t_sne
-[[./img/rl_dqn_tsne.jpeg]]
+ where $\gamma$ is the discounting factor. Discounting ensures that the return, which we are trying to maximize, can not be infinite, even when, in theory, the agent could go on forever.
 
-Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, which leads to variance in the network updates. If a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target $y_j$ , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets $y_j$ in the Q-learning update.
+ To select a good next action, the policy needs to know the value of states and actions. For this we could use the state value function $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the state-action value function $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive. The “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy $\pi^*$ is one /(of the possibly many policies)/ that yield the maximum amount of total reward if followed.
 
-In experience replay, the agent’s experiences over multiple episodes are stored in a data set called the replay memory. Each experience item is a tuple consisting of the previous state, selected action, returned reward, and new state: $(s_t, a_t, r_t, s_{t+1})$. During training, randomly sampled batches from the replay memory are used to train the Q-network.
+ One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration:
+ \[V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]\]
 
-Using a separate network for generating the targets $y_j$ in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets $y_j$, making the algorithm more stable and reducing the chance of oscillations or divergence.
+ $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
+ To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning:
+ \[Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]\]
 
+ Here the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
 
+ In TD-learning, as the agent explores the environment and encounters new states, it has to store those states and their associated values. The same is true for Q-learning, but it also has to take state-action pairs into account, meaning that it has to store up to a number of $\|S\| \times \|A\|$ entries. That is fine when the state space and the action space are small but become infeasible when they are too big.
 
-*** Double Deep Q-Network
-Several improvements have been made to DQN over the years. Q-learning has been shown to produce overly optimistic action values as a result of using the maximum action value as approximation for the maximum expected action value\cite{h_p_van_hasselt_hado_double_2010}. Double Q-learning attempts to reduce this overestimation by decomposing the target into an action selector and an action value estimator. The regular Q-learning target is written as:
+ The described way of storing and updating the values is called tabular methods because we treat the states, or state-action pairs, as entries in a table. Tabular methods break down when the state space or the action space becomes very large or even continuous. Creating RL algorithms that can handle very large or continuous action spaces is challenging \cite{zhou_deep_2021}. However, there exist methods that can scale RL to handle very large or continuous state spaces.
 
-\[r_{t+1} + \gamma max_a Q(s_{t+1},a)\]
+*** Deep Reinforcement Learning
+ A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them. In practice, the vast majority of pixel permutations are not used, so we could ignore them, but the number of possible states would still be too high to explore exhaustively.
 
-This can be rewritten as:
+ The values of even such a large state space can be represented in much less data without losing much relevant information. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This allows the agent to generalize state value or state-action value functions to new not-before-seen states.
 
-\begin{equation}
-r_{t+1} + \gamma Q^A(s_{t+1},argmax_a Q^B(s_{t+1},a))
-\end{equation}
+ A lot of today’s research into RL goes into scaling it up to a larger state space. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods", but they are not the only ones to do so. Policy gradient is another popular set of methods that is able to learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Only action-value methods are covered in this essay, but policy gradient methods will be considered for the final thesis.
 
-Where $Q^A$ acts as an action value estimator and $Q^B$ acts as an action selector. If $Q^A=Q^B$ then this is just the regular Q-learning target. If we only update the action selector at each update, and randomly choose which of the two Q-functions should be used as the action selector at each update, then the overestimation is reduced. This also applies to DQN, and it has been shown that using a double DQN results in better policies than using a regular DQN\cite{van_hasselt_deep_2015}.
+**** Deep Q-Network
+ The modified Q-learning algorithm was termed Deep Q-Network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
 
-*** Prioritized Replay
-Using experience replay, an agent isn’t forced to process transitions in the exact order that they are experienced. However, because we are sampling the transitions uniformly from the replay memory, all transitions are given equal priority. We might benefit from prioritizing transitions that have a high TD-error magnitude, which acts as a proxy-measure of how "surprising" a transition is to the agent\cite{schaul_prioritized_2016}.
+ The original DQN algorithm takes the raw pixel values from an Atari game as input, followed by three convolutional layers and two fully connected layers. The final fully connected layer outputs one value for each possible action, approximating the expected value of taking each action given the state, i.e., $Q(s, a)$. An $\epsilon$-greedy policy then chooses either the action with the highest approximated value with probability $1 - \epsilon$ or a random action with probability $\epsilon$.
 
-Prioritizing experience by the magnitude of the TD-error may introduce a lack of diversity. One of the reasons for this is that an experience that initially had a low TD-error, but that later becomes large as the network is trained, will continue to be de-prioritized because the TD-error is only updated when the transition is revisited — and because of its low prioritization, the probability that it will be visited again soon is low. To overcome this challenge, a stochastic sampling method that interpolates between pure greedy prioritization and uniform random sampling is introduced.
+ The authors showed how the network is able to reduce the state space by applying a technique called "t-SNE" to the DQNs’ internal state representation. t-SNE is an unsupervised learning algorithm that maps high-dimensional data to points in a 2D or 3D map \cite{liao_artificial_2016}. As expected, the t-SNE algorithm tends to map the DQN representation of perceptually similar states to nearby points. Interestingly, it also maps representations that are perceptually dissimilar, but that are close in terms of expected rewards, to nearby points. This indicates that the network is able to learn a higher-level, but lower-dimensional, representation of the states in terms of expected reward. This is visualized in figure [[fig:dqn_atari_t_sne]].
 
-Another problem with prioritized experience replay is that DQN optimizes for minimizing the expected TD-error squared, with respect to the network parameters $\theta$, assuming that the samples in the replay buffer corresponds to the same distribution as seen while exploring. Prioritized experience replay breaks this assumption, introducing a bias in the calculated gradient. This is fixed by using importance sampling, such that the less-sampled experiences are compensated for in the gradient. As the unbiased nature of the updates is most important near convergence at the end of training, the importance sampling is gradually added towards the end of training, with less importance sampling included at the start of training.
+ #+CAPTION: From \cite{mnih_human-level_2015}: "Two-dimensional t-SNE embedding of the representations in the last hidden layer assigned by DQN to game states experienced while playing Space Invaders. The plot was generated by letting the DQN agent play for 2 h of real game time and running the t-SNE algorithm on the last hidden layer representations assigned by DQN to each experienced game state. The points are coloured according to the state values (V, maximum expected reward of a state) predicted by DQN for the corresponding game states (ranging from dark red (highest V) to dark blue (lowest V)). The screenshots corresponding to a selected number of points are shown. The DQN agent predicts high state values for both full (top right screenshots) and nearly complete screens (bottom left screenshots) because it has learned that completing a screen leads to a new screen full of enemy ships. Partially completed screens (bottom screenshots) are assigned lower state values because less immediate reward is available. The screens shown on the bottom right and top left and middle are less perceptually similar than the other examples but are still mapped to nearby representations and similar values because the orange bunkers do not carry great significance near the end of a level. With permission from Square Enix Limited."
+ #+NAME: fig:dqn_atari_t_sne
+ [[./img/rl_dqn_tsne.jpeg]]
 
-Prioritized replay is found to speed up an agent’s ability to learn by a factor of 2.
+ Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, which leads to variance in the network updates. If a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target $y_j$ , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets $y_j$ in the Q-learning update.
 
-*** Dual Deep Q-Network
-In the dueling architecture, or Dual DQN, the network that approximates the Q-function is split into two parts: one for estimating the value of the current state, and one for measuring the so-called advantage of taking an action in this state\cite{wang_dueling_2016}. The combination of the state-value estimate and the advantage yields the Q values:
+ In experience replay, the agent’s experiences over multiple episodes are stored in a data set called the replay memory. Each experience item is a tuple consisting of the previous state, selected action, returned reward, and new state: $(s_t, a_t, r_t, s_{t+1})$. During training, randomly sampled batches from the replay memory are used to train the Q-network.
 
-\begin{equation}
-Q(s,a)=V(s)+A(s,a)
-\end{equation}
+ Using a separate network for generating the targets $y_j$ in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets $y_j$, making the algorithm more stable and reducing the chance of oscillations or divergence.
 
-But because the state value function $V(s)$ can be expressed in terms of the state-action value function $Q(s,a)$ by taking the mean of $Q(s,a)$ over all actions, then it means that the mean of the advantage function $A(s,a)$ over all actions equals zero. This is not necessarily the case because the networks are simply approximations. To fix this the authors also subtract the mean advantage from the equation. This change loses the original semantics of $V(s)$ and $A(s,a)$, but results in a more stable algorithm.
 
-\begin{equation}
-Q(s,a)=V(s)+A(s,a)-\frac{\sum_{a}A(s,a)}{N_{actions}}
-\end{equation}
 
-The dueling architecture lets the network train the state-value function and the advantage function separately.
 
-*** Multi-Step Learning
-We look only one step ahead when constructing the target in the Q-learning update, but this isn’t a requirement. We could extend it to look $N$ steps ahead if we wanted to, in which it is called N-step learning, or multi-step learning\cite{sutton_reinforcement_2018}.
+**** Double Deep Q-Network
+ Several improvements have been made to DQN over the years. Q-learning has been shown to produce overly optimistic action values as a result of using the maximum action value as approximation for the maximum expected action value\cite{h_p_van_hasselt_hado_double_2010}. Double Q-learning attempts to reduce this overestimation by decomposing the target into an action selector and an action value estimator. The regular Q-learning target is written as:
 
-To use multi-step learning we must look at $N$ consecutive experiences for every update, and sum the appropriately discounted rewards and add it to an appropriately discounted value estimation of the final state in the sequence. The N-step target for a given state $s_t$ is given as:
+ \[r_{t+1} + \gamma max_a Q(s_{t+1},a)\]
 
-\begin{equation}
-\sum_{k=0}^{N-1}\gamma^k r_{t+k+1} + \gamma^N max_a(Q(s_{t+N}, a))
-\end{equation}
+ This can be rewritten as:
 
-If we set $N$ to be 1, then the algorithm would be equal to the regular Q-learning algorithm. As we increase $N$, the algorithm would become more and more similar to Monte Carlo method, which looks all the way until the agent hits a terminal state.
+ \begin{equation}
+ r_{t+1} + \gamma Q^A(s_{t+1},argmax_a Q^B(s_{t+1},a))
+ \end{equation}
 
+ Where $Q^A$ acts as an action value estimator and $Q^B$ acts as an action selector. If $Q^A=Q^B$ then this is just the regular Q-learning target. If we only update the action selector at each update, and randomly choose which of the two Q-functions should be used as the action selector at each update, then the overestimation is reduced. This also applies to DQN, and it has been shown that using a double DQN results in better policies than using a regular DQN\cite{van_hasselt_deep_2015}.
 
-\begin{equation}
-r_{t+1} + \gamma max_a Q(s_{t+1},a)
-= \sum_{k=0}^{n-1}\gamma^k r_{t+k+1} + \gamma^n max_a(Q(s_{t+n}, a))\textrm{, iff n=1}
-\end{equation}
+**** Prioritized Replay
+ Using experience replay, an agent isn’t forced to process transitions in the exact order that they are experienced. However, because we are sampling the transitions uniformly from the replay memory, all transitions are given equal priority. We might benefit from prioritizing transitions that have a high TD-error magnitude, which acts as a proxy-measure of how "surprising" a transition is to the agent\cite{schaul_prioritized_2016}.
 
-The best choice of $N$ usually lies somewhere between 1 and the length of an episode. This is because bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred. Another intuition for why it is better is that when we look further ahead into the future we depend less on our own estimates of the future.
+ Prioritizing experience by the magnitude of the TD-error may introduce a lack of diversity. One of the reasons for this is that an experience that initially had a low TD-error, but that later becomes large as the network is trained, will continue to be de-prioritized because the TD-error is only updated when the transition is revisited — and because of its low prioritization, the probability that it will be visited again soon is low. To overcome this challenge, a stochastic sampling method that interpolates between pure greedy prioritization and uniform random sampling is introduced.
 
-*** Distributional Reinforcement Learning
-The Q-function is an approximation of the /expected/ returns, but it is also possible to approximate the /distribution/ of returns instead\cite{bellemare_distributional_2017}. It makes sense to think about the returns as a distribution, even when the environment has deterministic rewards, because stochasticity is still introduced while training through various sources. Firstly, state aliasing, the conflation of two or more states into one representation, may cause different amounts of rewards to be observed even though the agent "sees" the same state. Secondly, because of bootstrapping, target values are nonstationary while training, and the return will seem to take on different values over time. Lastly, because we are approximating the Q-function, approximation errors will make the returns seem stochastic.
+ Another problem with prioritized experience replay is that DQN optimizes for minimizing the expected TD-error squared, with respect to the network parameters $\theta$, assuming that the samples in the replay buffer corresponds to the same distribution as seen while exploring. Prioritized experience replay breaks this assumption, introducing a bias in the calculated gradient. This is fixed by using importance sampling, such that the less-sampled experiences are compensated for in the gradient. As the unbiased nature of the updates is most important near convergence at the end of training, the importance sampling is gradually added towards the end of training, with less importance sampling included at the start of training.
 
-Approximating the distribution of returns instead of the expected returns results in more stable learning targets.
+ Prioritized replay is found to speed up an agent’s ability to learn by a factor of 2.
 
-*** Noisy Deep Q-Network
-Exploration of the environment is often enabled by using an $\epsilon$ -greedy policy, where $\epsilon$ is gradually reduced. For particularly hard problems, like the Atari game "Montezuma’s Revenge", this technique become insufficient for exploration\cite{bellemare_unifying_2016}. $\epsilon$ -greedy explores with a fixed probability that is the same for every state. An alternative could be to let the network itself learn when it should explore, and for what states. 
+**** Dual Deep Q-Network
+ In the dueling architecture, or Dual DQN, the network that approximates the Q-function is split into two parts: one for estimating the value of the current state, and one for measuring the so-called advantage of taking an action in this state\cite{wang_dueling_2016}. The combination of the state-value estimate and the advantage yields the Q values:
 
-NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters\cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyper parameter tuning, but also to apply different amounts of exploration to different states.
+ \begin{equation}
+ Q(s,a)=V(s)+A(s,a)
+ \end{equation}
 
-*** Rainbow Deep Q-Network
-Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such extensions:
+ But because the state value function $V(s)$ can be expressed in terms of the state-action value function $Q(s,a)$ by taking the mean of $Q(s,a)$ over all actions, then it means that the mean of the advantage function $A(s,a)$ over all actions equals zero. This is not necessarily the case because the networks are simply approximations. To fix this the authors also subtract the mean advantage from the equation. This change loses the original semantics of $V(s)$ and $A(s,a)$, but results in a more stable algorithm.
 
-1. Double DQN\cite{van_hasselt_deep_2015}
-2. Prioritized replay\cite{schaul_prioritized_2016}
-3. Dual DQN\cite{wang_dueling_2016}
-4. Multi-step learning\cite{sutton_reinforcement_2018}
-5. Distributional RL\cite{bellemare_distributional_2017}
-6. Noisy DQN\cite{fortunato_noisy_2019}
+ \begin{equation}
+ Q(s,a)=V(s)+A(s,a)-\frac{\sum_{a}A(s,a)}{N_{actions}}
+ \end{equation}
 
-The authors are able to show that the combined algorithm performs much better than each extension alone, in terms of both learning speed and overall performance.
+ The dueling architecture lets the network train the state-value function and the advantage function separately.
 
-They also performed an ablation study on the Rainbow algorithm to see how much each extension contributes to its overall performance. The study concludes that prioritized replay and multi-step learning contribute the most to the overall performance, as removing them from the algorithm reduces its performance the most. Distributional Q-learning ranked directly below, followed by Noisy DQN, and then Dual DQN. The benefit of using a Double DQN is not apparent, as removing it from the algorithm does not reduce its performance.
+**** Multi-Step Learning
+ We look only one step ahead when constructing the target in the Q-learning update, but this isn’t a requirement. We could extend it to look $N$ steps ahead if we wanted to, in which it is called N-step learning, or multi-step learning\cite{sutton_reinforcement_2018}.
 
-#+CAPTION: From \cite{hessel_rainbow_2017}, figure 1: Median human-normalized performance across 57 Atari games. We compare our integrated agent (rainbowcolored) to DQN (grey) and six published baselines. Note that we match DQN’s best performance after 7M frames, surpass any baseline within 44M frames, and reach substantially improved final performance. Curves are smoothed with a moving average over 5 points.
-#+NAME: fig:dqn_rainbow_parts_perf
-[[./img/dqn_rainbow_parts_perf.png]]
+ To use multi-step learning we must look at $N$ consecutive experiences for every update, and sum the appropriately discounted rewards and add it to an appropriately discounted value estimation of the final state in the sequence. The N-step target for a given state $s_t$ is given as:
 
+ \begin{equation}
+ \sum_{k=0}^{N-1}\gamma^k r_{t+k+1} + \gamma^N max_a(Q(s_{t+N}, a))
+ \end{equation}
 
-#+CAPTION: From \cite{hessel_rainbow_2017}, figure 3: Median human-normalized performance across 57 Atari games, as a function of time. We compare our integrated agent (rainbow-colored) to DQN (gray) and to six different ablations (dashed lines). Curves are smoothed with a moving average over 5 points.
-#+NAME: fig:dqn_rainbow_ablation
-[[./img/dqn_rainbow_ablation.png]]
+ If we set $N$ to be 1, then the algorithm would be equal to the regular Q-learning algorithm. As we increase $N$, the algorithm would become more and more similar to Monte Carlo method, which looks all the way until the agent hits a terminal state.
 
 
+ \begin{equation}
+ r_{t+1} + \gamma max_a Q(s_{t+1},a)
+ = \sum_{k=0}^{n-1}\gamma^k r_{t+k+1} + \gamma^n max_a(Q(s_{t+n}, a))\textrm{, iff n=1}
+ \end{equation}
 
+ The best choice of $N$ usually lies somewhere between 1 and the length of an episode. This is because bootstrapping works best if it is over a length of time in which a significant and recognizable state change has occurred. Another intuition for why it is better is that when we look further ahead into the future we depend less on our own estimates of the future.
 
+**** Distributional Reinforcement Learning
+ The Q-function is an approximation of the /expected/ returns, but it is also possible to approximate the /distribution/ of returns instead\cite{bellemare_distributional_2017}. It makes sense to think about the returns as a distribution, even when the environment has deterministic rewards, because stochasticity is still introduced while training through various sources. Firstly, state aliasing, the conflation of two or more states into one representation, may cause different amounts of rewards to be observed even though the agent "sees" the same state. Secondly, because of bootstrapping, target values are nonstationary while training, and the return will seem to take on different values over time. Lastly, because we are approximating the Q-function, approximation errors will make the returns seem stochastic.
 
+ Approximating the distribution of returns instead of the expected returns results in more stable learning targets.
 
+**** Noisy Deep Q-Network
+ Exploration of the environment is often enabled by using an $\epsilon$ -greedy policy, where $\epsilon$ is gradually reduced. For particularly hard problems, like the Atari game "Montezuma’s Revenge", this technique become insufficient for exploration\cite{bellemare_unifying_2016}. $\epsilon$ -greedy explores with a fixed probability that is the same for every state. An alternative could be to let the network itself learn when it should explore, and for what states. 
 
+ NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters\cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyper parameter tuning, but also to apply different amounts of exploration to different states.
 
+**** Rainbow Deep Q-Network
+ Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such extensions:
 
+ 1. Double DQN\cite{van_hasselt_deep_2015}
+ 2. Prioritized replay\cite{schaul_prioritized_2016}
+ 3. Dual DQN\cite{wang_dueling_2016}
+ 4. Multi-step learning\cite{sutton_reinforcement_2018}
+ 5. Distributional RL\cite{bellemare_distributional_2017}
+ 6. Noisy DQN\cite{fortunato_noisy_2019}
 
-* Related Work
+ The authors are able to show that the combined algorithm performs much better than each extension alone, in terms of both learning speed and overall performance.
+
+ They also performed an ablation study on the Rainbow algorithm to see how much each extension contributes to its overall performance. The study concludes that prioritized replay and multi-step learning contribute the most to the overall performance, as removing them from the algorithm reduces its performance the most. Distributional Q-learning ranked directly below, followed by Noisy DQN, and then Dual DQN. The benefit of using a Double DQN is not apparent, as removing it from the algorithm does not reduce its performance.
+
+ #+CAPTION: From \cite{hessel_rainbow_2017}, figure 1: Median human-normalized performance across 57 Atari games. We compare our integrated agent (rainbowcolored) to DQN (grey) and six published baselines. Note that we match DQN’s best performance after 7M frames, surpass any baseline within 44M frames, and reach substantially improved final performance. Curves are smoothed with a moving average over 5 points.
+ #+NAME: fig:dqn_rainbow_parts_perf
+ [[./img/dqn_rainbow_parts_perf.png]]
+
+
+ #+CAPTION: From \cite{hessel_rainbow_2017}, figure 3: Median human-normalized performance across 57 Atari games, as a function of time. We compare our integrated agent (rainbow-colored) to DQN (gray) and to six different ablations (dashed lines). Curves are smoothed with a moving average over 5 points.
+ #+NAME: fig:dqn_rainbow_ablation
+ [[./img/dqn_rainbow_ablation.png]]
+
+
+
+
+
+
+
+
+
+
+
+* Related Work (State-of-the-art Section (TBD))
 ** ED-/ES-Detection
 #+INCLUDE: parts/previous_work.org
 
@@ -469,13 +500,13 @@ The dataset consists of three parts: /FileList.csv/ contains general information
 To get the ED and ES frames we have to look at the volume tracings, whose variables are listed in table [[tbl:echonet_volumetracings_variables]]. The volume tracings is a list of line segments that together define the volume of the heart at a given frame. For each video there are two sets of line segments, one for ED and one for ES, but which one is which is not given explicitly. We can find this information by calculating the volume from the line segments for both frames and comparing them — the one with the biggest volume is ED and the other one is ES.
 
 ** Extrapolating Diastole and Systole Labels
-As is explored in later chapters, we would also like to label the phase of each frame in the video, not just the frame which ends each phase. When we only have access to the end-frames of each phase, on of them will only have one labeled frame. For example, if the ED frame comes first then only the first frame will be labeled diastole as the rest will be systole, as visualized in figure [[fig:echonet_label_imbalance]].
+As is explored in later chapters, we would also like to label the phase of each frame in the video, not just the frame which ends each phase. When we only have access to the end-frames of each phase the first phase will only have one labeled frame. For example, if the ED frame comes first then only the first frame will be labeled diastole as the rest will be systole, as visualized in figure [[fig:echonet_label_imbalance]].
 
 #+CAPTION: Class imbalance: only the first frame is marked with the phase of the first end-event (either ED or ES), all others are marked with the other phase.
 #+NAME: fig:echonet_label_imbalance
 [[./img/echonet_label_imbalance.png]]
 
-We can extract more frames before and after the labeled frames by exploiting the periodicity of the cardiac cycle. As the heart goes from one phase-end to another the image gradually gets more different, until it starts going back towards the starting position again. For example, the next frame with the biggest difference from the ED frame is likely to be close to the ES frame.
+We can extract more frames before and after the labeled frames by exploiting the periodicity of the cardiac cycle. As the heart goes from one phase-end to another the difference between the current frame and the first phase-end becomes more and more different until around the point when the opposite end-phase is reached. For example, the next frame with the biggest difference from the ED frame is likely to be close to the ES frame.
 
 #+CAPTION: The absolute frame difference of all frames in a video compared to frame 100. Notice that the difference for frame 100 is 0 as it (of course) equals itself.
 #+NAME: fig:frame_difference_plot
@@ -485,7 +516,7 @@ An optimistic approach would be to label all the frames until the previous or ne
 
 We also risk labeling too many frames, adding wrongly labeled frames, because there are no guarantees that the peaks directly coincide with the change of phase. This problem can be mitigated by only including a certain percentage of frames leading up to the peak. We elect to include 75% of the frames leading up to the peaks.
 
-#+CAPTION: The same summed absolute frame difference plot as in figure [[fig:frame_difference_plot]], but smoothed using a gaussian blur with a kernel standard deviation of 5. The dashed lines represent phase-end events and the frames in the light blue area are frames with labeled phase. Notice how the labeled frames area only extend 75% towards the peak (the the right, the bottom valley on the left) instead of all the way. Also note that the gaussian blur causes the summed absolute frame difference for frame 100 to no longer be 0.
+#+CAPTION: The same summed absolute frame difference plot as in figure [[fig:frame_difference_plot]], but smoothed using a gaussian blur with a kernel standard deviation of 5. The dashed lines represent phase-end events and the frames in the light blue area are frames with labeled phase. Notice how the labeled frames area only extend 75% towards the peak on the fight side. Also note that the gaussian blur causes the summed absolute frame difference for frame 100 to no longer be 0.
 #+NAME: fig:extrapolated_labels
 [[./img/extrapolated_labels.png]]
 
@@ -495,7 +526,7 @@ An assumption made when labeling the frames is that both events occur within the
 
 The summed absolute frame difference should at most have one peak if the frames are from the same cardiac cycle. If it has two or more peaks then it suggests that the video contains more than one heartbeat and thus can not be properly labeled. There are 19 of such videos in total, and these are filtered out.
 
-#+CAPTION: The summed absolute frame difference between first end-phase event and the frames up ti the next end-phase event. This should only be a half cardiac cycle, so there should not be any peaks (or at most one peak). The upper plots show videos where the end-phase labels only cover one half cardiac cycle, while the bottom plots show videos with more than one cardiac cycle, and thus have incorrect labels.
+#+CAPTION: The summed absolute frame difference between first end-phase event and the frames up until the next end-phase event. This should only be a half cardiac cycle, so there should be at most one peak. The upper plots show videos where the end-phase labels only cover one half cardiac cycle, while the bottom plots show videos with more than one cardiac cycle, and thus have incorrect labels.
 #+NAME: fig:phase_diff_plots
 [[./img/phase_diff_plots.png]]
 
@@ -504,7 +535,7 @@ The summed absolute frame difference should at most have one peak if the frames 
 ** Normalizing Videos
 The videos all already have the same size of 112-by-112, but the FPS differ. Luckily, most videos in the dataset have the same FPS — almost 80% of the videos have exactly 50 FPS. The smallest FPS is 18 and the higest FPS is 138. See figure [[fig:echonet_fps_histogram]] for a histogram (logarithmic scale on the y-axis) of the different FPS values.
 
-To normalize the videos with a much smaller FPS than 50 we would have to add information to them by inserting new frames. This may add unwanted bias to the data however, and it is not obvious how to label the interpolated frames when the video goes from one phase to another. To normalize the videos with a much higher FPS we would have to remove frames from them. Unless the FPS is a multiple of 50, we risk introducing varying FPS to the video which may confuse the model. For example, if a video has 75 FPS we could opt to remove every third frame to make it 50 FPS, but this would make it seem like the heart moves slightly faster every third frame.
+To normalize the videos with a much smaller FPS than 50 we would have to add information to them by inserting new frames. This may add unwanted bias to the data however, and it is not obvious how to label the interpolated frames when the video goes from one phase to another. To normalize the videos with a much higher FPS we would have to remove frames. Unless the FPS is a multiple of 50, we risk introducing varying FPS to the video which may confuse the model. For example, if a video has 75 FPS we could opt to remove every third frame to make it 50 FPS, but this would make it seem like the heart moves slightly faster every third frame.
 
 Because the Echonet dataset is so large, we opt to simply filter out all videos that have an FPS other than 50. Thus, we filter out another 2071 videos, leaving us with a total of 7946 videos.
 
@@ -515,7 +546,7 @@ Because the Echonet dataset is so large, we opt to simply filter out all videos 
 
 
 ** Training, Validation, Test Split
-The dataset has already been split into three parts: one part for training the algorithm, one part for validation, and one for testing (i.e. presenting results). The percentage split is approximately 75% for training, 12.5% for the validation, and 12.5% for testing. This split remains after filtering out videos as explained in the previous two sections. We opt to also use this split in this project.
+The dataset has already been split into three parts: one part for training the algorithm, one part for validation, and one for testing (i.e. presenting results). The percentage split is approximately 75% for training, 12.5% for the validation, and 12.5% for testing. These split ratios remains approximately the same after filtering out videos as explained in the previous two sections. We opt to also use this split in this project.
 
 
 
@@ -526,152 +557,199 @@ TOOD: Dataset by Elizabeth Lane.
 
 
 \chapter{Methodology}
-* Ed-/ES-Detection as a Reinforcement Learning Problem
+
 The goal of this thesis is to explore the potential of using deep RL in the task of ED-/ES-Detection. Thus, the main methods revolve around exploring different formulations of the problem as a RL problem and comparing them.
 
-The standard metric for this task is the Average Absolute Frame Difference (aaFD), as defined in equation [[eqn:aafd]]. aaFD measures the precision and accuracy of predictions by measuring the frame difference between each ground truth event $y_t$ and the corresponding prediction $\hat{y}_t$ generated by the model — a lower aaFD meaning that the model is making fewer errors. $t$ is the index of a specific event, of which there are $N$ in total.
 
-#+NAME: eqn:aafd
-\begin{equation}
-aaFD=\frac{1}{N}\sum^N_{t=1}|y_t-\hat{y}_t|
-\end{equation}
+* Supervised Learning Baseline
+TODO: Write about simple experiment with the same neural network as in RL for comparing results. Are there any mechanisms in RL that makes it perform better?
 
-One weakness of aaFD is that it is only defined when there are an equal number of predicted events as there are ground truth events. This is not always the case as an imperfect model may predict more or fewer events. A generalized aaFD ($GaaFD_1$) was considered for a metric instead, calculated as the average frame difference between each predicted event and its nearest ground truth event as in equation [[eqn:aafd_generalized_1]], having the property that it converges towards the true aaFD as the model becomes better. In equation [[eqn:aafd_generalized_1]] $\hat{N}$ is the number of predicted events and $\mathcal{C(y, \hat(y))}$ is the frame difference between the predicted event to the /closest/ ground truth event of the same type. For cases where there are more predicted events than there are ground truth events $GaaFD_1$ would, as is rational, give a worse score. But for cases where there are fewer predicted events than there are ground truth events $GaaFD_1$ would give a score that does not reflect its inability to predict all events.
-
-#+CAPTION: $\mathcal{C}(y, \hat{y}_t)$ is the closest ground truth event from the predicted event $\hat{y}_t$. $\hat{N}$ is the number of predicted events.
-#+NAME: eqn:aafd_generalized_1
-\begin{equation}
-GaaFD_1=\frac{1}{\hat{N}}\sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|
-\end{equation}
-
-If we instead calculate the average frame difference between each ground truth event and its nearest predicted event, $GaaFD_2$, as in equation [[eqn:aafd_generalized_2]], we get the opposite problem — too many predicted events are not reflected in the score.
-
-#+CAPTION: $\mathcal{C}(y_t, \hat{y})$ is the closest predicted event from the ground truth event $y_t$.
-#+NAME: eqn:aafd_generalized_2
-\begin{equation}
-GaaFD_2=\frac{1}{N}\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})|
-\end{equation}
-
-By combining $GaaFD_1$ and $GaaFD_2$ as in equation [[eqn:aafd_generalized]] we mitigate these problems while maintaining the convergence property.
-
-#+NAME: eqn:aafd_generalized
-\begin{equation}
-GaaFD = \frac{1}{N+\hat{N}}(\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})| + \sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|)
-\end{equation}
-
-Using GaaFD, or rather its inverse since we want to minimize the error, as a reward function for RL means that we are optimizing the agent directly for our main metric aaFD. It does have one final flaw, however: it is only defined on whole episodes. This means that the agent has to run an entire episode before getting a reward, making the reward signal sparse.
-
-We could instead frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either Diastole or Systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
-
-From this we can define a simple reward function $R_1$, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_1$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth. We can make the reward signal more similar to GaaFD by defining it in terms of the distance to the nearest predicted phase, as seen in equation [[eqn:proximity_reward]], where $d(s,a)$ is the distance from the current phase $s$ to the nearest predicted phase $a$.
-
-#+NAME: eqn:simple_reward
-\begin{equation}
-  R_1(s, a) \triangleq
-    \left\{
-	    \begin{array}{ll}
-		    1 & \mbox{if } s=a \\
-  	  	0 & \mbox{if } s\neq a
-	    \end{array}
-    \right\}
-\end{equation}
-
-#+NAME: eqn:proximity_reward
-\begin{equation}
-  R_2(s, a) \triangleq -d(s, a)
-\end{equation}
-
-For this thesis, we will be exploring the reward functions $R_1$ and $R_2$.
-
-** Simple Binary Classification Environment
-A simple baseline environment is defined as such: The agent, after observing the current and adjacent frames, takes an action predicting that the current frame is either of Diastole or Systole phase, and receives a reward dependent on its prediction before the environment moves the current frame one frame forwards. This environment is visualized in figure [[fig:binary_classification_environment_loop]].
+* Simple Binary Classification Environment
+A simple baseline environment is described as such: The agent, after observing the current and adjacent frames, takes an action predicting that the current frame is either of Diastole or Systole phase, and receives a reward dependent on its prediction before the environment moves the current frame one frame forwards. This environment is visualized in figure [[fig:binary_classification_environment_loop]].
 
 #+CAPTION: Visualization of the Binary Classification Environment loop. An agent sees the observation from the current frame and takes an action, either marking it as Diastole or as Systole, and gets back the reward and the observation for the next frame from the environment.
 #+NAME: fig:binary_classification_environment_loop
 [[./img/binary_classification_environment_loop.png]]
 
-More formally, the observation $o_t$ at time $t$ is an array of $(2N+1, W, H)$ grayscale pixel values normalized to be between 0 and 1, where $N$ is the number of adjacent frames on either side of the current frame and $W$ and $H$ are width and height, respectively. As a tentative first attempt $N$ is set to 3, making the number of channels of the observations be $3+1+3=7$, and the final shape of the observation be $(7, 112, 112)$, given that we set all videos to be 112-by-112 pixels. The number of adjacent frames is assumed to be an important hyper parameter because it is what gives the agent temporal information.
+More formally, the observation $o_t$ at time $t$ is the current frame in the video prepended by the $N$ previous frames and the $N$ next frames. The shape of an observation is thus $(W, H, 2N+1)$. The number of channels, $2N+1$, affect how much temporal information the agent has when making a decision, but also how much memory and computational power is required. The agent takes the observation as-is and takes one of two actions: /Mark current frame as Diastole/ or /Mark current frame as Systole/. After taking an action $a_t$, the agent receives a reward $r_{t+1}$ and is presented with the next observation $o_{t+1}$. The current frame is moved one frame forwards after each action taken and the episode ends when there are no more labeled frames to decide on.
 
-The agent has a policy $\pi(a|s)$, which, given a state $s$ (which is just the observation in our case), returns probability of taking an action $a$. The goal of the agent is to find the policy $\pi^*$ that, if followed, maximizes our reward function $R$.
+
+** Reward Function Design
+ The standard metric for this task is the Average Absolute Frame Difference (aaFD), as defined in equation [[eqn:aafd]]. aaFD measures the precision and accuracy of predictions by measuring the frame difference between each ground truth event $y_t$ and the corresponding prediction $\hat{y}_t$ generated by the model — a lower aaFD meaning that the model is making fewer errors. $t$ is the index of a specific event, of which there are $N$ in total.
+
+ #+NAME: eqn:aafd
+ \begin{equation}
+ aaFD=\frac{1}{N}\sum^N_{t=1}|y_t-\hat{y}_t|
+ \end{equation}
+
+ One weakness of aaFD is that it is only defined when there are an equal number of predicted events as there are ground truth events. This is not always the case as an imperfect model may predict more or fewer events. A generalized aaFD ($GaaFD_1$) was considered for a metric instead, calculated as the average frame difference between each predicted event and its nearest ground truth event as in equation [[eqn:aafd_generalized_1]], having the property that it converges towards the true aaFD as the model becomes better. In equation [[eqn:aafd_generalized_1]] $\hat{N}$ is the number of predicted events and $\mathcal{C}(y, \hat{y})$ is the frame difference between the predicted event to the /closest/ ground truth event of the same type. For cases where there are more predicted events than there are ground truth events $GaaFD_1$ would, as is rational, give a worse score. But for cases where there are fewer predicted events than there are ground truth events $GaaFD_1$ would give a score that does not reflect its inability to predict all events.
+
+ #+CAPTION: $\mathcal{C}(y, \hat{y}_t)$ is the closest ground truth event from the predicted event $\hat{y}_t$. $\hat{N}$ is the number of predicted events.
+ #+NAME: eqn:aafd_generalized_1
+ \begin{equation}
+ GaaFD_1=\frac{1}{\hat{N}}\sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|
+ \end{equation}
+
+ If we instead calculate the average frame difference between each ground truth event and its nearest predicted event, $GaaFD_2$, as in equation [[eqn:aafd_generalized_2]], we get the opposite problem — too many predicted events are not reflected negatively in the score.
+
+ #+CAPTION: $\mathcal{C}(y_t, \hat{y})$ is the closest predicted event from the ground truth event $y_t$.
+ #+NAME: eqn:aafd_generalized_2
+ \begin{equation}
+ GaaFD_2=\frac{1}{N}\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})|
+ \end{equation}
+
+ By combining $GaaFD_1$ and $GaaFD_2$ as in equation [[eqn:aafd_generalized]] we mitigate these problems while maintaining the convergence property.
+
+ #+NAME: eqn:aafd_generalized
+ \begin{equation}
+ GaaFD = \frac{1}{N+\hat{N}}(\sum^N_{t=1}|y_t - \mathcal{C}(y_t, \hat{y})| + \sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|)
+ \end{equation}
+
+ Using negative GaaFD (negative because we wish to minimize it) as a reward function for RL means that we are optimizing the agent directly for our main metric aaFD. It does have one final flaw, however: it is only defined on whole episodes. This means that the agent has to run an entire episode before getting a reward, making the reward signal sparse.
+
+ We could instead frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either Diastole or Systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
+
+ From this we can define a simple reward function $R_1$ that gives a reward of $1$ if the predicted phase was correct and $-1$ if it was incorrect, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_1$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth. We can make the reward signal more similar to GaaFD by defining it in terms of the distance to the nearest predicted phase, as seen in equation [[eqn:proximity_reward]], where $d(s,a)$ is the distance from the current phase $s$ to the nearest predicted phase $a$.
+
+ #+NAME: eqn:simple_reward
+ \begin{equation}
+   R_1(s, a) \triangleq
+     \left\{
+	     \begin{array}{ll}
+		     1 & \mbox{if } s=a \\
+  	  	 -1 & \mbox{if } s\neq a
+	     \end{array}
+     \right\}
+ \end{equation}
+
+ #+NAME: eqn:proximity_reward
+ \begin{equation}
+   R_2(s, a) \triangleq -d(s, a)
+ \end{equation}
 
 
 ** Agent Architecture
-The experiments in the next chapter all use a Deep Q-Network (DQN) RL architecture with Prioritized Replay, N-Step returns, and Double Q-Learning. It uses an $\epsilon$ greedy policy to facilitate exploration.
+Deep Q-Network was selected for the RL agent architecture. DQN is a well-established method for scaling up RL by approximating the expected returns of taking an action in a given state using a (deep) neural network. It is also simple to train distributedly as it is off-policy, enabling us to separate the algorithm into a learner and multiple agents, as explained in the next sub-section. 
 
-For the Q-network, two architectures are explored:
-
-1. A simple CNN with few layers, inspired by the Atari DQN paper (TODO: citation).
-2. MobileNet-v1: a bigger and more complex CNN that uses batch normalization.
+We take advantage of a few additions to the original DQN algorithm, namely: Prioritized Replay, N-step returns, and Double Q-Learning. For facilitating exploration, an $\epsilon$ greedy policy is used.
 
 
-** Distributed Training
-As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through Deepmind's library Acme\cite{hoffman_acme_2020}. At the center of Acme is another library by Deepmind called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step om the algorithm Reverb can be used as the communication point between the two. In this way one or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database and a learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner doesn't need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library, also by Deepmind, called Launchpad\cite{yang_launchpad_2021}.
+*** Neural Networks
+Two neural networks are explored — one simple baseline CNN and a more complex CNN with more parameters.
 
-#+CAPTION: The distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is a inter-process function call facilitated by Launchpad.
-#+NAME: fig:distributed_rl_training
-[[./img/distributed_rl_training.png]]
+The first neural network is relatively simple, and is inspired by the original Atari DQN paper\cite{mnih_human-level_2015}. It has two convolutional layers and two fully connected layers, each layer except for the last one is followed by a ReLU activation layer. The first convolutional layer has 16 output channels, a kernel size of 8-by-8, and a stride of 4. The second has 32 output channels, a kernel size of 4-by-4, and a stride of 2. Before the fully connected layers the data is flattened. The first fully connected layer has an output size of 256, and the final layer has two outputs, each representing the estimated value of taking one of the actions, given the input state. In total there are $1\,621\,810$ parameters.
 
-There is a balance to be made between how fast experience samples should be added to the experience replay and how fast they should be sampled by the learner. If the learner samples faster than the actors are able to generate new samples then the network will be trained using trajectories generated from outdated policies. If the actors generate new samples much faster than the learner is able to sample then we are arguably wasting computer resources.
+#+CAPTION: A visualization of the simple DQN-Atari paper inspired CNN.
+#+NAME: fig:simple_dqn_network
+[[./img/simple_dqn_network.png]]
 
-Reverb helps maintain this balance through rate limiters. We use a rate limiter that tries to maintain a specified ratio between insertions and samples, blocking either the actors from inserting new samples or the learner from sampling if the ratio starts to differ too much. Using 6 actors was found to be suffient for generating new experience samples fast enough. TODO: For cases where we use MobileNet also (don't we need less actors there since the learner takes more time)?
+TODO: Describe MobileNet
+
+
+*** Loss Function and Optimizer
+The loss function is the Double Q-Learning loss where the TD-error is calculated with respect to another Q-network. Because of this we have to keep track of two sets of network parameters: one for the selector Q-network and one for the estimator Q-network. Huber loss\cite{huber_robust_1964} is applied to the TD-error such that the L2 loss becomes linear after a certain threshold. In addition, the loss is weighted with respect to the prioritixed replay importance weights.
+
+The Adam optimizer\cite{kingma_adam_2017} is used to update the selector parameters and the target network parameters are updated to equal the selector parameters every 100 gradient descent steps.
+
+
+
+*** Distributed Training
+  As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through Deepmind's library Acme\cite{hoffman_acme_2020}. At the center of Acme is another library by Deepmind called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step om the algorithm Reverb can be used as the communication point between the two. In this way one or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database and a learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner doesn't need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library, also by Deepmind, called Launchpad\cite{yang_launchpad_2021}.
+
+  #+CAPTION: The distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is a inter-process function call facilitated by Launchpad.
+  #+NAME: fig:distributed_rl_training
+  [[./img/distributed_rl_training.png]]
+
+  There is a balance to be made between how fast experience samples should be added to the experience replay and how fast they should be sampled by the learner. If the learner samples faster than the actors are able to generate new samples then the network will be trained using trajectories generated from outdated policies. If the actors generate new samples much faster than the learner is able to sample then we are arguably wasting computer resources.
+
+  Reverb helps maintain this balance through rate limiters. We use a rate limiter that tries to maintain a specified ratio between insertions and samples, blocking either the actors from inserting new samples or the learner from sampling if the ratio starts to differ too much. For example, using a samples-per-insert ratio of 2 means that, on average, each insertion made by an actor will be sampled twice. A ratio of 0.5 means that, on average, each insertion will be sampled one half time — i.e.: there are twice as many insertions as there are samples.
+
+
+* Incorporating Search
+This is not a RL problem, really. RL is designed to search through an unknown state space. In the previous setup there is no exploration as previous actions do not affect future actions. There is therefore no reason to believe that RL will outperform a carefully designed Supervised learning approach. By transforming the problem to one that requires search we will have a problem that is not trivially solved by supervised learning but where RL can shine. Though this may seem like straightening a screw to make it work with a hammer there may be unforeseen benefits. Of great importance to ML is to represent the problem space in a way that is easy to learn from. Perhaps there is an optimal representation of the problem of ED-/ES-detection that also happens to require search?
+
+** Temporal Search
+We could formulate the problem as a search in time where the agent must learn to move the current frame towards the end-phase event. The agent sees the current frame and some number of previous and following frames and can either move the current frame backwards or forwards. The agent can be rewarded with 1 if it moves a step closer to the nearest end-phase frame and -1 if it moves away from it.
+
+There are a handful of issues with this approach. *Issue 1*: we'd have to train two different agents: one for ED and one for ES. *Issue 2*: there is no terminal state and the episodes can run forever. *Issue 3*: there will be ambiguity in what frame the agent truly predicts as end-phase because it will likely show oscillating behavior around the predicted frame. *Issue 4*: we'd have to run multiple agents at different points in the video in order to find all end-phase events and it is not obvious how to do so.
+
+*Issue 2* and *issue 3* can be partially solved by including a third action for marking the current frame and ending the episode, though this may still lead to the agent getting stuck in an endless loop of going back and forth. We could also keep just the two actions, but terminate the episode once the agent starts showing oscillating behavior, as in [TODO: citation], as this indicates that it has found the predicted frame. The problem with this is that the final predicted frame would be ambiguous as we don't know which of the two frames that the agent oscillates between is the true predicted frame. If we're using DQN, we could however peek at the Q-values and pick the frame where expected reward of taking the action with the maximum expected reward is the lowest. *Issue 4* may be solved by starting an agent from each frame, though this would increase the computational requirements of the algorithm.
+
+
+** Spatial Search
+Instead of searching through the frames of the video, we could let the agent search spatially in the video. In this formulation, the agent only has access to a part of the images while making a prediction. Similar to landmark detection tasks it can move its focus around in the image, the hope being that it is able to discover parts of the video which makes it easier to identify the correct phase. In a way this can be seen as reducing the space and memory requirements at the cost of speed, as the agent has to process a smaller part of the image, but may explore for multiple steps before making a prediction.
+
+One option is to look at a Region Of Interest (ROI) around a point that the agent can move. If we build upon the simple binary classification environment described in previous sections, this would add 4 new actions: move up, move down, move left, and move right. This is visualized in figure [[fig:roi_exploration]]. Because we reduce the size of the observations we could either trade it for reduced memory usage or for including more temporal information in terms of included adjacent frames.
+
+ #+CAPTION: A Region Of Interest (ROI) is given to the agent which it can then move around in order to explore.
+ #+NAME: fig:roi_exploration
+ [[./img/roi_exploration.png]]
+
+Another option is to take inspiration from m-mode imaging used in ultrasound. We can define a synthetic m-mode image in terms of a line in the video. The synthetic m-mode image shows how the pixels along this line changes over time. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. This synthetic m-mode exploration formulation adds 6 new actions: move up, move down, move left, move right, rotate left, and rotate right. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
+
+ #+CAPTION: An m-mode image is an intersecting plane in 3D "video space".
+ #+NAME: fig:m_mode_cube
+ [[./img/m_mode_cube.png]]
+
+When moving the line up, down, left, or right, it is done relative to its own rotation. We call this local translation, which is different from global translation where the movement is independent of the rotation of the line. Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, independent of rotation — it simply shifts the m-mode image down or up, respectively.
+
+ #+CAPTION: Global (to the left) versus local (to the right) translation. Local translation means that the movement depends on the direction of the m-mode line.
+ #+NAME: fig:local_vs_global_mmode_translation
+ [[./img/local_vs_global_mmode_translation.png]]
+
+#+CAPTION: Moving the line in up or down using local translation changes the synthetic m-mode image very little — it simply translates the whole image up or down, as indicated by the blue arrows. To the left: an overview image of a video with the line added on top. To the right: the resulting synthetic m-mode image.
+#+NAME: fig:m_mode_vertical_movement_effect
+[[./img/m_mode_vertical_movement_effect.png]]
+
+
+* M-Mode Binary Classification Environment
+Using a synthetic m-mode search space scheme, we formulate the M-Mode Binary Classification environment. The agent can make one of 8 actions: /Mark current frame as Diastole/, /Mark current frame as Systole/, /Rotate line/ (left or right), /Move line along its pointing direction/ (up or down), and /Move line perpendicular to its pointing direction/ (left or right). The observation includes the synthetic m-mode image of the current line position, but we also want to give the agent explicit information about what it would look like if it moved or rotated the line, and a history of the latest actions.
+
+The observation therefore consists of the synthetic m-mode image for three different rotations (rotated left, not rotated at all, and rotated right) and for three different perpendicular movements (moved to the left, not moved at all, moved to the right), for a total of 9 synthetic m-mode images. The synthetic m-mode image is created by interpolating the line across the video using nearest neighbour. Up and down line movements are not included because they do not provide as much information to the agent, as is visualized in figure [[fig:m_mode_vertical_movement_effect]]. An overview image consisting of the average of the first 50 frames is also included in the observation, as well as the current position of the line overlapping it in a different channel, also visualied in figure [[fig:m_mode_vertical_movement_effect]]. Lastly, we include the last 5 actions taken as a one-hot encoded array of shape $(5, 8)$ — 8 being the number of possible actions. Observations are thus a tuple of an "overview" image of shape $(W, H, 2)$, a synthetic m-mode image of shape $(T, L, 9)$, and an action history array of shape $(5, 8)$, where $W$ and $H$ are the width and height of the video respectively, and $T$ and $L$ are the number of frames (amount of temporal information) and length of the line respectively.
+
+
+At the start of an episode the line is placed at a random position. This is in order to force the agent to learn to explore instead of learning to predict the phase from a common starting position. The random position is selected by first placing the line, centered, facing upwards, before translating it in the direction it's facing by a random amount sampled uniformly from the interval $[-0.1H, 0.1H]$, and in the perpendicular direction by a random amount sampled uniformly from the interval $[-0.1W, 0.1W]$, and rotated by an angle sampled uniformly from the interval $[-\frac{\pi}{2}, \frac{\pi}{2}]$ radians. The starting positions are asserted to be within bounds and if a line somehow is generated outside of bounds a new line is generated instead. The random starting positions were verified to be reasonable through visual inspection of a sample of $1\,000$ lines as seen in figure [[fig:m_mode_line_starting_positions]]. An episode ends once the phase of every frame have been predicted by the agent, or until the agent has taken 200 steps. We have to cut the episode off at 200 steps because the agent may now move indefinitely.
+
+#+CAPTION: The union of 100 randomly sampled m-mode lines.
+#+NAME: fig:m_mode_line_starting_positions
+[[./img/m_mode_line_starting_positions.png]]
+
+The reward function is the same as in the simple binary classification environment, but with some modifications. The agent receives a reward of $-1$ if it moves the line such that it goes out of bounds of the video. The agent will also receives a reward of $-1$ if it becomes stuck in a loop. The agent is stuck in a loop if it has already visited the current position at an earlier time without marking the frame as diastole or systole. If either of these things happen the line is moved to a new random position.
+
+
+** Agent Architecture
+We keep the same base architectures as in the simple binary classification environment, but we need to also accomodate the overview image and action history array. This is done by passing all three through their own neural network before concatenating the result and passing it through a couple more fully connected layers. Both the synthetic m-mode image and the overview image is passed through the Atari DQN-paper inspired CNN that is visualized in figure [[fig:simple_dqn_network]], but with the final output layer removed. The action-history array is flattened before being passed into a fully connected layer with 32 outputs followed by a ReLU activation layer. After concatenating the three results they are passed through yet another fully connected layer of 64 outputs and a ReLU activation layer, before being passed through a final fully connected layer with 2 outputs.
+
+#+CAPTION: The network architecture of the m-mode agent. An observation consists of three parts. Each part is processed independently by a neural network before being concatenated and used to produce the approximated Q-values.
+#+NAME: simple_dqn_network_m_mode
+[[./img/simple_dqn_network_m_mode.png]]
+
+For the more complex network architecture, we simply swap out the CNN for the synthetic m-mode images with MobileNet-v1.
+
+
+
+
+
+
+
+
 
 
 
 TODO: Write about why we chose DQN, what alternatives we considered, etc.
 
-** Discussion
-Under the hood, the DQN algorithm is solving a regression problem. Given a state, the model predicts the expected future returns after taking a given action. 
+*** TODO Discussion
+ Under the hood, the DQN algorithm is solving a regression problem. Given a state, the model predicts the expected future returns after taking a given action. 
 
 
 
 
-TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
-- How is this similar to regular supervised learning classification problem?
-  - DQN predicts expected future returns of taking an action. We can set up a supervised learning regression problem that predicts the same thing
-- We use epsilon=1 and discount=0 — implications?
-- Write about how DQN is simply a regression problem
-- Future work could be using Policy Gradient methods
-
-* Incorporating Search
-RL is a tool meant for solving problems that require search, so in order to get any benefits from it we must transform the problem to one that requires search. This may sound like straightening a screw to make it work with a hammer, and the author sympathizes with this sentiment.
-
-We could let the agent search through frames to find the ED or ES frames. In this case the action set could be to move to the previous, move to the next frame, marking the current frame as ED, or marking it as ES, 4 actions in total. One problem with this formulation is that once the agent has marked one frame as ED or ES, it must know that this state can be ignored and that it should start to look for other ED or ES frames. One work-around to this problem that enforces that the agent visits all frames at least once is simply by initializing it at every frame, but this setup is just a slower, less robus version of the Binary Classification Environment.
-
-#+CAPTION: An agent moves to the previous or next frame and marks frames that it predicts to be ED os ES.
-#+NAME: fig:explore_frames_environment
-[[./img/explore_frames_environment.png]]
-
-Another option is to perform exploration in space, taking inspiration from papers like (TODO: add paper of RL landmark detection). This can be done by looking at just a small region of interest in the video, which the agent can move around before taking an action. In this way, the agent loses some global context depending on how small the region of interest is, but the smaller input size makes the model less computationally intensive, enabling us to include more temporal information.
-
-#+CAPTION: A Region Of Interest (ROI) is given to the agent which it can then move around in order to explore.
-#+NAME: fig:roi_exploration
-[[./img/roi_exploration.png]]
-
-Another version of the space-exploration scheme is to let the agent create a synthetic m-mode image from the video. Here, a line can be translated and rotated by the agent, forming the bases of the m-mode image. The pixels along the line for the current frame and some number of previous and next frames are concatenated together into one image. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
-
-#+CAPTION: An m-mode image is an intersecting plane in 3D "video space".
-#+NAME: fig:m_mode_cube
-[[./img/m_mode_cube.png]]
-
-** M-Mode Binary Classification Environment
-The set of actions remain the same as in the binary classification environment, but an additional 6 actions are added: rotating the m-mode line /clockwise/ and /anti-clockwise/, and translating the line /up/, /down/, /left/, or /right/. The rotation amount and step size are considered hyper parameters. Making them too big would make the line movement less precise, but making it too small would make both the training and inference slower, as well as further sparsifying direct reward signals. A decision also has to be made for whether the translation should be global or local. Global translation means that the line moves in a direction relative to the video, while local translation means that the line moves in a direction relative to where it is pointing towards.
-
-#+CAPTION: Global (to the left) versus local (to the right) translation. Local translation means that the movement depends on the direction of the m-mode line.
-#+NAME: fig:local_vs_global_mmode_translation
-[[./img/local_vs_global_mmode_translation.png]]
-
-Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, independent of rotation — it simply shifts the m-mode image down or up, respectively.
-
-TODO: Show how vertical translation (up or down) simply shifts the m-mode image.
-
-At the beginning of an episode the m-mode line is placed in the center of the video, vertically. TODO: This should be at a random position/rotation in the image. The observations returned from the environment is the synthetic m-mode image from the current line, by looking 15 frames in the past and 15 frames in the future, for a total of 31 frames. 8 additional channels are included for the synthetic m-mode images that result from rotating the line to the left and to the right, and moving it to the left and to the right. Synthetic m-mode images resulting from moving the line up or down are not included as channels, as they add very little new information, given that we use a neural network architecture with translational invariance, like CNNs. To counteract the big loss of global context when using synthetic m-mode images, two other channels are included in the observations as well: an average of up to 50 frames around the current frames and an image with the location of the current line drawn onto it. The averaged video image and the current line image adds information about the current line position and provides the agent with some additional context.
-
-TODO: Add image showing m-mode environment and example observations.
-
-The same reward functions are explored as in the regular binary classification environment. In practice, the agent will receive a sparser reward signal, since a reward may only be given when the agent selects to mark the current frame as diastole or systole, not when it only performs translation or rotation.
-
-** Reinforcement Learning Agent Architecture
-TODO: Same as before, DQN, but network must be adjusted to fit a tuple of observations (m-mode + overview).
+ TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
+ - How is this similar to regular supervised learning classification problem?
+   - DQN predicts expected future returns of taking an action. We can set up a supervised learning regression problem that predicts the same thing
+ - We use epsilon=1 and discount=0 — implications?
+ - Write about how DQN is simply a regression problem
+ - Future work could be using Policy Gradient methods
 
 ** TODO Discussion
 - Sparse reward signal may make the results worse. Can be counteracted by: what? n-step? Less dicsount (gamma closer to 1.0)? Using "advantage" for Q-function? Actor-critic network agent?
@@ -688,6 +766,125 @@ TODO: Same as before, DQN, but network must be adjusted to fit a tuple of observ
 
 
 \chapter{Experiments and Results}
+
+This chapter is dedicated to exploring the performance of methods described in the previous chapter through experiments. It is separated into two main parts, one for each environment formulation. The three reward functions are explored: Generalized Average Absolute Frame Difference (GaaFD), a simple binary phase prediction reward $R_1$, and the proximity-based phase prediction reward $R_2$.
+
+A base list of hyper-parameters is listed in table [[tbl:gaafd_hyper_params]]. Unless otherwise specified, these values are used.
+
+#+NAME: tbl:gaafd_hyper_params
+| Hyper parameter              | Value                        |
+|------------------------------+------------------------------|
+| Epsilon                      | $0.0$                        |
+| Discount                     | $1.0$                        |
+| N (N-step bootstrapping)     | $\infty$                     |
+| Target update period         | $100$                        |
+| Importance sampling exponent | $0.2$                        |
+| Priority exponent            | $0.6$                        |
+| Number of actors             | $8$                          |
+| Min replay size              | $10\,000$                    |
+| Max replay size              | $250\,000$                   |
+| Samples per insert ratio     | $0.5$                        |
+| Optimizer                    | Adam with default parameters |
+| Learning rate                | $1^{-4}$                     |
+| Gradient descent steps       | $100\,000$                   |
+| Batch-size                   | $128$                        |
+| TODO                         | Huber loss                   |
+
+
+
+
+
+* Simple Binary Classification Environment
+
+
+
+
+** Generalized Average Absolute Frame Difference Reward Function
+We start by exploring the use of GaaFD as defined in equation [[eqn:aafd_generalized]] as the reward function. This has the benefit that we are directly optimizing the agent for the key performance metric, which is aaFD as defined in equation [[eqn:aafd]]. However, a weakness, as discussed in section [[Reward Function Design]] is that it is only defined at the end of an episode, making the reward signal very sparse. The agent will only get a reward at the last step of an episode, which on average lasts for 50 steps.
+
+For a random agent the GaaFD score is approximately in the range of 10 to 20. We scale this down by a factor of 10 to keep the gradients from exploding too much when there is a large discrepancy between predicted returns and actual returns.
+
+To solve for reward-sparsity we use multistep bootstrapping with a value of $N$ that is greater than or equal to the number of steps in an episode. This will in practice mean that the agent is trained using the Monte Carlo method. We do this by setting $N=200$ because we automatically stop an episode once it reaches 200 steps (though in the case of the simple binary classificaiton environment this will never happen because no video have this many frames).
+
+We also set the discount value $\gamma=1.0$ which means that an agent tries to maximize all future rewards. Having $\gamma < 1.0$ means that the calculated returns will be more noisy and harder to predict because the discounted returns calculated for steps earlier in an episode would have a lower value than those calculated closer to the end.
+
+Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The assumption is that using $\epsilon=0.0$ is best because the reward signal is so noisy from the beginning because the reward is carried from the end of an episode an back to all steps. Using an $\epsilon>0.0$ may add even more noise as it becomes harder for the network to distinguish whether it was its own actions or the randomness of exploration that caused a drop in returns.
+
+The hyper parameters listed in table [[tbl:gaafd_hyper_params]] are used unless otherwise specified.
+
+
+
+
+#+CAPTION: The training curves of using GaaFD as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Right: Balanced accuracy over training time. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The middle plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: fig:gaafd_training_curves 
+[[./img/gaafd_training_curves.png]]
+
+
+TODO: Take the best model for each of these run and perform analysis. Look at percentage of videos with the same number of predicted frames as ground truth and calculate aaFD (on test dataset). Can we do some post-processing on the result to make it better? What were the worst performing videos? What were the best performing videos?
+
+
+** Frame Phase Detection Reward Function
+The next experiment explores the phase detection reward functions which are able to provide a reward on every step, not only at the end of the episode as with GaaFD. Two reward functions are explored: a simple reward function $R_1$, as defined in equation [[eqn:simple_reward]], and an error-based reward function $R_2$, as defined in equation [[eqn:proximity_reward]].
+
+This makes it quite similar to a supervised regression problem where we want to learn the Q-values given an observation and an action. This is because the returns only depend on the current action and not on all the actions in an episode as we saw with the GaaFD reward function. As a result, it is assumed that the optimal discounting factor is $\gamma=0.0$, meaning that the returns is calculated using only the immediate reward. A discount value of $\gamma > 0.0$ would make expected future returns predictions depend more on the current policy, adding noise to the target values until the policy converges.
+
+Unless discounting is not zero there will be no need for bootstrapping and we can ignore N-step bootstrapping for these reward functions by setting $N=1$.
+
+Since an action does not affect future states exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. It is not obvious which value of $\epsilon$ is best, so we try 3 different values: $\epsilon=0.0$, $\epsilon=0.5$, and $\epsilon=1.0$.
+
+We use the same values of hyper parameters as in table [[tbl:gaafd_hyper_params]], except for using a value of Discount $\gamma=0.0$ and a value of N-step bootstrapping of $N=1$.
+
+
+TODO: Graph showing different values of epsilon for $R_1$ and $R_2$
+
+
+TODO: Maybe scrap next paragraph.
+
+To show that discounting only adds noise to the learning process, we experiment with using different values of discounting: $\gamma=0.0$, $\gamma=0.5$, and $\gamma=0.9$. To give an intuition on the effect of these discount values, the reward received 5 steps after the current step will account for $0.5^5 \approx 0.03$ for $\gamma=0.5$ and $0.9^5 \approx 0.59$ for $\gamma=0.9$.
+
+TODO: Trying different values of discounting.
+
+
+* M-Mode Binary Classification Environment
+
+
+
+
+
+
+Later: Mobilenet
+TODO: mobilenet, best value of epsilon.
+
+
+
+
+TODO: Mention the deadly triad in Q-learning with function approximators.
+
+
+
+
+
+
+
+
+
+Experiments:
+Simple binary classification
+
+1. GaaFD with N=infinity
+2. Simple reward spec
+3. Proximity base reward spec
+
+Discussion about using exploration, bootstrapping and discounting for experiment 2 and 3.
+
+1. The one with the best result between simple and proximity, but without the "bells and whistles" of RL. Use 100% exploration f.ex....
+
+M-mode binary classification
+...what to do........
+
+
+
+
 
 #+BEGIN_SRC python
 Notes for this chapter 
@@ -787,3 +984,6 @@ SHOW WORST PERFORMING IMAGES WITH Q-VALUES
 
 
 
+\backmatter{}
+
+\printbibliography{}

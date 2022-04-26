@@ -20,7 +20,9 @@ Gifani et al. (2010) employed manifold learning, an unsupervised learning algori
 
 Non-negative Matrix Factorization (NMF) is another unsupervised learning method that has been employed to reduce the dimensionality of ultrasound videos \cite{yuan_machine_2017}. In this work, rank-2 NMF was used to generate two end-members from a cardiac ultrasound video. The end-members turn out to be quite similar to the ED and ES frames, and the end-member coefficient peaks can be used to find ED and ES. NMF was found to give predictions with less error than LLE and Isomap manifold learning.
 
-TODO: Re-add image from essay! Caption: Comparison between NMF, LLE and ISOMAP results for all 99 cases in the apical 4 view, taken from \cite{yuan_machine_2017}.
+#+CAPTION: Comparison between NMF, LLE and ISOMAP results for all 99 cases in the apical 4 view, taken from \cite{yuan_machine_2017}.
+#+NAME: fig:manifold_and_nmf_comparison
+[[../img/manifold_and_nmf_comparison.png]]
 
 Other methods use either image segmentation or speckle tracking to track the changes to the left ventricle volume, taking advantage of the fact that it is most expanded during ED and most contracted during ES \cite{barcaro_automatic_2008} \cite{darvishi_measuring_2013} \cite{a_automatic_2015}. However, these methods are prone to significant errors due to noise inherent in cardiac ultrasound or discontinuous edges.
 

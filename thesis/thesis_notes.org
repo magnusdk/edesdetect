@@ -102,3 +102,40 @@ What are measurements: Why we need to find the ED and ES frames.
 
 
 
+* NOTES
+** Missing
+- Abstract
+- Preface
+- 1.3 Limitations of the Work
+- 1.4 Thesis Structure
+- 2.1 last parts about Cardiac Cycle
+  - Also add ultrasound image of heart showing the different chambers.
+- 2.2.2 Creating Images From Sound
+
+
+** Add reference
+- There even exists handheld devices that can be carried by hand and brought on-site.
+- Left ventricular ejection fraction is an example of an important measurement that is calculated using ED and ES.
+
+
+** Other
+- There are multiple ways of finding the ED and ES frames in a cardiac cycle...
+  - Move parts to background and only focus on the motivation in this section.
+
+- Machine learning methods show promising results on several tasks within medical imaging...
+  - Move this paragraph to the next section as it is not strictly "Motivation", is it?
+
+- RL: $\gamma$ for episodic tasks.
+
+- RL: Value functions are not needed for policy gradient methods. "The learning part"... also needs to be updated.
+
+- 2.4.1 Deep Reinforcement Learning
+  - Compare Policy-gradient with Value-based methods. See the last paragraph of section 2.4.1 and improve it.
+
+
+** Redo Section
+- 1.2 Goal and Research Questions
+- 2.2 Echocardiography — restructure and make things more clear
+
+
+
