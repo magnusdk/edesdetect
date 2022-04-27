@@ -215,7 +215,7 @@ class DistributedLayout:
             learner,
             key="learner",
             subdirectory="learner",
-            time_delta_minutes=5,
+            time_delta_minutes=60,
             **kwargs,
         )
 
