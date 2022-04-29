@@ -25,10 +25,13 @@ def get_events(labels):
             yield Event(index=i, label=l1)
 
 
-def dist(e0, e1, default=None):
+def dist(e0, e1, default=None, use_abs=True):
     if e0 is None or e1 is None:
         return default
-    return abs(e0.index - e1.index)
+    if use_abs:
+        return abs(e0.index - e1.index)
+    else:
+        return e1.index - e0.index
 
 
 def nearest_same_event(e0, other_events):
@@ -44,9 +47,13 @@ def nearest_same_event(e0, other_events):
     return closest_e
 
 
-def gaafd(ground_truths, predictions):
-    gt_events = list(get_events(ground_truths))
-    pred_events = list(get_events(predictions))
+def gaafd(ground_truths, predictions, label=None):
+    gt_events = [
+        e for e in get_events(ground_truths) if (label == None or e.label == label)
+    ]
+    pred_events = [
+        e for e in get_events(predictions) if (label == None or e.label == label)
+    ]
 
     if (len(gt_events) + len(pred_events)) == 0:
         return 0.0
@@ -66,3 +73,29 @@ def gaafd(ground_truths, predictions):
         )
 
     return s / (len(gt_events) + len(pred_events))
+
+
+def frame_diffs(ground_truths, predictions):
+    gt_events = list(get_events(ground_truths))
+    pred_events = list(get_events(predictions))
+    gt_diffs = []
+    pred_diffs = []
+
+    for e in gt_events:
+        diff = dist(
+            e,
+            nearest_same_event(e, pred_events),
+            min(e.index + 1, len(ground_truths) - e.index),
+            use_abs=False,
+        )
+        gt_diffs.append(diff)
+    for e in pred_events:
+        diff = dist(
+            e,
+            nearest_same_event(e, gt_events),
+            min(e.index + 1, len(predictions) - e.index),
+            use_abs=False,
+        )
+        pred_diffs.append(diff)
+
+    return gt_diffs, pred_diffs
