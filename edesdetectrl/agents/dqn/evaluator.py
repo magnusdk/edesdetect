@@ -22,7 +22,9 @@ def evaluate_and_get_metrics(
     actor: core.Actor,
     num_samples: int,
     environment: dm_env.Environment,
+    max_seconds: int = 60,
 ):
+    start_time = time.time()
     # Evaluate actor on all samples
     all_metrics = []
     all_gaafd = []
@@ -32,6 +34,12 @@ def evaluate_and_get_metrics(
         all_metrics.append(trajectory.balanced_accuracy())
         all_gaafd.append(trajectory.gaafd())
         all_action_distributions.append(trajectory.action_distribution())
+        elapsed = time.time() - start_time
+        if elapsed >= max_seconds:
+            print("Max seconds reached")
+            break
+    
+    num_samples = len(all_metrics)
 
     # Return averaged metrics
     action_distribution = {}
@@ -90,7 +98,7 @@ class Evaluator(core.Worker):
                 self.actor, num_samples, environment
             )
 
-            # It's a code-smell to depend on m-mode env for getting the names of 
+            # It's a code-smell to depend on m-mode env for getting the names of
             # actions, but deadline is approaching and this works.
             presented_action_distribution = {
                 (split + "_" + iactions[k]): v for k, v in action_distribution.items()

@@ -133,7 +133,7 @@ class DistributedLayout:
         prefetch_size: int = 1,
         log_to_bigtable: bool = False,
         max_number_of_steps: Optional[int] = None,
-        workdir: str = "~/acme",
+        workdir: str = "/scratch/users/magnukva/acme",
         multithreading_colocate_learner_and_reverb: bool = False,
     ):
         if prefetch_size < 0:
@@ -165,7 +165,7 @@ class DistributedLayout:
         return self._builder.make_replay_tables(environment_spec)
 
     def counter(self):
-        kwargs = {"directory": self._workdir, "add_uid": self._workdir == "~/acme"}
+        kwargs = {"directory": self._workdir, "add_uid": True}
         return savers.CheckpointingRunner(
             counting.Counter(),
             key="counter",
@@ -209,7 +209,7 @@ class DistributedLayout:
         learner = self._builder.make_learner(
             random_key, networks, iterator, replay, counter
         )
-        kwargs = {"directory": self._workdir, "add_uid": self._workdir == "~/acme"}
+        kwargs = {"directory": self._workdir, "add_uid": True}
         # Return the learning agent.
         return savers.CheckpointingRunner(
             learner,

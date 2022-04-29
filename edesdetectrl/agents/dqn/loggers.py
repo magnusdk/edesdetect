@@ -59,8 +59,8 @@ def make_default_logger(
 
     loggers = [terminal_logger, mlflow_logger]
 
-    if save_data:
-        loggers.append(csv.CSVLogger(label=label))
+    #if save_data:
+    #    loggers.append(csv.CSVLogger(label=label))
 
     # Dispatch to all writers and filter Nones and by time.
     logger = aggregators.Dispatcher(loggers, serialize_fn)
