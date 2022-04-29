@@ -3,7 +3,9 @@ from collections import defaultdict
 
 import acme.core
 import edesdetectrl.util.dm_env as util_dm_env
+import jax
 import jax.numpy as jnp
+import tqdm
 from acme import specs, types
 from acme.jax import networks as networks_lib
 from acme.jax import types as jax_types
@@ -33,11 +35,12 @@ class ActorImpl(acme.core.Actor):
         self.params = params
         self.state = state
         self.rng_key = initial_rng_key
+        self._apply = jax.jit(self.network.apply)
 
     def select_action(self, observation):
         self.rng_key, sub_key = random.split(self.rng_key)
         observation = add_batch_dimension(observation)
-        result, _ = self.network.apply(self.params, self.state, sub_key, observation)
+        result, _ = self._apply(self.params, self.state, sub_key, observation)
         return jnp.argmax(result)
 
     def observe_first(self, timestep):
@@ -60,10 +63,11 @@ def evaluate_with_params(params_path, split):
     rng_key = random.PRNGKey(1337)
     actor = ActorImpl(network, params, state, rng_key)
 
-    evaluations = {}
-    for data_item in Echonet(split).get_generator(cycle=False):
+    trajectories = {}
+    echonet = Echonet(split)
+    for data_item in tqdm.tqdm(echonet.get_generator(cycle=False), total=len(echonet)):
         if data_item.extra_frames_left >= 3 and data_item.extra_frames_right >= 3:
             base_env.video = data_item
             trajectory = generate_trajectory_using_actor(env, actor)
-            evaluations[data_item.name] = trajectory.all_metrics()
-    return evaluations
+            trajectories[data_item.name] = trajectory._labels_and_predictions()
+    return trajectories
