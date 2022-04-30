@@ -64,17 +64,7 @@ In order to obtain images of the heart, clinicians use tools such as Magnetic Re
 
 Many heart measurements depend on two key events in the cardiac cycle: End-Diastole (ED) and End-Systole (ES). Roughly speaking, ED is when the heart is the most relaxed, and ES is when it is the most contracted. Left ventricular ejection fraction is an example of an important measurement that is calculated using ED and ES.
 
-
-
-
-There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite{mada_razvan_o_how_2015}:
-1. Finding the frame with the maximum left ventricle volume (for ED) and the frame with the minimum left ventricle volume (for ES).
-2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
-3. Analyzing a simultaneously acquired Electrocardiogram (ECG) signal.
-
-Out of these three, using the ECG signal is the least preferable. This is because the methods for detecting the ED and ES frame may become unreliable when given an unconventional ECG signal, such as from patients with cardiomyopathy or regional wall motion abnormalities \cite{mada_razvan_o_how_2015}. Acquiring an ECG signal also requires applying electrodes to the patient, which is not ideal in emergency settings.
-
-The other two methods, examining the aortic valve closure and finding the frame of maximum and minimum left ventricle volume, are both visual tasks and can be very time-consuming and laborious if done manually. A recent study has reported that the average time taken for manually annotating ED and ES frames from a video of 1 to 3 heartbeats is 26 seconds, with a standard deviation of $\pm 11$ seconds \cite{lane_multibeat_2021}. Furthermore, because there is not much movement around these frames, the predicted ED and ES frames may differ between different operators. It may even differ for the same operator predicting on the same video at different times. For these reasons automating ED/ES frame detection is desirable because it reduces time and creates a more robust and deterministic result.
+A recent study has reported that the average time taken for manually annotating ED and ES frames from visual cues from a video of 1 to 3 heartbeats is 26 seconds, with a standard deviation of $\pm 11$ seconds \cite{lane_multibeat_2021}. Furthermore, because there is not much movement around these frames, the predicted ED and ES frames may differ between different operators. It may even differ for the same operator predicting on the same video at different times. For these reasons automating ED/ES frame detection is desirable because it reduces time and creates a more robust and deterministic result.
 
 Machine learning methods show promising results on several tasks within medical imaging, as is explored in the following chapter. For ED/ES frame detection, most recent methods revolve around the use of Supervised Deep Learning, a family of methods in which a computer program is shown examples of correct predictions and over time learns to make the correct predictions itself. Reinforcement Learning (RL) is another family of methods that has as of yet not been explored for the problem of ED/ES frame detection. RL is able to outperform humans in complex tasks, such as mastering the board game Go in 2016 \cite{silver_mastering_2016} or becoming among the 0.2% best players in the world in the video game Starcraft II \cite{vinyals_grandmaster_2019}. However, RL can do more than just play games, and many medical imaging applications also show promising potential \cite{zhou_deep_2021}.
 
@@ -111,71 +101,151 @@ What are in each chapter...
  [[./img/cardiac_cycle_heart_illustration.jpeg]]
 
 
- A cardiac cycle consists of multiple events as visualized in the Wiggers diagram (figure [[fig:wiggers_diagram]]). ......
+There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite{mada_razvan_o_how_2015}:
+1. Finding the frame with the maximum left ventricle volume (for ED) and the frame with the minimum left ventricle volume (for ES).
+2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
+3. Analyzing a simultaneously acquired Electrocardiogram (ECG) signal.
+
+These methods can be visualized in the Wiggers diagram, as seen in [[fig:wiggers_diagram]], which plots several key events in the cardiac cycle and the corresponding values of various measurements.
+
+Out of these three, using the ECG signal is the least preferable. This is because the methods for detecting the ED and ES frame may become unreliable when given an unconventional ECG signal, such as from patients with cardiomyopathy or regional wall motion abnormalities \cite{mada_razvan_o_how_2015}. Acquiring an ECG signal also requires applying electrodes to the patient, which is not ideal in emergency settings.
+
 
  #+CAPTION: The Wiggers diagram desccribes the different phases of the cardiac cycle, as well as what they represent in different measurements. Source [[https://en.wikipedia.org/wiki/Wiggers_diagram]].
  #+NAME: fig:wiggers_diagram
  [[./img/wiggers_diagram.png]]
 
 
+** What is Sound?
+What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
 
- - Phases of the heart
-   - Wiggers diagram
+#+NAME: fig:pressure_wave_propagation
+#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
+[[./img/pressure_wave_propagation.png]]
 
- - Definition of ED/ES
-   - Using this, clinicians can make measuremetns ....
+*** Attributes of a Sine Wave
+A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
+
+#+NAME: fig:amp_freq_phase
+#+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
+[[./img/amp_freq_phase.png]]
+
+A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
+
+#+NAME: fig:freq_spectrum
+#+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
+[[./img/freq_spectrum.png]]
+
+#+NAME: fig:piano_clarinet_freqs
+#+CAPTION: It's the overtones that makes two instruments sound different, even while they are playing the same notes. To the left is the frequency spectrum of a piano and a clarinet from 150 to 450 hertz. To the right is the same frequency spectrum from 0 to 5000 hertz, in log$_{10}$ scale. Both instruments are playing the Am7 chord which consists of four notes. You can see the notes clearly in the left image, all having relatively high amplitudes for both instruments.
+[[./img/piano_clarinet_freqs.png]]
+
+*** Attributes of the Medium
+The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
+
+#+NAME: fig:conveyor_belt_speed_change
+#+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
+[[./img/conveyor_belt_speed_change.png]]
+
+
+#+NAME: fig:nonlinearity
+#+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
+[[./img/nonlinearity.png]]
+
+
+An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
+
+#+NAME: eqn:acoustic_impedance
+\begin{equation}
+Z=\rho\times c
+\end{equation}
+
+#+NAME: eqn:reflection_factor
+\begin{equation} 
+RF=\frac{Z_2-Z_1}{Z_2+Z_1}
+\end{equation}
+
+
+*** TODO Attributes of the Wave Front 
+Huygens-Fresnel principle
+
 
 ** Echocardiography
- /Seeing/ is the act of sensing photons with our eyes. We can see the color of a curtain because photons that hit it and are reflected back into our eyes. A heart, being inside a body and all, can not be seen because light does not penetrate that deep, and thus is not reflected back into our eyes. To see the heart we need a signal that can penetrate the body just enough to reach the heart, but not so much as to completely penetrate the heart without sending back a reflection. As luck would have it — sound is such a signal.
+Light is a signal that does not penetrate very far into the body, which is why we are unable to simply gaze into eachother's hearts. We could however imagine a universe where the light penetrates too much, giving off no reflections at all. In this universe we would not be able to see the heart either — in fact we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweetspot where the signal is able to penetrate tissue with enough energy while at the same time being reflected back with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
 
-*** What is Sound?
- What we as humans perceive as sound are simply vibrations of the particles that surrounds us. When particles are disturbed, such as what happens to the air particles when we clap our hands together, they interact by pushing into eachother. As the atoms and molecules that make up the air bump into eachother, they also repell eachother, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
+- Table of different acoustic impedances of various human tissues
+- Why we use ultrasound jelly
 
- #+NAME: fig:pressure_wave_propagation
- #+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
- [[./img/pressure_wave_propagation.png]]
+How can we use sound reflections to create images? If we send out a sound signal and measure the time it takes for a reflection to come back we can get information about the relative distance to various reflectors in the medium from the sound source. If we know the speed of sound, and assume that the speed of sound is homogeneous in the medium, then we can approximate the distance that the wave has travelled by multiplying the delay between sending the sound signal and receiving back an echo by the speed of sound (equation [[eqn:reflector_distance_by_delay]]). This makes the assumption that waves always travel in straight lines which is not always true, but the effect is often neglible in medical ultrasound usecases.
 
-**** Attributes of a Sine Wave
- A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
-
- #+NAME: fig:amp_freq_phase
- #+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
- [[./img/amp_freq_phase.png]]
-
- A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet plays the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
-
- #+NAME: fig:freq_spectrum
- #+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
- [[./img/freq_spectrum.png]]
-
- #+NAME: fig:piano_clarinet_freqs
- #+CAPTION: It's the overtones that makes two instruments sound different, even while they are playing the same notes. To the left is the frequency spectrum of a piano and a clarinet from 150 to 450 hertz. To the right is the same frequency spectrum from 0 to 5000 hertz, in log$_{10}$ scale. Both instruments are playing the Am7 chord which consists of four notes. You can see the notes clearly in the left image, all having relatively high amplitudes for both instruments.
- [[./img/piano_clarinet_freqs.png]]
-
-**** Attributes of the Medium
- The other important thing about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly backed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
-
- #+NAME: fig:conveyor_belt_speed_change
- #+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
- [[./img/conveyor_belt_speed_change.png]]
-
-
- #+NAME: fig:nonlinearity
- #+CAPTION: In a medium with nonlinearity the higher-pressure parts of a wave propagates faster than lower-pressure parts. Over time, the higher-pressure parts will "catch up" to the lower-pressure parts, and what started as a sine wave will start to resemble a sawtooth wave.
- [[./img/nonlinearity.png]]
-
-
- An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When the $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
-
- #+NAME: eqn:acoustic_impedance
+ #+NAME: eqn:reflector_distance_by_delay
  \begin{equation}
- Z=\rho\times c
+ \text{distance} = \text{delay} \times c 
  \end{equation}
 
- #+NAME: eqn:reflection_factor
- \begin{equation} 
- RF=\frac{Z_2-Z_1}{Z_2+Z_1}
- \end{equation}
+Likewise, if want to know what the reflected signal is for a given distance away from the sender and receiver we can calculate the corresponding delay of a signal traveling that distance and back by dividing the total distance by the speed of sound (equation [[eqn:reflector_delay_by_distance]]). When we know the corresponding delay we can simply look up its value in the signal. If we repeat this for every point in an area that we want to image we would end up with an image.
+
+#+NAME: eqn:reflector_delay_by_distance
+\begin{equation}
+\text{delay} = \frac{\text{distance}}{c} 
+\end{equation}
+
+ #+CAPTION: By measuring the time between sending a signal and receiving it back from a reflector we can approximate how far away the reflector is — given that we know the approximate speed of sound.
+ #+NAME: fig:sound_tx_rx
+ [[./img/sound_tx_rx.png]]
+
+When we only have a single receiver that measures that reflected sound waves we can not know the exact location of a given reflector, only the distance. By utilizing more receivers spread over some area we get more information about where the signal orginated from as the distance will match across receivers for an actual reflector object.
+
+TODO: Add images showing effect of using just one receivers versus many.
+
+By utilizing multiple sender elements as well who can send sound waves independently of each other we are able to shape the wavefront as we wish. This let's us for example focus the energy of the sound wave in a specific area, or shape the wave front to be planar. The Huygens-Fresnel principle states that every point of a wavefront is the source of a new spherical wavefront. We can simulate this behavior by imagining a desired wavefront passing through the sender elements, activating each element at the moment the wave hits it. Each sender element on its own creates a spherical wavefront, but together they make up the desired imagined wavefront. An example of this has been visualized in figure [[fig:huygens_fresnel_focusing]]. Time delays are to sound waves like a lens is to a magnifying glass.
+
+#+CAPTION: Because of the Huygens-Fresnel principle, we can create a desired wavefront by creating spherical waves at each sender element the moment the imagined wavefront would hit it. The dashed, pink curve represents the imagined desired wavefront as it approaches the sender elements marked by the purple rectangle. Each sender element is activated the moment the imagined wavefront passes through it, creating new spherical waves, represented by the cyan semi circles. The generated spherical waves converge on the same point that the imagined wavefront would have converged.
+#+NAME: fig:huygens_fresnel_focusing
+[[./img/huygens_fresnel_focusing.png]]
+
+In reality, an ultrasound probe consists of many elements which act both as transmitters and as receivers. This is done using a piezoelectric material, a material that is both able to produce vibrations if given electric current, and produce electric current when exposed to vibrations. With a transducer, we can apply an electric current to each element independently to create sound waves with given wave front characteristics, and read off the electric current generated by reflected pressure waves.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+- focusing
+  - sector scans
+  - M-mode imaging
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 *** Creating Images From Sound
@@ -797,8 +867,6 @@ A base list of hyper-parameters is listed in table [[tbl:gaafd_hyper_params]]. U
 * Simple Binary Classification Environment
 
 
-
-
 ** Generalized Average Absolute Frame Difference Reward Function
 We start by exploring the use of GaaFD as defined in equation [[eqn:aafd_generalized]] as the reward function. This has the benefit that we are directly optimizing the agent for the key performance metric, which is aaFD as defined in equation [[eqn:aafd]]. However, a weakness, as discussed in section [[Reward Function Design]] is that it is only defined at the end of an episode, making the reward signal very sparse. The agent will only get a reward at the last step of an episode, which on average lasts for 50 steps.
 
@@ -808,16 +876,57 @@ To solve for reward-sparsity we use multistep bootstrapping with a value of $N$ 
 
 We also set the discount value $\gamma=1.0$ which means that an agent tries to maximize all future rewards. Having $\gamma < 1.0$ means that the calculated returns will be more noisy and harder to predict because the discounted returns calculated for steps earlier in an episode would have a lower value than those calculated closer to the end.
 
-Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The assumption is that using $\epsilon=0.0$ is best because the reward signal is so noisy from the beginning because the reward is carried from the end of an episode an back to all steps. Using an $\epsilon>0.0$ may add even more noise as it becomes harder for the network to distinguish whether it was its own actions or the randomness of exploration that caused a drop in returns.
-
-The hyper parameters listed in table [[tbl:gaafd_hyper_params]] are used unless otherwise specified.
-
-
-
+Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$.
 
 #+CAPTION: The training curves of using GaaFD as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Right: Balanced accuracy over training time. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The middle plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
 #+NAME: fig:gaafd_training_curves 
 [[./img/gaafd_training_curves.png]]
+
+
+#+CAPTION: The training loss over time for different values of epsilon. The left plot shows the full y-axis, while the right plot shows the same plots but with a zoomed-in y-axis.
+#+NAME: fig:gaafd_loss_curves
+[[./img/gaafd_loss_curves.png]]
+
+
+
+#+CAPTION: TODO
+#+NAME: gaafd_worst_videos_q
+[[./img/gaafd_worst_videos_q.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_best_model_ed_es_perf
+[[./img/gaafd_best_model_ed_es_perf.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_best_model_perf
+[[./img/gaafd_best_model_perf.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_best_videos_q
+[[./img/gaafd_best_videos_q.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_learning_curves
+[[./img/gaafd_learning_curves.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_loss_curves
+[[./img/gaafd_loss_curves.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_mismatched_predictions
+[[./img/gaafd_mismatched_predictions.png]]
+
+#+CAPTION: TODO
+#+NAME: gaafd_training_curves
+[[./img/gaafd_training_curves.png]]
+
+
+
+
+TODO: How fast is it at inference?
+
+
 
 
 TODO: Take the best model for each of these run and perform analysis. Look at percentage of videos with the same number of predicted frames as ground truth and calculate aaFD (on test dataset). Can we do some post-processing on the result to make it better? What were the worst performing videos? What were the best performing videos?

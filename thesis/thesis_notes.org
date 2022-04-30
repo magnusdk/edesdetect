@@ -119,9 +119,6 @@ What are measurements: Why we need to find the ED and ES frames.
 
 
 ** Other
-- There are multiple ways of finding the ED and ES frames in a cardiac cycle...
-  - Move parts to background and only focus on the motivation in this section.
-
 - Machine learning methods show promising results on several tasks within medical imaging...
   - Move this paragraph to the next section as it is not strictly "Motivation", is it?
 
