@@ -839,26 +839,6 @@ TODO: Write about why we chose DQN, what alternatives we considered, etc.
 
 This chapter is dedicated to exploring the performance of methods described in the previous chapter through experiments. It is separated into two main parts, one for each environment formulation. The three reward functions are explored: Generalized Average Absolute Frame Difference (GaaFD), a simple binary phase prediction reward $R_1$, and the proximity-based phase prediction reward $R_2$.
 
-A base list of hyper-parameters is listed in table [[tbl:gaafd_hyper_params]]. Unless otherwise specified, these values are used.
-
-#+NAME: tbl:gaafd_hyper_params
-| Hyper parameter              | Value                        |
-|------------------------------+------------------------------|
-| Epsilon                      | $0.0$                        |
-| Discount                     | $1.0$                        |
-| N (N-step bootstrapping)     | $\infty$                     |
-| Target update period         | $100$                        |
-| Importance sampling exponent | $0.2$                        |
-| Priority exponent            | $0.6$                        |
-| Number of actors             | $8$                          |
-| Min replay size              | $10\,000$                    |
-| Max replay size              | $250\,000$                   |
-| Samples per insert ratio     | $0.5$                        |
-| Optimizer                    | Adam with default parameters |
-| Learning rate                | $1^{-4}$                     |
-| Gradient descent steps       | $100\,000$                   |
-| Batch-size                   | $128$                        |
-| TODO                         | Huber loss                   |
 
 
 
@@ -876,12 +856,45 @@ To solve for reward-sparsity we use multistep bootstrapping with a value of $N$ 
 
 We also set the discount value $\gamma=1.0$ which means that an agent tries to maximize all future rewards. Having $\gamma < 1.0$ means that the calculated returns will be more noisy and harder to predict because the discounted returns calculated for steps earlier in an episode would have a lower value than those calculated closer to the end.
 
-Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$.
+Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The agents were allowed to train until they visually reach a plateau. A full list of the hyper-parameters used is listed in table [[tbl:gaafd_hyper_params]] (most relevant ones are highlighted).
 
-#+CAPTION: The training curves of using GaaFD as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Right: Balanced accuracy over training time. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The middle plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: tbl:gaafd_hyper_params
+| Hyper parameter              | Value                              |
+|------------------------------+------------------------------------|
+| *Epsilon*                    | $\{0.0, 0.01, 0.1\}$               |
+| *Discount*                   | $1.0$                              |
+| *N (N-step bootstrapping)*   | $\infty$                           |
+| Target update period         | $100$                              |
+| Importance sampling exponent | $0.2$                              |
+| Priority exponent            | $0.6$                              |
+| Number of actors             | $8$                                |
+| Min replay size              | $10\,000$                          |
+| Max replay size              | $250\,000$                         |
+| Samples per insert ratio     | $0.5$                              |
+| Optimizer                    | Adam with default parameters       |
+| Huber loss parameter         | $1.0$                              |
+| Learning rate                | $1^{-4}$                           |
+| Gradient descent steps       | $\{100\,000, 150\,000, 200\,000\}$ |
+| Batch-size                   | $128$                              |
+
+
+
+
+From the learning curves in figure [[fig:gaafd_training_curves]] we see that the agent does indeed over time learn to make correct predictions. Interestingly, the best agent is the one who performs no exploration and "explores" greedily at every step. It also converges faster on a solution, though they are all arguably very slow, taking tens of thousands of SGD steps to converge. Even a value of $\epsilon=0.01$, meaning that only 1 percent of actions are random, significantly reduces performance and convergence speed.
+
+Not surprisingly, over time the agent will perform better on the training data compared to the validation data, as is visualized in the right-most plot in figure [[fig:gaafd_training_curves]]. This is less apparent the agent that uses a value of $\epsilon=0.1$ as the overfitting curve, whose positive values indicate worse performance on the validation set compared to the training set, remain closer to 0. For neither agent the increased relative performance on the training set appears to have a negative impact on the validation performance, so overfitting is not a big issue.
+
+#+CAPTION: The training curves of using GaaFD as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
 #+NAME: fig:gaafd_training_curves 
-[[./img/gaafd_training_curves.png]]
+[[./img/gaafd_learning_curves.png]]
 
+The reason behind these results is likely due to the learner having access to noisier signals the higher the value of $\epsilon$. Recall that the agent only receives a reward at the very end of the episode which on average lasts for 50 steps. Any mistake in those 50 steps will be penalized and the agent has no way of knowing whether it was penalized for an action taken under its policy or an action taken randomly.
+
+Further evidence of this can be found in the loss curves, as generally the models with $\epsilon\in\{0.01, 0.1\}$ have a greater loss at the end of training, as seen in [[fig:gaafd_loss_curves]]. This indicates that the data that it has trained on "surprises" the model which could be explained through the fact that when it makes a mistake through random exploration the model will not know which action in the episode was the true culprit.
+
+Another interesting feature of the loss curves is the valleys in the beginning of training. In the beginning of training the model has no knowledge about the data and any prediction will be random. This leads to actors taking random actions and the GaaFD, i.e. the reward, staying pretty uniformly bad (TODO: back up with data?). As the actors learn which action to pick the sample data distribution changes, reflecting the new policies. This in turn creates a change in loss as the learner "catches up" to the new policy. As the model approaches a good estimate of the true Q-value $Q^*$ it will make less mistakes and in turn the loss will decrease (TODO: this can probably be explained through information theory and Shannon entropy also? The amount of new information gained follows a bell curve depending on the accuracy of predictions. When every action is random, how do we know what to update? When 50% of actions are randomly incorrect we have maybe more information? When only 5% of actions are randomly incorrect, we again have little information. *OR* maybe it could simply be explained by that an agent needs time to fill the replay buffer with samples from the new distribution. But why does the curves have different shapes then?). (TODO: what does it mean that the blue curve has lower loss than the dark-blue/purple one?)
+
+(TODO: perhaps interesting to see how the Q-values change over training time for a video? An image where x-axis are the estimated value of marking each frame as Diastole and y-axis is SGD-steps.)
 
 #+CAPTION: The training loss over time for different values of epsilon. The left plot shows the full y-axis, while the right plot shows the same plots but with a zoomed-in y-axis.
 #+NAME: fig:gaafd_loss_curves
@@ -889,71 +902,244 @@ Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilo
 
 
 
-#+CAPTION: TODO
-#+NAME: gaafd_worst_videos_q
-[[./img/gaafd_worst_videos_q.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_best_model_ed_es_perf
-[[./img/gaafd_best_model_ed_es_perf.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_best_model_perf
+
+For all three models we select the parameters at the step where GaaFD was lowest for the validation set to find the best one. Because the GaaFD is only calculated on a subset of the validation data, 50 videos to be exact, we opt to smooth the curves first using a Gaussian filter with a kernel standard deviation of 20. If we don't do this we risk selecting a model that by chance was evaluated on 50 very easy videos instead of being the actual best model. Smoothing the curves this way may lead us to not pick the absolute best model parameters, but in general it should be among the best. The SGD step of the selected model parameters and the overall performance of that model are listed in table [[tbl:gaafd_best_models_sgd_steps]].
+
+#+CAPTION: Performance of agents trained using GaaFD as the reward function on the test dataset.
+#+NAME: tbl:gaafd_best_models_sgd_steps
+|                     | $\epsilon=0.1$ | $\epsilon=0.01$ | $\epsilon=0$ |
+|---------------------+----------------+-----------------+--------------|
+| Best model SGD step | $167\,336$     | $136\,996$      | $95\,616$    |
+| GaaFD               | $5.84$         | $4.59$          | $3.68$       |
+| GaaFD ED            | $5.69$         | $4.84$          | $3.74$       |
+| GaaFD ES            | $5.83$         | $4.20$          | $3.50$       |
+| % valid aaFD        | $0.64$         | $0.70$          | $0.77$       |
+| aaFD                | $3.51$         | $2.71$          | $2.43$       |
+
+TODO: Explain how ES performance is better than ED performance. Hypothesis: systole phase is shorter therefore mistakes are closer to ES on average.
+
+TODO: Explain how (for $\epsilon=0.1$) GaaFD is higher (worse) than both the GaaFD for only ED and only ES. It's because when we filter out events sometimes there are no events to predict.
+
+
+A GaaFD-density plot comparing the performance on both the test-data and the train-data was created for each model using Gaussian Kernel Density Estimation (KDE), as seen in figure [[fig:gaafd_best_model_perf]]. The kernel bandwidth is selected using Scott's rule which is the default selection method for SciPy's KDE implementation. (TODO: discuss plot)
+
+Similarly, a GaaFD-density plot was created for ED- and ES-events individually, as seen in figure [[fig:gaafd_best_model_ed_es_perf]]. (TODO: discuss plot)
+
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$). The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
+#+NAME: fig:gaafd_best_model_perf
 [[./img/gaafd_best_model_perf.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_best_videos_q
-[[./img/gaafd_best_videos_q.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_learning_curves
-[[./img/gaafd_learning_curves.png]]
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$), only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
+#+NAME: fig:gaafd_best_model_ed_es_perf
+[[./img/gaafd_best_model_ed_es_perf.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_loss_curves
-[[./img/gaafd_loss_curves.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_mismatched_predictions
+To compare against other state-of-the-art models we use aaFD, but as discussed in earlier sections aaFD is not defined on videos whose number of predictions does not equal the number of ground truth events. As seen in table [[tbl:gaafd_best_models_sgd_steps]], the best model of the three generates the correct number of predictions in 77% of the cases, the worst model 64%. Disregarding these low numbers, and/or assuming there are methods of cleaning up the predictions such that aaFD becomes valid, we can filter out the invalid predictions for each model and compare their aaFD. This is seen in [[fig:gaafd_mismatched_predictions]]. Unsurprisingly, the model with $\epsilon=0$ who performs the best on GaaFD also makes the fewest mistakes in number of predictions. We also see a small bump at 2 mismatched number of predictions. This may be due to the fact that the model sometimes predicts rogue frames with wrong labels, perhaps due to noise, who are quickly fixed in the following frames. This creates two events in rapid succession, as visualized in figure [[ed_es_from_predictions_2]].
+
+
+#+CAPTION: The difference between the number of predicted events and the number of ground truth events for each model. Most predictions produce the same number of predicted events as ground truth, f.ex. the model with $\epsilon=0$ produces the correct number of events 77% of the time, which can also be seen in table [[tbl:gaafd_best_models_sgd_steps]].
+#+NAME: fig:gaafd_mismatched_predictions
 [[./img/gaafd_mismatched_predictions.png]]
 
-#+CAPTION: TODO
-#+NAME: gaafd_training_curves
-[[./img/gaafd_training_curves.png]]
+
+#+CAPTION: A single wrongly predicted phase that is corrected right after creates two incorrect events.
+#+NAME: ed_es_from_predictions_2
+[[./img/ed_es_from_predictions.png]]
 
 
 
+
+
+Peeking inside the machinery of the DQN-agent, we see a potential cause of the performance discrepancy between the three models. For every frame the agent predicts the future returns of marking a frame as diastole or marking it as systole. These predictions are plotted in [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. It is apparent that the model that uses $\epsilon=0$ is better at differentiating the value of taking either action for a given state. 
+
+
+#+CAPTION: The Q-values for three of the best predicted videos for each model. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents tiime in the video. 
+#+NAME: fig:gaafd_best_videos_q
+[[./img/gaafd_best_videos_q.png]]
+
+
+#+CAPTION: The Q-values for three of the worst predicted videos for each model. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents tiime in the video.
+#+NAME: fig:gaafd_worst_videos_q
+[[./img/gaafd_worst_videos_q.png]]
+
+
+TODO: Also show example of frames from video of good video and bad video with corresponding q-values.
+
+TODO: What does the in-the-middle spikes represent in the gaafd_best_videos_q plot?
+
+TODO: Plot the best/worst videos as per each model's performance. Now each column is the same video, selected as the best for one of the models.
 
 TODO: How fast is it at inference?
 
 
 
-
-TODO: Take the best model for each of these run and perform analysis. Look at percentage of videos with the same number of predicted frames as ground truth and calculate aaFD (on test dataset). Can we do some post-processing on the result to make it better? What were the worst performing videos? What were the best performing videos?
-
-
-** Frame Phase Detection Reward Function
-The next experiment explores the phase detection reward functions which are able to provide a reward on every step, not only at the end of the episode as with GaaFD. Two reward functions are explored: a simple reward function $R_1$, as defined in equation [[eqn:simple_reward]], and an error-based reward function $R_2$, as defined in equation [[eqn:proximity_reward]].
+** Simple- and Proximity-Based Reward Functions
+The next set of experiments explore the phase detection reward functions which are able to provide a reward on every step, not only at the end of the episode as with GaaFD. Two reward functions are explored: a simple reward function $R_1$, as defined in equation [[eqn:simple_reward]], and an error-based reward function $R_2$, as defined in equation [[eqn:proximity_reward]].
 
 This makes it quite similar to a supervised regression problem where we want to learn the Q-values given an observation and an action. This is because the returns only depend on the current action and not on all the actions in an episode as we saw with the GaaFD reward function. As a result, it is assumed that the optimal discounting factor is $\gamma=0.0$, meaning that the returns is calculated using only the immediate reward. A discount value of $\gamma > 0.0$ would make expected future returns predictions depend more on the current policy, adding noise to the target values until the policy converges.
 
 Unless discounting is not zero there will be no need for bootstrapping and we can ignore N-step bootstrapping for these reward functions by setting $N=1$.
 
-Since an action does not affect future states exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. It is not obvious which value of $\epsilon$ is best, so we try 3 different values: $\epsilon=0.0$, $\epsilon=0.5$, and $\epsilon=1.0$.
+Since an action does not affect future states, exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be.
 
-We use the same values of hyper parameters as in table [[tbl:gaafd_hyper_params]], except for using a value of Discount $\gamma=0.0$ and a value of N-step bootstrapping of $N=1$.
+Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$. The agents were trained for $200\,000$ SGD steps. A full list of the hyper-parameters used is listed in table [[tbl:r1r2_hyper_params]] (most relevant ones are highlighted).
+
+#+NAME: tbl:r1r2_hyper_params
+| Hyper parameter              | Value                        |
+|------------------------------+------------------------------|
+| *Epsilon*                    | $\{0.1, 0.5, 1.0\}$          |
+| *Discount*                   | $0.0$                        |
+| *N (N-step bootstrapping)*   | $1$                          |
+| Target update period         | $100$                        |
+| Importance sampling exponent | $0.2$                        |
+| Priority exponent            | $0.6$                        |
+| Number of actors             | $8$                          |
+| Min replay size              | $10\,000$                    |
+| Max replay size              | $250\,000$                   |
+| Samples per insert ratio     | $0.5$                        |
+| Optimizer                    | Adam with default parameters |
+| Huber loss parameter         | $1.0$                        |
+| Learning rate                | $1^{-4}$                     |
+| Gradient descent steps       | $200\,000$                   |
+| Batch-size                   | $128$                        |
 
 
-TODO: Graph showing different values of epsilon for $R_1$ and $R_2$
 
 
-TODO: Maybe scrap next paragraph.
 
-To show that discounting only adds noise to the learning process, we experiment with using different values of discounting: $\gamma=0.0$, $\gamma=0.5$, and $\gamma=0.9$. To give an intuition on the effect of these discount values, the reward received 5 steps after the current step will account for $0.5^5 \approx 0.03$ for $\gamma=0.5$ and $0.9^5 \approx 0.59$ for $\gamma=0.9$.
+From the learning curves in figure [[fig:r1_learning_curves]] and figure [[fig:r2_learning_curves]] we see that the agent is able to learn to make correct predictions much faster than when using GaaFD as the reward function. This is very likely due to the GaaFD reward signal being much sparser than $R_1$ and $R_2$ — $R_1$ and $R_2$ simply provides information more efficiently, and with less noise, to the learner.
 
-TODO: Trying different values of discounting.
+Compared to GaaFD, these models also reach their best performance much faster, though the performance on the validation set visibly degrades as the model starts to overfit. The exception to this is the model of the agent that has been trained using $\epsilon=0.1$, i.e. the agent that most often greedily takes actions, which seemingly doesn't overfit that much. 
+
+#+CAPTION: The training curves of using $R_1$ (simple reward) as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: fig:r1_learning_curves
+[[./img/r1r2_res/r1_learning_curves.png]]
+
+#+CAPTION: The training curves of using $R_2$ (proximity reward) as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: fig:r2_learning_curves
+[[./img/r1r2_res/r2_learning_curves.png]]
 
 
+To explain the fact that the least explorative agent is the one that overfits the least on the training set it is useful to think of exploration in this case as a means of sampling the training data. No action affects future states in this environment, so the agent is not exploring to discover long-term strategies. It instead provides the learner only with samples of which it believes are the best and this, perhaps surprisingly, seems to have a regularizing effect.
+
+However, despite the regularization, the agent is still able to achieve perfect accuracy and GaaFD on the training set. Figure [[fig:r1r2_train_val_comparison_learning_curves]] plots the learning curves of the agents on both the training set and the validation set. 
+
+#+CAPTION: The GaaFD over training time (gradient descent steps) on the validation set (solid pink and blue line) and the training set (dashed pink and blue lines). The GaaFD on the training set reaches 0, meaning perfect predictions.
+#+NAME: fig:r1r2_train_val_comparison_learning_curves
+[[./img/r1r2_res/r1r2_train_val_comparison_learning_curves.png]]
+
+
+
+The effect of the reward function is also visible in the learning curves if we plot them for agents trained with $R_1$ and agents trained with $R_2$ together, as in figure [[fig:r1r2_comparison_learning_curves]]. The blue curves are the performance of agents trained using $R_1$ and the pink curves are the performance of agents trained using $R_2$. Looking only on the right side of the plots, i.e. as the agent approaches $200\,000$ SGD steps, we see a clear pattern. The upper plots show GaaFD, in which lower values are better, and therefore $R_2$ is the better reward function, at least for agents with $\epsilon=0.1$. The lower plots show balanced accuracy, in which higher values are better, and in this case $R_1$ is definitely the better reward function. So, it would seem that the reward function that was deliberately designed to be more similar to GaaFD turned out to get a better GaaFD score, even though it actually performs worse on a metric based on accuracy. This indicates that an agent trained using $R_2$ reward makes more errors compared to an agent trained using $R_1$, but the errors are less often severe. However, this is only when looking at the right side of the plot, where the agent is already fitted to the training set. If we look at the curve at the point of the lowest GaaFD score the simple reward function $R_1$ outperforms $R_2$. This is likely due to $R_2$ being a more difficult function to estimate, as its values span multiple values, while $R_1$ can only be either $1$ or $-1$. 
+
+#+CAPTION: Comparison of the training curves using $R_1$ (simple reward) versus $R_2$ (proximity reward) for different values of of the exploratio parameter $\epsilon$. Top row shows the GaaFD over training time (gradient descent steps). Bottom row shows the balanced accuracy over training time. Each column correspond to one of the agents, $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$, respectively.
+#+NAME: fig:r1r2_comparison_learning_curves
+[[./img/r1r2_res/r1r2_comparison_learning_curves.png]]
+
+
+
+Compared to the loss curves of agents trained using GaaFD as the reward, agents trained using $R_1$ and $R_2$ yield a more familiar-looking loss curve. The loss curves in figure [[fig:r1r2_loss]] is seen dropping sharply in the beginning before slowly approaching some minimum. This is likely because in this case where discounting is $0.0$ the value of taking an action does not depend on the current policy, and thus the distribution of returns-estimations doesn't change as the policy changes as it did when using GaaFD as the reward function.
+
+Again, the agent with the lowest amount of exploration, plotted as the pink curve, stands out from the other models, its loss seeming to decrease faster in the beginning.
+
+#+CAPTION: The training loss over time for different values of epsilon. Left: an agent trained using $R_1$ (simple reward). Right: an agent trained using $R_2$ (proximity reward).
+#+NAME: fig:r1r2_loss
+[[./img/r1r2_res/r1r2_loss.png]]
+
+
+
+
+*Performance*
+
+
+Again, we select the parameters at the step where GaaFD was lowest on the validation set for each of the three $\epsilon$ values and each of $R_1$ and $R_2$, giving us 6 trained models. Before doing so we smooth the curves using a Gaussian filter with a kernel standard deviation of 20 such that the selected parameters are not selected due to randomly sampling 50 easy videos. The SGD step of the selected model parameters and the overall performance of that model are listed in table [[tbl:r1_best_models_sgd_steps]] and table [[tbl:r2_best_models_sgd_steps]]. TODO: Rewrite this, and maybe merge with the /exact/ same paragraph as in GaaFD reward?
+
+
+
+#+CAPTION: Performance of agents trained using $R_1$ as the reward function on the test dataset.
+#+NAME: tbl:r1_best_models_sgd_steps
+|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
+|---------------------+----------------+----------------+--------------|
+| Best model SGD step | $6\,220$       | $10\,960$      | $8\,964$     |
+| GaaFD               | $2.52$         | $2.46$         | $2.57$       |
+| GaaFD ED            | $2.48$         | $2.43$         | $2.52$       |
+| GaaFD ES            | $2.47$         | $2.41$         | $2.55$       |
+| % valid aaFD        | $0.79$         | $0.80$         | $0.77$       |
+| aaFD                | $1.71$         | $1.69$         | $1.69$       |
+
+#+CAPTION: Performance of agents trained using $R_2$ as the reward function on the test dataset.
+#+NAME: tbl:r2_best_models_sgd_steps
+|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
+|---------------------+----------------+----------------+--------------|
+| Best model SGD step | $107\,936$     | $6\,880$       | $7\,096$     |
+| GaaFD               | $2.55$         | $2.56$         | $2.63$       |
+| GaaFD ED            | $2.52$         | $2.56$         | $2.67$       |
+| GaaFD ES            | $2.50$         | $2.48$         | $2.52$       |
+| % valid aaFD        | $0.79$         | $0.79$         | $0.77$       |
+| aaFD                | $1.74$         | $1.80$         | $1.71$       |
+
+
+
+
+#+CAPTION: TODO
+#+NAME: r1_gaafd_performance
+[[./img/r1r2_res/r1_gaafd_performance.png]]
+
+#+CAPTION: TODO
+#+NAME: r1_edes_gaafd_performance
+[[./img/r1r2_res/r1_edes_gaafd_performance.png]]
+
+#+CAPTION: TODO
+#+NAME: r2_gaafd_performance
+[[./img/r1r2_res/r2_gaafd_performance.png]]
+
+#+CAPTION: TODO
+#+NAME: r2_edes_gaafd_performance
+[[./img/r1r2_res/r2_edes_gaafd_performance.png]]
+
+#+CAPTION: TODO
+#+NAME: r1r2_num_pred_mismatch
+[[./img/r1r2_res/r1r2_num_pred_mismatch.png]]
+
+
+
+*Q-values*
+
+#+CAPTION: TODO
+#+NAME: r1_q_best_videos
+[[./img/r1r2_res/r1_q_best_videos.png]]
+
+#+CAPTION: TODO
+#+NAME: r1_q_worst_videos
+[[./img/r1r2_res/r1_q_worst_videos.png]]
+
+#+CAPTION: TODO
+#+NAME: r2_q_best_videos
+[[./img/r1r2_res/r2_q_best_videos.png]]
+
+#+CAPTION: TODO
+#+NAME: r2_q_wrong_videos
+[[./img/r1r2_res/r2_q_wrong_videos.png]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+* Hey, Reader! You can disregard the following sections...
+
+\newpage
 * M-Mode Binary Classification Environment
 
 
