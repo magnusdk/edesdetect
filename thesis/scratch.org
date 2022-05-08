@@ -1,0 +1,34 @@
+
+#+BIBLIOGRAPHY: ../main
+
+
+* TODOs
+
+TODO: Mention the deadly triad in Q-learning with function approximators.
+TODO: Write about why we chose DQN, what alternatives we considered, etc.
+
+*** TODO Discussion
+ Under the hood, the DQN algorithm is solving a regression problem. Given a state, the model predicts the expected future returns after taking a given action. 
+
+
+
+
+ TODO: BCE is using RL for a job that asks for Supervised Learning. There is no exploration, but we still use exploration mechanisms like greedy-epsilon. Using epsilon of 1.0 (100% random decisions while training) is a sign that something is off. It is like an inefficient supervised learning training loop.
+ - How is this similar to regular supervised learning classification problem?
+   - DQN predicts expected future returns of taking an action. We can set up a supervised learning regression problem that predicts the same thing
+ - We use epsilon=1 and discount=0 — implications?
+ - Write about how DQN is simply a regression problem
+ - Future work could be using Policy Gradient methods
+
+** TODO Discussion
+- Sparse reward signal may make the results worse. Can be counteracted by: what? n-step? Less dicsount (gamma closer to 1.0)? Using "advantage" for Q-function? Actor-critic network agent?
+
+
+
+
+
+
+
+
+
+* Scratch
