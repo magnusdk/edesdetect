@@ -11,8 +11,16 @@ To export to a PDF, run these commands in a scratch buffer:
      ("\\subsection{%s}" . "\\subsection*{%s}")
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
 (setq org-latex-with-hyperref nil)
+(setq org-latex-image-default-width "1.2\\linewidth")
 
 ...followed by calling the command =org-latex-export-to-pdf=.
+
+
+After which, to center images, regex-replace:
+\\centering\n(\\includegraphics.*\})
+\centerline{$1}
+
+
 #+END_COMMENT
 
 #+BIBLIOGRAPHY: main plain
@@ -25,7 +33,7 @@ To export to a PDF, run these commands in a scratch buffer:
 #+LATEX_HEADER: \usepackage{amsmath}
 #+LATEX_HEADER: \usepackage{gensymb}
 #+LATEX_HEADER: \usepackage[nospace]{varioref}
-#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \usepackage[hidelinks]{hyperref}
 #+LATEX_HEADER: \usepackage[backend=biber,style=numeric-comp]{biblatex}
 #+LATEX_HEADER: \bibliography{main} 
 #+LATEX_HEADER: \DeclareUnicodeCharacter{2212}{-}
@@ -34,7 +42,6 @@ To export to a PDF, run these commands in a scratch buffer:
 
 \uiomasterfp[
   title=Exploring Reinforcement Learning for End-Diastolic and End-Systolic Frame Detection,
-  subtitle=or: How I Learned to Stop Worrying and Love the Bomb,
   author=Magnus Dalen Kvalevåg,
   fac=The Faculty of Mathematics and Natural Sciences,
   dept=Department of Informatics,
@@ -42,7 +49,23 @@ To export to a PDF, run these commands in a scratch buffer:
 
 \frontmatter{}
 \chapter*{Abstract}
-#+INCLUDE: parts/abstract.org
+
+The thesis explores ways of formulating the problem of ED-/ES-frame detection as a reinforcement learning problem, and whether there are any benefits in doing so. Of special interest is the design of the reward function. The standard performance metric for the task of ED-/ES-frame detection is the Average Absolute Frame Difference (aaFD), defined as the average error between predicted and ground truth events. A Generalized aaFD (GaaFD) metric is designed such that it can be used when there is a different number of predicted and ground truth events. GaaFD is then used directly as the reward function $R_{GaaFD}$, defined such that the agent receives the reward at the end of an episode. ED-/ES-frame detection is also framed as a phase classification problem, whereby the agent predicts the phase of each frame in a video. The reward functions $R_{simple}$ and $R_{proximity}$ is defined on this formulation of the problem, providing a less sparse reward signal than that of $R_{GaaFD}$. $R_{simple}$ is designed to be simple, giving a reward of either $1$ or $-1$ for correct and incorrect phase predictions, respectively. $R_{proximity}$ is designed to bring the reward function closer to the semantics of GaaFD by giving a penalty proportional to the distance to the nearest frame with the predicted phase. Additionally, two formulations of the environment are explored: Binary Classification Environment (BCE), designed to be a direct reformulation of a supervised binary classification task, and M-Mode Binary Classification Environment (MMBCE), designed to provide the agent with the ability to explore the environment using synthetic m-mode imaging. Because of time constraints, MMBCE was only preliminary explored, yet the results of which indicate that the problem is too complex for the current setup and requires more work before we can draw any conclusions on its feasiability.
+
+Experiments with the different reward functions show that the agent is able to learn from all of them, even the very-sparsely defined $R_{GaaFD}$. The agent is able to predict the correct number of frame-events on 77% of the videos in the test-dataset for all reward functions. Of the videos with the current number of predicted frame-events the best agents scored $2.43$, $1.69$, and $1.71$ for $R_{GaaFD}$, $R_{simple}$, and $R_{proximity}$, respectively.
+
+It is concluded that there are multiple ways of formulating the problem of ED-/ES-frame detection as a reinforcement learning problem, but not all formulations are equal. Reward sparsity degrades the performance of the agent significantly, and by defining the reward on phase detection instead the results improve. There are indications that designing a reward function to be closer in semantics to the key performance metric, such as $R_{proximity}$, may improve the performance of the agent on that metric, though the final results show that $R_{simple}$ performs slightly better. By regarding exploration as a way to sample data to the network the results indicate that a very low amount of exploration has a regularizing effect on the network, resulting in less overfitting. It is believed that the same effect can be reproduced in a regular supervised learning setting and that reinforcement learning does not provide substantial value to the problem of ED-/ES-frame detection.
+
+
+
+
+
+
+
+
+
+
+
 
 \tableofcontents{}
 \listoffigures{}
@@ -67,7 +90,17 @@ Machine learning methods show promising results on several tasks within medical 
 
 
 * Goal and Research Question
-The goal of this Master’s project is to explore the use of RL for automatically detecting the ED and ES frames from an ultrasound video. From a healthcare perspective it is interesting because it may open the doors for better automated tools. Yet, it is arguably more interesting from a research perspective because RL is not an obvious choice for this task. RL is built for tasks that require strategic reasoning, but ED/ES frame detection is fundamentally a classification problem. Of importance to all types of machine learning is formulating the problem in a way that makes it easier to learn for the computer. That is, optimizing the /inductive bias/ by incorporating human knowledge into the algorithm itself. Using RL for ED/ES frame detection may open up possibilities of seeing the problem from a new perspective, allowing us the add the right set of inductive bias.
+The goal of this Master’s project is to explore the use of RL for automatically detecting the ED and ES frames from an ultrasound video. From a healthcare perspective it is interesting because it may open the doors for better automated tools. Yet, it is arguably more interesting from a research perspective because RL is not an obvious choice for this task. RL is built for tasks that require strategic reasoning, but ED/ES frame detection is fundamentally a classification problem.
+
+We pose the following research questions:
+
+- *Is it possible to use Reinforcement Learning for the task of ED-/ES-frame detection?*
+- *How does the formulation of the problem as a Reinforcement Learning problem affect the performance of the model?*
+
+Of importance to all types of machine learning is formulating the problem in a way that makes it easier to learn for the computer. That is, optimizing the /inductive bias/ by incorporating human knowledge into the algorithm itself. Using RL for ED/ES frame detection may open up possibilities of seeing the problem from a new perspective, allowing us the add the right set of inductive bias.
+
+
+
 
 
 * Limitations of the Work
@@ -82,7 +115,7 @@ What are in each chapter...
 * The Cardiac Cycle
  The human heart is situated in the middle compartement of the chest, between the lungs. Blood is used for transporting oxygen and essential nutrients throughout the body and carry metabolic waste such as carbon dioxide to the lungs. The heart is responsible for keeping the blood flowing by acting as a pump.
 
- The heart consists of two halves, the left heart and the right heart, as illustrated in figure [[fig:heart_diagram]]. The left heart pumps newly oxinated blood from the lungs out to the rest of the body and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, is where the blood first enters the heart, and the lower chambers, the ventricles is where the blood exits the heart. Each chamber also have valves which are opened and closed during a cardiac cycle to help keep the blood flowing in one direction. 
+ The heart consists of two halves, the left heart and the right heart, as illustrated in figure [[fig:heart_diagram]]. The left heart pumps newly oxinated blood from the lungs out to the rest of the body, and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, is where the blood first enters the heart, and the lower chambers, the ventricles is where the blood exits the heart. Each chamber also have valves which are opened and closed during a cardiac cycle to help keep the blood flowing in one direction. 
 
  #+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Source: [[https://en.wikipedia.org/wiki/Atrium_(heart)]].
  #+NAME: fig:heart_diagram
@@ -110,21 +143,23 @@ Out of these three, using the ECG signal is the least preferable. This is becaus
  [[./img/wiggers_diagram.png]]
 
 
-* What is Sound?
-What we as humans perceive as sound are simply vibrations of the particles that surround us. When particles are disturbed, such as what happens to air particles when we clap our hands together, they interact by pushing into each other. As the atoms and molecules that make up the air bump into each other, they also repell, creating an increase in pressure and causing a chain reaction where the pertubation moves from particle to particle, illustrated in figure [[fig:pressure_wave_propagation]]. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
+* What is Ultrasound?
+What we as humans perceive as sound are simply vibrations of the particles that surround us. Sound waves push particles together, creating an increase in pressure. Particles in an area of high pressure moves to areas of lower pressure, and this creates a chain reaction where a pressure field moves through particles, illustrated in figure [[fig:pressure_wave_propagation]]. This is called wave propagation. Sound is simply waves of pressure propagating through a medium.
 
 #+NAME: fig:pressure_wave_propagation
 #+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles pushes back as the pressure increases, making the pressure field move further on. Warning: this image is just a representation of how particles interact — real particles don't look like this.
 [[./img/pressure_wave_propagation.png]]
 
 ** Attributes of a Sine Wave
-A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
+A basic wave has three important attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time, as visualized in figure [[fig:amp_freq_phase]]. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own, but can affect the sound in relation with other sound waves.
 
 #+NAME: fig:amp_freq_phase
 #+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
 [[./img/amp_freq_phase.png]]
 
-A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound has a unique frequency spectrum. Finding the frequency spectrum is the same as decomposing a sound into its sine waves. We can also take the frequency spectrum and convert it back to its original sound. These operations are called the Fourier Transform and the inverse Fourier Transform, respectively. As seen in figure [[fig:freq_spectrum]], the frequency spectrum after adding two sine waves together is fairly simple as well, but real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet play the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
+A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound can be transformed into its frequency spectrum. As seen in figure [[fig:freq_spectrum]], the frequency spectrum of a sine wave is just a single spike. Adding together to sounds has the same effect as adding together their frequency spectrums.
+
+Real world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent it. When a piano and a clarinet play the same note, what we are really saying is that the frequencies with the highest amplitudes are generally the same for both sounds. Musicians speak of overtones — it's the overtones that are different for different instruments playing the same notes. What they are referring to are the additional frequencies that can be seen in the frequency spectrum.
 
 #+NAME: fig:freq_spectrum
 #+CAPTION: Adding two sounds together means that their frequency spectrums are also added together.
@@ -135,20 +170,7 @@ A basic wave means a sine wave in this context. Every sound can be represented a
 [[./img/piano_clarinet_freqs.png]]
 
 ** Attributes of the Medium
-Another important point about sound is the medium in which it travels through. Medium properties such as speed of sound, density, attenuation and non-linearity affect how the wave propagates through it. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller. Density is how tightly packed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. For example, in water, waves propagate faster the higher the pressure — pressure for example caused by the wave itself.
-
-
-An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium, and is a function of the speed of sound and density. When a wave goes from one medium and into another medium that has a different acoustic impedance, a part of the energy is reflected back, the amplitude being reduced for both resulting waves. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When $Z_1$ and $Z_2$ are equal, no sound is reflected back, which is what we expect — after all we usually don't hear an echo while speaking when there is only air in front of us. However, when there is a difference it doesn't matter which medium has the highest or lowest acoustic impedance — the same amount of energy is reflected either way. The only thing that changes is the sign og the reflection factor, but the magnitude of the wave stays the same whether $Z_1 > Z_2$ or $Z_1 < Z_2$. This means that the amount of echo would be the same if you were talking in the second medium, into the first one, or the other way around.
-
-#+NAME: eqn:acoustic_impedance
-\begin{equation}
-Z=\rho c
-\end{equation}
-
-#+NAME: eqn:reflection_factor
-\begin{equation} 
-RF=\frac{Z_2-Z_1}{Z_2+Z_1}
-\end{equation}
+Another important aspect of sound is the medium in which it travels through. Properties such as the speed of sound, density, attenuation and non-linearity affect how a sound wave propagates through its medium. Speed of sound is how fast a wave propagates through the medium. Because the frequency will stay the same, if the speed of sound is lower then the wavelength will be smaller, as visualized in figure [[fig:conveyor_belt_speed_change]]. Density is how tightly packed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Non-linearity is the property where the speed of sound at a point depends on the pressure at that point. In water, pressure waves propagate faster in higher pressure. The pressure may be cause by the wave itself, in which case the shape of the wave may change, as visualized in figure [[fig:nonlinearity]].
 
 #+NAME: fig:conveyor_belt_speed_change
 #+CAPTION: Even though the rate of packages per second stays the same, the distance between each package decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
@@ -160,8 +182,22 @@ RF=\frac{Z_2-Z_1}{Z_2+Z_1}
 [[./img/nonlinearity.png]]
 
 
+An important concept is "acoustic impedance" which is a measure of how much resistance the wave encounters while propagating through the medium. Acoustic impedance is a function of the speed of sound and density. When a wave propagates out of one medium and into another medium that has a different acoustic impedance, a fraction of the energy is reflected back. So when one hears a sound being reflected back from a wall it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density and speed of sound, where $Z$ is the acoustic impedance, while $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor and determines how much of the energy is reflected back, where $Z_1$ is the acoustic impedance of the original medium and $Z_2$ is the acoustic impedance of the second medium. When $Z_1$ and $Z_2$ are equal, no sound is reflected back.
+
+#+NAME: eqn:acoustic_impedance
+\begin{equation}
+Z=\rho c
+\end{equation}
+
+#+NAME: eqn:reflection_factor
+\begin{equation} 
+RF=\frac{Z_2-Z_1}{Z_2+Z_1}
+\end{equation}
+
+
+
 * Echocardiography
-Light is a signal that does not penetrate very far into the body, which is why we are unable to simply gaze into each other's hearts. We could, however, imagine a universe where the light penetrates too much, giving off no reflections at all. In this universe we would not be able to see the heart either — in fact we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweetspot where the signal is able to penetrate tissue with enough energy while at the same time being reflected back with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
+Light is a signal that does not penetrate very far into the body, which is why we can't simply gaze into each other's hearts. We could, however, imagine a universe where light penetrates all the way, giving off no reflections at all. In this universe we would not be able to see the heart either — in fact we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweetspot where the signal is able to penetrate tissue with enough energy while at the same time being reflected back with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
 
 #+CAPTION: Values of the acoustic wave velocity $c$ and acoustic impedance Z of some substances from \cite{suetens_fundamentals_2017}.
 #+NAME: tbl:acoustic_impedances
@@ -178,15 +214,17 @@ Light is a signal that does not penetrate very far into the body, which is why w
 
 - Why we use ultrasound gel explained by the above table [[tbl:acoustic_impedances]].
 
+Table [[tbl:acoustic_impedances]] lists the speed of sound and acoustic impedance $Z$ of some substances. Notice how for example there is a large difference in acoustic impedance between air and soft tissue. This means that if there is air between the sound wave transmitter and the body then most of the energy will be reflected back by the skin. To reduce this effect, ultrasound gel, which has a very similar acoustic impedance to soft tissue, is applied between the body and the sound wave transmitter. Notice also the difference in acoustic impedance between bone and soft tissue. This has consequences for what we can image in the body, as bones such as the ribcage act as shields to the sound waves.
 
-How can we use sound reflections to create images? If we send out a sound signal and measure the time it takes for a reflection to come back we can get information about the relative distance to various reflectors in the medium from the sound source. If we know the speed of sound, and assume that the speed of sound is homogeneous in the medium, then we can approximate the distance that the wave has travelled by multiplying the delay between sending the sound signal and receiving back an echo by the speed of sound (equation [[eqn:reflector_distance_by_delay]]). This makes the assumption that waves always travel in straight lines, which is not always true, but the effect is often neglible in medical ultrasound usecases.
+
+How can we use sound reflections to create images? If we send out a sound signal and measure the time it takes for a reflection to come back we can get information about the relative distance to various reflectors in the medium from the sound source, as visualized in figure [[fig:sound_tx_rx]]. If we know the speed of sound, and assume that the speed of sound is homogeneous in the medium, then we can approximate the distance that the wave has travelled by multiplying the delay between sending and receiving by the speed of sound (equation [[eqn:reflector_distance_by_delay]]). This makes the assumption that waves always travel in straight lines, which is not always true, but the effect is often neglible in medical ultrasound usecases.
 
  #+NAME: eqn:reflector_distance_by_delay
 \begin{equation}
 \text{distance} = \text{delay} \times c 
 \end{equation}
 
-Likewise, if want to know what the reflected signal is for a given distance away from the sender and receiver we can calculate the corresponding delay of a signal traveling that distance and back by dividing the total distance by the speed of sound (equation [[eqn:reflector_delay_by_distance]]). When we know the corresponding delay we can simply look up its value in the signal. If we repeat this for every point in an area that we want to image we would end up with an image.
+Likewise, if want to know what the reflected signal is for a given distance away from the sender and receiver we can calculate the corresponding delay of a signal traveling that distance and back by dividing the total distance by the speed of sound (equation [[eqn:reflector_delay_by_distance]]). When we know the corresponding delay we can simply look up its value in the signal through interpolation. To create an image we could simply repeat this process for every point in the image.
 
 #+NAME: eqn:reflector_delay_by_distance
 \begin{equation}
@@ -197,10 +235,9 @@ Likewise, if want to know what the reflected signal is for a given distance away
  #+NAME: fig:sound_tx_rx
  [[./img/sound_tx_rx.png]]
 
-When we only have a single receiver that measures the reflected sound waves we can not know the exact location of a given reflector, only the distance. By utilizing more receivers spread over some area we get more information about where the signal orginated from as the distance will match across receivers for an actual reflector object.
+When we only have a single receiver that measures the reflected sound waves we can not know the exact location of a given reflector, only the distance. By utilizing more receivers spread over some area we get more information about where the signal orginated from as there will be a correlation between signals across receivers at the reflecting object.
 
-
-By utilizing multiple sender elements as well, tha can send sound waves independently of each other we are able to shape the wavefront as we wish. This let's us for example focus the energy of the sound wave in a specific area, or shape the wave front to be planar. The Huygens-Fresnel principle states that every point of a wavefront is the source of a new spherical wavefront. We can simulate this behavior by imagining a desired wavefront passing through the sender elements, activating each element at the moment the wave hits it. Each sender element on its own creates a spherical wavefront, but together they make up the desired imagined wavefront. An example of this has been visualized in figure [[fig:huygens_fresnel_focusing]]. Time delays are to sound waves like a lens is to a magnifying glass.
+By utilizing multiple sender elements that can send sound waves independently of each other, we are able to shape the wavefront as we wish. This lets us for example focus the energy of the sound wave in a specific area, or shape the wave front to be planar. The Huygens-Fresnel principle states that every point of a wavefront is the source of a new spherical wavefront. We can simulate the Huygens-Fresnel principle by imagining a desired wavefront passing through the sender elements, activating each element at the moment the wave hits it. Each sender element on its own creates a spherical wavefront, but together they make up the desired imagined wavefront. Time delays are to sound waves like a lens is to a magnifying glass. An example of this has been visualized in figure [[fig:huygens_fresnel_focusing]].
 
 #+CAPTION: Because of the Huygens-Fresnel principle, we can create a desired wavefront by creating spherical waves at each sender element the moment the imagined wavefront would hit it. The dashed, pink curve represents the imagined desired wavefront as it approaches the sender elements marked by the purple rectangle. Each sender element is activated the moment the imagined wavefront passes through it, creating new spherical waves, represented by the cyan semi circles. The generated spherical waves converge on the same point that the imagined wavefront would have converged.
 #+NAME: fig:huygens_fresnel_focusing
@@ -212,17 +249,17 @@ In reality, an ultrasound probe consists of many elements which act both as tran
 
 There are multiple modes of ultrasound imaging. The two most important modes to this project is B-mode imaging and M-mode imaging.
 
-In B-mode (as in "Brightness"-mode) imaging an image is created by visualizing the amplitude of the reflected signal as the brightness for a given point. This imaging mode often sends out individual focused transmits in multiple directions, creating a sector scan — a fan-like image, as seen in [[fig:sector_scan]]. Another method is to transmit unfocused plane waves. A single transmit creates an unfocused image of the scatterers in the medium, but multiple transmits in different directions may be copounded to create an image of comparable quality to those of focused transmits \cite{montaldo_coherent_2009}.
+In B-mode (as in "Brightness"-mode) imaging an image is created by visualizing the amplitude of the reflected signal as the brightness for a given point. This imaging mode often sends out individual focused transmits in multiple directions, creating a sector scan — a fan-like image, as seen in [[fig:sector_scan]]. Another method is to transmit unfocused plane waves. A single transmit creates an unfocused image of the scatterers in the medium, but multiple transmits in different directions may be compounded to create an image of comparable quality to those of focused transmits \cite{montaldo_coherent_2009}.
 
 #+CAPTION: Imaging along different angles from a common starting point creates a sector scan.
 #+NAME: fig:sector_scan
 [[./img/sector_scan.png]]
 
-B-mode images provides images of the whole area of interest, but because they require multiple transmits to do so they also take longer to acquire, as we have to fire each transmit after the other. In extreme cases this could pose a problem given that the heart is an organ that moves quite rapidly and if we are transmitting too slow then the heart may have a noticably different phase on one side of the sector scan compared to the other. This is not a big problem for 2D-images as even multiple transmits can be made and received back in a short period of time, but it does have consequences for the temporal resolution if we are creating many images in a video.
+B-mode imaging provide images of the whole area of interest, but because they require multiple transmits to do so they also take longer to acquire, as we have to fire each transmit after the other. In extreme cases this could pose a problem given that the heart is an organ that moves quite rapidly and if we are transmitting too slow then the heart may have a noticably different phase on one side of the sector scan compared to the other. This is not a big problem for 2D-images as even multiple transmits can be made and received back in a short period of time, but it does have consequences for the temporal resolution.
 
-In M-mode (as in "Motion"-mode) imaging only one direction is imaged over time, instead of a whole sector. This means that it only requires one transmit per frame meaning that it has a higher temporal resolution compared to B-mode imaging, at the cost of only focusing on a small part of the heart. M-mode imaging lets us see the motion of a focused part of the heart in single image as the columns can be concatenated into an image where the y-axis represent the amplitudes at different depths and the x-axis represent time, as seen in figure [[fig:m_mode_example]].
+In M-mode (as in "Motion"-mode) imaging only one direction is imaged over time, instead of a whole sector. This means that it only requires one transmit per frame, giving it a higher temporal resolution compared to B-mode imaging, but at the cost of only focusing in a single direction. M-mode imaging lets us see the motion of a focused part of the heart in single image as the columns can be concatenated into an image where the y-axis represent the amplitudes at different depths and the x-axis represent time, as seen in figure [[fig:m_mode_example]].
 
-#+CAPTION: A still of a sector scan (left) and the M-mode (right) of the same video for the indicated blue line. TODO: ask Krissy about using this image.
+#+CAPTION: A still of a sector scan (left) and the M-mode (right) of the same video for the indicated blue line.
 #+NAME: fig:m_mode_example
 [[./img/m_mode_example.png]]
 
@@ -231,18 +268,24 @@ In M-mode (as in "Motion"-mode) imaging only one direction is imaged over time, 
 ** Gradient Descent
 The most significant deep learning innovations have all used a technique called gradient descent.
 
-Gradient descent is based on calculus. It takes advantage of the fact that even if we don't know the true nature of some function, given that it is differentiable, we can calculate its slope at a given point. This is called the gradient and it gives us information about how to update its parameters in order to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e. reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, then we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters in the opposite direction is what's called gradient descent.
+Gradient descent is based on calculus. It takes advantage of the fact that even if we don't know the true nature of some function, if it is differentiable, then we can calculate its slope at a given point. The slope is also called the gradient and it gives us information about how to update its parameters in order to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e. reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, then we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters in the opposite direction is what's called gradient descent.
 
 #+NAME: fig:gradient_descent_simple
 [[./img/gradient_descent_simple.png]]
 
-Gradient descent also scales to functions that take multiple parameters, so instead of just taking $x$ it may take an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually in some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least 10000 parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works.
-
-We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as those of cats or of dogs. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called Stochastic Gradient Descent (SGD) and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once.
+Gradient descent scales to an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually in some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
 
 
 
-The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as both the model and the loss function is differentiable then we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient and whether it contains a lot of local minima. Another aspect of great importance is to instill what's called inductive bias into the model — that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some important features are explored in the next section.
+The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as both the model and the loss function is differentiable then we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient and whether it contains a lot of local minima. 
+
+
+We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as those of cats or of dogs. We may consider the data set as part of the loss function, as we want to minimize the error of the model on these specific data. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called Stochastic Gradient Descent (SGD) and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once.
+
+Another aspect of great importance is to instill what's called inductive bias into the model; that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some important features are explored in the next section.
+
+
+
 
 ** Deep Neural Networks
 Fully connected layers is just a matrix multiplication between the input $x$ and a weigth matrix $w$, often with an additional bias $b$ added, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
@@ -281,7 +324,7 @@ TODO: Explain ADAM
 ** Overfitting and Regularization
 The goal of machine learning is to train models that generalize to data samples outside of the training set. When we optimize a model on a given data distribution we risk making the model specialize too much on that specific distribution. When the model performs significantly better on the data it has been trained on versus unseen data we say that it has overfit.
 
-One way to reduce the chance of overfitting is to use regularizers. Regularizers augments the training data or puts additional constraints on the optimization process such that the the model is likely to overfit. One example is to use data augmentations: random transformations on the training data. In practice, this increases the training dataset as more data are added to it. One could also augment the loss function itself by adding the magnitude of all the parameters, thereby encouraging the network to be less dependent on a small number of features.
+One way to reduce the chance of overfitting is to use regularizers. Regularizers either augment the training data or put additional constraints on the optimization process such that the the model is likely to overfit. One example is to use data augmentations: random transformations on the training data. In practice, this increases the training dataset as more data are added to it. One could also augment the loss function itself by adding the magnitude of all the parameters, thereby encouraging the network to be less dependent on a small number of features.
 
 
 
@@ -295,7 +338,7 @@ If we don't have access to ground truth labels we can instead define the loss in
 
 
 ** Reinforcement Learning
-  RL allows an agent to learn a strategy, called a /policy/, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it can reason about future decisions. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
+  RL allows an agent to learn a strategy, called a /policy/, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it takes future decisions into account when deciding on the next action. An RL agent can make a decision now that has no immediate benefit, but that will lead to a better result in the future.
 
  At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
 
@@ -304,43 +347,58 @@ If we don't have access to ground truth labels we can instead define the loss in
  - The transition function $P(s_{t+1}|s_t, a_t)$
  - The reward function $R(s_t, a_t)$
 
- An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state $s_t$ and returns the probability of taking an action at: $\pi(a|s)\in[0,1]$.
+ An RL agent is faced with a sequence of decisions. At each step it is presented with the current state $s_t \in S$ of the environment, and must take an action $a_t \in A$. In an episodic task, the agent’s goal is to maximize the total amount of reward $r$ it receives during its lifetime, called an episode. The environment may change after the agent takes an action in a given state, and how it changes, i.e. what the next state $s_{t+1}$ will be, is determined by the transition function $P(s_{t+1}|s_t, a_t)$. How much reward the agent receives after taking an action in a given state is determined by the reward function $R(s_t, a_t)$. The goal of RL is to find a policy $\pi$, a strategy that, if followed, will yield the most amount of total reward during the lifetime of the agent. In practice, the policy is simply a function that takes in the current state $s_t$ and returns the probability of taking an action $a_t$: $\pi(a|s)\in[0,1]$.
 
- The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards:
- \[G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T\]
+ The agent’s goal is not to maximize the immediate reward $r$ but rather the expected return. The return is denoted as $G_t$, and is in its simplest form a sum of all the future rewards, as seen in equation [[eqn:returns]]. $T$ marks the timestep where the episode ends.
 
- where $T$ marks the timestep where the episode ends. However, some tasks are not episodic, which means they can, in theory, run forever. For this reason, we apply discounting to the return, giving greater weight to more immediate rewards and less weight to rewards in the far future:
-\begin{align*}
+#+NAME: eqn:returns
+\begin{equation}
+G_t = r_{t+1} + r_{t+1} + r_{t+2} + \ldots + r_T
+\end{equation}
+
+
+However, some tasks are not episodic, which means that they may run forever. For environments with potentially endless rewards, the returns $G$ may become infinite, making the optimization problem intractable. To solve this problem we include /discounting/ to the returns, as seen in equation [[eqn:discounted_returns]]. $\gamma$ is the /discount rate/ and is a number in the range $[0,1]$. If $\gamma<1$, then future rewards counts for less in the full returns, and as the number of steps into the future approaches inifity, the corresponding rewards approaches $0$. Discounting guarantees that non-episodic tasks converges to optimal solutions, while also giving a mechanism for preferring more immediate rewards compared to future rewards.
+
+#+NAME: eqn:discounted_returns
+\begin{equation}
+\begin{aligned}
 G_t &= r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots \\
     &= \sum_{k=0}^\infty \gamma^k r_{t+k+1} \\
     &= r_{t} + \gamma G_{t+1}
-\end{align*}
+\end{aligned}
+\end{equation}
 
- where $\gamma$ is the discounting factor. Discounting ensures that the return, which we are trying to maximize, can not be infinite, even when, in theory, the agent could go on forever.
+One way to select action is to try to predict the value of the following state after taking an aciton. For this we could use the /state value function/ $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the /state-action value function/ $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive at subsequent steps. For this setup, the “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy $\pi^*$ is one /(of the possibly many policies)/ that yield the maximum amount of total reward if followed.
 
- To select an appropriate next action, the policy needs to know the value of states and actions. For this we could use the state value function $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the state-action value function $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive. The “learning” part of RL could be considered to be updating a value function towards the “optimal value function”, defined as the value function that uses the optimal policy when estimating returns. The optimal policy $\pi^*$ is one /(of the possibly many policies)/ that yield the maximum amount of total reward if followed.
+TODO: Mention epsilon-greedy policy and UCB
 
- One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration:
- \[V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]\]
+One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration, as seen in equation [[eqn:state_value_function]]. $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is able to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
- $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is able to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
- To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning:
- \[Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]\]
+#+NAME: eqn:state_value_function
+\begin{equation}
+V(s_t) \leftarrow V(s_t) + \alpha[(r_{t+1} + \gamma V(s_{t+1}))-V(s_t)]
+\end{equation}
 
- Here the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
+
+ To be able to use $V(s)$ for making a decision, the agent needs knowledge about the transition function $P(s_{t+1}|s_t, a_t)$. This is because it needs to know what the next state will be in order to select the best action to take. $Q(s, a)$ does not need knowledge about the transition function because it learns the value of taking an action in a state directly. TD can be modified to use the state-action value function instead of the value function, in which case it is called Q-learning. In equation [[eqn:state_action_value_function]] the target, the Q-target, is defined as the immediate reward of taking action $a_t$, plus the discounted value of taking the best action in the following state.
+
+#+NAME: eqn:state_action_value_function
+\begin{equation}
+Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a))-Q(s_t, a_t)]
+\end{equation}
+
 
  In TD-learning, as the agent explores the environment and encounters new states, it has to store those states and their associated values. The same is true for Q-learning, but it also has to take state-action pairs into account, meaning that it has to store up to a number of $\|S\| \times \|A\|$ entries. That is fine when the state space and the action space are small but becomes infeasible when they are too big.
 
  The described way of storing and updating the values is called tabular methods because we treat the states, or state-action pairs, as entries in a table. Tabular methods break down when the state space or the action space becomes very large or even continuous. Creating RL algorithms that can handle very large or continuous action spaces is challenging \cite{zhou_deep_2021}. However, there exist methods that can scale RL to handle very large or continuous state spaces.
 
 
-TODO: Mention epsilon-greedy policy and UCB
 
 *** Deep Reinforcement Learning
- A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them. In practice, the vast majority of pixel permutations are not used, so we could ignore them, but the number of possible states would still be too high to explore exhaustively.
+ A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them.
 
- The values of even such a large state space can be represented in much less data without losing much relevant information. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This allows the agent to generalize state value or state-action value functions to new not-before-seen states.
+We assume that there exists a way to approximate the value of states in a much more compressed way. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This may also allow the agent to generalize state value or state-action value functions to new not-before-seen states.
 
  A lot of today’s research into RL goes into scaling it up to a larger state space. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods", but they are not the only ones to do so. Policy gradient is another popular set of methods that is able to learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Policy gradient methods may more naturally model continuous action spaces as it outputs a distribution of action probabilities instead of the values of a discrete set of actions. As seen in later chapters, the RL formulations used in this thesis all use discrete action spaces, and only action-value methods are considered for this thesis.
 
@@ -356,11 +414,11 @@ The authors showed how the network is able to reduce the state space by applying
 #+NAME: fig:dqn_atari_t_sne
 [[./img/rl_dqn_tsne.jpeg]]
 
-Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, which leads to variance in the network updates. If a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target $y_j$ , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets $y_j$ in the Q-learning update.
+Using function approximation does have its problems. Naively training the network by inputting state and returns pairs as they are generated by the agent can result in the algorithm becoming unstable. There is a strong correlation between consecutive samples, and if a neural network receives a batch of very similar input, it might overwrite previously learned knowledge. Furthermore, an update that increases $Q(s, a)$ often also increases $Q(s+1, a)$ and therefore also increases the target value , possibly leading to oscillations or divergence of the policy. These problems are mitigated by using experience replay and by using a separate network for generating the targets in the Q-learning update.
 
 In experience replay, the agent’s experiences over multiple episodes are stored in a data set called the replay memory. Each experience item is a tuple consisting of the previous state, selected action, returned reward, and new state: $(s_t, a_t, r_t, s_{t+1})$. During training, randomly sampled batches from the replay memory are used to train the Q-network.
 
-Using a separate network for generating the targets $y_j$ in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets $y_j$, making the algorithm more stable and reducing the chance of oscillations or divergence.
+Using a separate network for generating the targets in the Q-learning update adds a delay between the time an update to Q is made and the time it affects the targets, making the algorithm more stable and reducing the chance of oscillations or divergence.
 
 
 
@@ -432,7 +490,7 @@ Exploration of the environment is often enabled by using an $\epsilon$ -greedy p
 NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters\cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyper parameter tuning, but also to apply different amounts of exploration to different states.
 
 *** Rainbow Deep Q-Network
-Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such extensions:
+Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such improvements:
 
 1. Double DQN\cite{van_hasselt_deep_2015}
 2. Prioritized replay\cite{schaul_prioritized_2016}
@@ -463,7 +521,6 @@ They also performed an ablation study on the Rainbow algorithm to see how much e
 
 
 
-TODO: Comments from Krissy
 * Related Work (State-of-the-art Section (TBD))
 ** ED-/ES-Detection
 #+INCLUDE: parts/previous_work.org
@@ -471,6 +528,8 @@ TODO: Comments from Krissy
 ** Reinforcement Learning in Medical Imaging
 #+INCLUDE: parts/rl_in_medical_imaging.org
 
+
+This work serves as inspiration for this thesis and help guide our own RL formulations for the task of ED-/ES-frame detection.
 
 
 
@@ -525,7 +584,7 @@ The dataset consists of three parts: /FileList.csv/ contains general information
 To get the ED and ES frames we have to look at the volume tracings, whose variables are listed in table [[tbl:echonet_volumetracings_variables]]. The volume tracings is a list of line segments that together define the volume of the heart at a given frame. For each video there are two sets of line segments, one for ED and one for ES, but which one is which is not given explicitly. We can find this information by calculating the volume from the line segments for both frames and comparing them — the one with the largest volume is ED and the other one is ES.
 
 ** Extrapolating Diastole and Systole Labels
-As is explored in later chapters, we would also like to label the phase of each frame in the video, not just the frame which ends each phase. When we only have access to the end-frames of each phase the first phase will only have one labeled frame. For example, if the ED frame comes first then only the first frame will be labeled diastole as the rest will be systole, as visualized in figure [[fig:echonet_label_imbalance]].
+As is explored in later chapters, we would also like to label the phase of each frame in the video, not just the frame that ends each phase. When we only have access to the end-frames of each phase the first phase will only have one labeled frame. For example, if the ED frame comes first then only the first frame will be labeled diastole as the rest will be systole, as visualized in figure [[fig:echonet_label_imbalance]].
 
 #+CAPTION: Class imbalance: only the first frame is marked with the phase of the first end-event (either ED or ES), all others are marked with the other phase.
 #+NAME: fig:echonet_label_imbalance
@@ -551,7 +610,7 @@ An example of a smoothed absolute-difference curve with 75% of extrapolated fram
 ** Normalizing and Removing Invalid Videos
 An assumption made when labeling the frames is that both events occur within the same cardiac cycle, though this is not always the case in the dataset. To filter out videos where the annotated end-phase events goes beyond a single cycle we again analyze the periodicity using a similar method to the one used in the previous section.
 
-The summed absolute frame difference should at most have one peak if the frames are from the same cardiac cycle. If it has two or more peaks then it suggests that the video contains more than one heartbeat and thus can not be properly labeled. There are 19 of such videos in total, and these are filtered out. A set of good and bad video label examples are visualized in figure [[fig:phase_diff_plots]].
+The summed absolute frame difference should at most have one peak if the frames are from the same cardiac cycle. If it has two or more peaks then it suggests that the labeled video contains more than one heartbeat and thus can not be properly labeled. There are 19 of such videos in total, and these are filtered out. A set of good and bad video label examples are visualized in figure [[fig:phase_diff_plots]].
 
 #+CAPTION: The summed absolute frame difference between first end-phase event and the frames up until the next end-phase event. This should only be a half cardiac cycle, so there should be at most one peak. The upper plots show videos where the end-phase labels only cover one half cardiac cycle, while the bottom plots show videos with more than one cardiac cycle, and thus have incorrect labels.
 #+NAME: fig:phase_diff_plots
@@ -587,8 +646,6 @@ A full Echonet-Dynamic dataset pipeline is visualized in figure [[fig:dataset_pi
 
 * Environment Formulation
 As described in section [[Reinforcement Learning]] a Markov Decision Process (MDP), which is at the core of RL, can be described using four elements: the state space, the action space, the transition function and the reward function. The states and actions dictate what information the agent receives from the environment and how it can in turn interact with the environment. The transition function defines the effect of actions on the environment. The reward function defines the goal of the agent.
-
-The experiments in the next chapter use an environment inspired by supervised learning approaches and is named Binary Classification Environment (BCE).
 
 ** Binary Classification Environment
 BCE is visualized in figure [[fig:binary_classification_environment_loop]]. The agent, after observing the current and adjacent frames, takes an action predicting that the current frame is either of Diastole or Systole phase, and receives a reward dependent on its prediction before the environment moves the current frame one frame forwards.
@@ -628,7 +685,7 @@ Given that videos from the dataset are 112-by-112, the only two hyper-parameters
  GaaFD_1=\frac{1}{\hat{N}}\sum^{\hat{N}}_{t=1}|\mathcal{C}(y, \hat{y}_t)-\hat{y}_t|
  \end{equation}
 
- If we instead calculate the average frame difference between each ground truth event and its nearest predicted event, $GaaFD_2$, as in equation [[eqn:aafd_generalized_2]], we get the opposite problem — too many predicted events are not reflected negatively in the score.
+We could instead base it on the true events and take the distance to the nearest predicted event, $GaaFD_2$, as in equation [[eqn:aafd_generalized_2]], we get the opposite problem — too many predicted events are not reflected negatively in the score.
 
  #+CAPTION: $\mathcal{C}(y_t, \hat{y})$ is the closest predicted event from the ground truth event $y_t$.
  #+NAME: eqn:aafd_generalized_2
@@ -647,83 +704,83 @@ Given that videos from the dataset are 112-by-112, the only two hyper-parameters
 
  We could instead frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either Diastole or Systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
 
- From this we can define a simple reward function $R_1$ that gives a reward of $1$ if the predicted phase was correct and $-1$ if it was incorrect, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_1$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth. We can make the reward signal more similar to GaaFD by defining it in terms of the distance to the nearest predicted phase, as seen in equation [[eqn:proximity_reward]], where $d(s,a)$ is the distance from the current phase $s$ to the nearest predicted phase $a$.
+ From this we can define a simple reward function $R_{simple}$ that gives a reward of $1$ if the predicted phase was correct and $-1$ if it was incorrect, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_{simple}$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth. We can make the reward signal more similar to GaaFD by defining it in terms of the distance to the nearest predicted phase, as seen in equation [[eqn:proximity_reward]], where $d(s,a)$ is the distance in frames from the current state $s$ to the nearest frame that has the predicted phase $a$.
 
  #+NAME: eqn:simple_reward
  \begin{equation}
-   R_1(s, a) \triangleq
+   R_{simple}(s, a) \triangleq
      \left\{
 	     \begin{array}{ll}
-		     1 & \mbox{if } s=a \\
-  	  	 -1 & \mbox{if } s\neq a
+		     1 & \mbox{if } \text{phase}(s)=a \\
+  	  	 -1 & \mbox{if } \text{phase}(s)\neq a
 	     \end{array}
      \right\}
  \end{equation}
 
  #+NAME: eqn:proximity_reward
  \begin{equation}
-   R_2(s, a) \triangleq -d(s, a)
+   R_{proximity}(s, a) \triangleq -d(s, a)
  \end{equation}
 
 
 
 * Frameworks and Libraries
-The code to train and run the agent is written in Python because of its ML and data-processing ecosystem. The main framework for data-processing is JAX \cite{bradbury_jax_2018}. Other frameworks considered were Tensorflow \cite{abadi_tensorflow_2015} and PyTorch \cite{paszke_pytorch_2019}. Many of the main libraries used are also developed by Deepmind; a list of the most important ones can be found in table [[tbl:rl_libs]].
+The code to train and run the agent is written in Python because of its ML and data-processing ecosystem. The main framework for data-processing is JAX \cite{bradbury_jax_2018}. Other frameworks considered were Tensorflow \cite{abadi_tensorflow_2015} and PyTorch \cite{paszke_pytorch_2019}. A list of the most important ones can be found in table [[tbl:rl_libs]].
 
 #+CAPTION: A collection of the most important libraries used in the project.
 #+NAME: tbl:rl_libs
-| Library      | Description                                                                                                                                         |
-|--------------+-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| jax          | Main data-processing framework. Provides autodifferentiation, vectorization, Just-In-Time (JIT) compilation, and more \cite{bradbury_jax_2018}      |
-| gym          | An interface for defining RL environments \cite{brockman_openai_2016}                                                                               |
-| dm-haiku     | A neural network library for JAX \cite{hennigan_haiku_2020}                                                                                         |
-| optax        | A gradient processing and optimization library for JAX \cite{hessel_optax_2020}                                                                     |
-| rlax         | Building blocks for building RL agents \cite{babuschkin_deepmind_2020}                                                                              |
-| dm-acme      | Distributed RL agent implementations and building blocks \cite{hoffman_acme_2020}                                                                   |
-| dm-reverb    | A database for storing and sampling experience replay \cite{cassirer_reverb_2021}                                                                   |
-| dm-launchpad | A library for defining and creating distributed systems \cite{yang_launchpad_2021}                                                                  |
-| SciPy        | A collection of algorithms for scientific computing in Python. In this project it is mostly used for calculating metrics \cite{virtanen_scipy_2020} |
+| Library      | Description                                                                                                                                    |
+|--------------+------------------------------------------------------------------------------------------------------------------------------------------------|
+| jax          | Main data-processing framework. Provides autodifferentiation, vectorization, Just-In-Time (JIT) compilation, and more \cite{bradbury_jax_2018} |
+| gym          | An interface for defining RL environments \cite{brockman_openai_2016}                                                                          |
+| dm-haiku     | A neural network library for JAX \cite{hennigan_haiku_2020}                                                                                    |
+| optax        | A gradient processing and optimization library for JAX \cite{hessel_optax_2020}                                                                |
+| rlax         | Building blocks for building RL agents \cite{babuschkin_deepmind_2020}                                                                         |
+| dm-acme      | Distributed RL agent implementations and building blocks \cite{hoffman_acme_2020}                                                              |
+| dm-reverb    | A database for storing and sampling experience replay \cite{cassirer_reverb_2021}                                                              |
+| dm-launchpad | A library for defining and creating distributed systems \cite{yang_launchpad_2021}                                                             |
+| Scikit-learn | A collection of machine learning algorithms. In this project it is mostly used for calculating metric \cite{pedregosa_scikit-learn_2011}       |
 
-** Agent Architecture
+* Agent Architecture
 Deep Q-Network was selected for the RL agent architecture. DQN is a well-established method for scaling up RL by approximating the expected returns of taking an action in a given state using a (deep) neural network. It is also simple to train distributedly as it is off-policy, enabling us to separate the algorithm into a learner and multiple agents, as explained in the next sub-section. 
 
 We take advantage of a few additions to the original DQN algorithm, namely: Prioritized Replay, N-step returns, and Double Q-Learning. For facilitating exploration, an $\epsilon$ greedy policy is used.
 
 
-*** Neural Network
-The neural network that approximates the Q-function is inspired by the original Atari DQN paper\cite{mnih_human-level_2015}. It has two convolutional layers and two fully connected layers, each layer except for the last one is followed by a ReLU activation layer. The first convolutional layer has 16 output channels, a kernel size of 8-by-8, and a stride of 4. The second has 32 output channels, a kernel size of 4-by-4, and a stride of 2. Before the fully connected layers the data is flattened. The first fully connected layer has an output size of 256, and the final layer has two outputs, each representing the estimated value of taking one of the actions, given the input state. In total there are $1\,621\,810$ parameters.
+** Neural Network
+The neural network that approximates the Q-function is inspired by the original Atari DQN paper\cite{mnih_human-level_2015}. It has two convolutional layers and two fully connected layers, each layer except for the last one is followed by a ReLU activation layer. The first convolutional layer has 16 output channels, a kernel size of 8-by-8, and a stride of 4. The second has 32 output channels, a kernel size of 4-by-4, and a stride of 2. Before the fully connected layers the data is flattened. The first fully connected layer has an output size of 256, and the final layer has two outputs, each representing the estimated value of taking one of the actions, given the input state. In total there are $1\,621\,810$ parameters. The network is visualized in figure [[fig:simple_dqn_network]].
 
 #+CAPTION: A visualization of the simple DQN-Atari paper inspired CNN.
 #+NAME: fig:simple_dqn_network
 [[./img/simple_dqn_network.png]]
 
-*** Loss Function and Optimizer
-The loss function is the Double Q-Learning loss where the TD-error is calculated with respect to another Q-network. Because of this we have to keep track of two sets of network parameters: one for the selector Q-network and one for the estimator Q-network. Huber loss \cite{huber_robust_1964} is applied to the TD-error such that the L2 loss becomes linear after a certain threshold. In addition, the loss is weighted with respect to the prioritixed replay importance weights.
+** Loss Function and Optimizer
+The loss function is the Double Q-Learning loss where the TD-error is calculated with respect to another Q-network. Because of this we have to keep track of two sets of network parameters: one for the selector Q-network and one for the estimator Q-network. Huber loss \cite{huber_robust_1964} is applied to the TD-error such that the L2 loss becomes linear after a certain threshold. In addition, the loss is weighted with respect to the prioriticed replay importance weights.
 
 The Adam optimizer \cite{kingma_adam_2017} is used to update the selector parameters and the target network parameters are updated to equal the selector parameters every 100 gradient descent steps.
 
 
-*** Distributed Training
-  As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through Deepmind's library Acme\cite{hoffman_acme_2020}. At the center of Acme is another library by Deepmind called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step om the algorithm Reverb can be used as the communication point between the two. In this way one or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database and a learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner doesn't need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library, also by Deepmind, called Launchpad\cite{yang_launchpad_2021}.
+** Distributed Training
+ As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through a library called Acme\cite{hoffman_acme_2020}. At the center of Acme is another library called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step om the algorithm Reverb can be used as the communication point between the two. In this way one or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database and a learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner don't need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library called Launchpad\cite{yang_launchpad_2021}.
 
-  #+CAPTION: The distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is a inter-process function call facilitated by Launchpad.
-  #+NAME: fig:distributed_rl_training
-  [[./img/distributed_rl_training.png]]
+ #+CAPTION: The distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is a inter-process function call facilitated by Launchpad.
+ #+NAME: fig:distributed_rl_training
+ [[./img/distributed_rl_training.png]]
 
-  There is a balance to be made between how fast experience samples should be added to the experience replay and how fast they should be sampled by the learner. If the learner samples faster than the actors are able to generate new samples then the network will be trained using trajectories generated from outdated policies. If the actors generate new samples much faster than the learner is able to sample then we are arguably wasting computer resources.
+ There is a balance to be made between how fast experience samples should be added to the experience replay and how fast they should be sampled by the learner. If the learner samples faster than the actors are able to generate new samples then the network will be trained using trajectories generated from outdated policies. If the actors generate new samples much faster than the learner is able to sample then we are wasting computer resources.
 
-  Reverb helps maintain this balance through rate limiters. We use a rate limiter that tries to maintain a specified ratio between insertions and samples, blocking either the actors from inserting new samples or the learner from sampling if the ratio starts to differ too much. For example, using a samples-per-insert ratio of 2 means that, on average, each insertion made by an actor will be sampled twice. A ratio of 0.5 means that, on average, each insertion will be sampled one half time — i.e.: there are twice as many insertions as there are samples.
+ Reverb helps maintain this balance through rate limiters. We use a rate limiter that tries to maintain a specified ratio between insertions and samples, blocking either the actors from inserting new samples or the learner from sampling if the ratio starts to differ too much. For example, using a samples-per-insert ratio of 2 means that, on average, each insertion made by an actor will be sampled twice. A ratio of 0.5 means that, on average, each insertion will be sampled one half time — i.e.: there are twice as many insertions as there are samples.
 
 
 
 
 
 * Evaluation
-During training, the updated parameters of the model are continuously evaluated using GaaFD on 50 random videos in the validation set. Smoothing is applied to the learning curves using a Gaussian filter with a kernel standard deviation of 10 in order to compensate for the low sample size for each point. The best parameters are selected by finding the parameters that produces the lowest GaaFD during training for the smoothed GaaFD learning curve. 
+During training, the updated parameters of the model are continuously evaluated using GaaFD on 50 videos, randomly selected each time, from the validation set. Smoothing is applied to the learning curves using a Gaussian filter with a kernel standard deviation of 10 in order to compensate for the low sample size for each point. The best parameters are selected by finding the parameters that produces the lowest GaaFD during training for the smoothed GaaFD learning curve. 
 
-The main evaluation metric for the trained model is aaFD. However, some videos may not have the same number of predicted events as there are ground truth events, and as such aaFD is undefined. Because of this the percentage of videos that have a valid aaFD is presented and aaFD is calculated using only those videos. The corresponding ground truth event to each predicted event is chosen to be the one that is closest to it and we can therefore use GaaFD, as defined in equation [[eqn:aafd_generalized]], for calculating aaFD.
+The main evaluation metric for the trained model is aaFD. However, some videos may not receive the same number of predicted events as there are ground truth events, and as such aaFD is undefined. Because of this the percentage of videos that have a valid aaFD is presented and aaFD is calculated using only those videos. The corresponding ground truth event to each predicted event is chosen to be the one that is closest to it and we can therefore use GaaFD, as defined in equation [[eqn:aafd_generalized]], for calculating aaFD.
 
-It may also be interesting to see the density plots of GaaFD for all videos and compare the performance of the agent on ED- and ES-frames individually. These density are created using Gaussian kernel Estimation (KDE) \cite{ScottDavidW1992Mde}. The kernel bandwidth is automatically selected using Scott's rule, which is the default selection method for SciPy's KDE implementation.
+It may also be interesting to see the density plots of GaaFD for all videos and compare the performance of the agent on ED- and ES-frames individually. The density plots used are an approximation of the continuous distribution of GaaFD. A histogram may also be used, but these plots were easier to compare using density plots. They are created using Gaussian kernel Estimation (KDE) \cite{scott_multivariate_1992}. The kernel bandwidth is automatically selected using Scott's rule, which is the default selection method for SciPy's KDE implementation.
 
 Because the RL problem formulation is so similar to a regular binary classification problem, accuracy and balanced accuracy is also reported. Accuracy and balanced accuracy are defined on frame phase predictions instead of on end-phase events. Accuracy is simply the percentage of correctly labeled frames, as defined in equation [[eqn:accuracy]], where $1(y=\hat{y})$ is the indicator function. Given that there is a class-imbalance between diastole and systole frames, balanced accuracy gives a score that is more representative of the actual model performance. Balanced accuracy weights systole frames accuracy higher than diastole frames and is defined in equation [[eqn:balanced_accuracy]]. $TP$, $FP$, $TN$, and $FN$ stands for True Positives, False Positives, True Negatives, and False Negatives, respectively. It is also defined as the average between the sensitivity and the specificity. The balanced accuracy score is also rescaled such that it gives a score in the range $[-1, 1]$, where $0$ means that the model's predictions are random, and $-1$ and $1$ means that the predictions are all incorrect or all correct, respectively.
 
@@ -740,7 +797,7 @@ Because the RL problem formulation is so similar to a regular binary classificat
 
 Models are also evaluated on their inference time — how long it takes to make predictions for a video. To use a trained model, one can use the Q-network directly, without instantiating a gym environment or using an $\epsilon$ -greedy policy. The Q-network outputs the expected returns of taking either action so picking the action with the highest output is the same as following a greedy policy. The Q-network can be evaluated on individual frames or on the video as a whole, where all the frames are combined into a single batch. Evaluating each frame individually enables incorporating the model into a pipeline of streaming frames, of which one step is predicting the current cardiac phase. Evaluating the whole video as a batch is generally faster as it gets away with less IO overhead of sending data back and forth between the CPU and the GPU.
 
-Batching the frames of a video may require more JIT-compilation with JAX. This is because, in order to speed the network up significantly, it is JIT-compiled to XLA, but JIT-compiled functions requires that the shape of the data remain the same. If the shape of the data is not the same, f.ex. if we are evaluating two videos with a different number of frames, as two different batches, the function will be recompiled, adding overhead. This could be solved by fixing the batch-size to a constant number. For videos with fewer frames than the batch-size, or with a number of frames that can not be split into equal chunks of the batch-size, frames filled with zeros can be added as needed. These extra frames creates needless work on the GPU, but doesn't require recompilation.
+Batching the frames of a video may require more JIT-compilation with JAX. This is because, in order to speed the network up significantly, it is JIT-compiled to XLA, but JIT-compiled functions requires that the shape of the data remain the same. If the shape of the data is not the same, e.g. if we are evaluating two videos with a different number of frames, as two different batches, the function will be recompiled, adding overhead. This could be solved by fixing the batch-size to a constant number. For videos with fewer frames than the batch-size, or with a number of frames that can not be split into equal chunks of the batch-size, frames filled with zeros can be added as needed. These extra frames creates needless work on the GPU, but doesn't require recompilation.
 
 Inference time is evaluated using single frame-inference and batched-frames inference with a batch-size of 128 on the CPU and GPU. Additionally, IO overhead is reported by comparing the average processing time when sending the data to GPU for each call versus pre-placing the data on the GPU. The average run time is calculated by taking the elapsed time, averaged over 1000 calls.
 
@@ -757,7 +814,7 @@ To solve for reward-sparsity we use multistep bootstrapping with a value of $N$ 
 
 We also set the discount value $\gamma=1.0$ which means that an agent tries to maximize all future rewards. Having $\gamma < 1.0$ means that the calculated returns will be more noisy and harder to predict because the discounted returns calculated for steps earlier in an episode would have a lower value than those calculated closer to the end.
 
-The expected returns are assumed to be very sensitive to the current policy as a correctly selected next action's returns may be jeopardized by future wrongly selected actions. This would make it hard for the agent to extract information about which action were wrong and which were correct. Because of these we opt to use very low values of the exploration parameter $\epsilon$, as higher values of $\epsilon$ means that actions will be selected at random more often, making the expected returns harder to predict. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The agents were allowed to train until they visually reach a plateau. A full list of the hyper-parameters used is listed in table [[tbl:gaafd_hyper_params]]. The most relevant hyper-parameters for this experiment are highlighted.
+The expected returns are assumed to be very sensitive to the current policy as a correctly selected next action's returns may be jeopardized by future wrongly selected actions. This would make it hard for the agent to extract information about which action were wrong and which were correct. Because of this we opt to use very low values of the exploration parameter $\epsilon$, as higher values of $\epsilon$ means that actions will be selected at random more often, making the expected returns harder to predict. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The agents were allowed to train until they visually reach a plateau. A full list of the hyper-parameters used is listed in table [[tbl:gaafd_hyper_params]] (most relevant ones are highlighted).
 
 #+NAME: tbl:gaafd_hyper_params
 | Hyper parameter              | Value                              |
@@ -782,13 +839,13 @@ The expected returns are assumed to be very sensitive to the current policy as a
 
 
 ** Simple- and Proximity-Based Reward Functions
-Using reward functions that are based on each individual phase prediction gets around the reward sparsity problem of using GaaFD as the reward function. Two more reward functions are explored: a simple reward function $R_1$, as defined in equation [[eqn:simple_reward]], and an proximity-based reward function $R_2$, as defined in equation [[eqn:proximity_reward]].
+Using reward functions that are based on each individual phase prediction gets around the reward sparsity problem of using GaaFD as the reward function. Two more reward functions are explored: a simple reward function $R_{simple}$, as defined in equation [[eqn:simple_reward]], and an proximity-based reward function $R_{proximity}$, as defined in equation [[eqn:proximity_reward]].
 
 This makes it quite similar to a supervised regression problem where we want to learn the Q-values given an observation and an action. This is because the returns only depend on the current action and not on all the actions in an episode as we saw with the GaaFD reward function. As a result, it is assumed that the optimal discounting factor is $\gamma=0.0$, meaning that the returns is calculated using only the immediate reward. A discount value of $\gamma > 0.0$ would make expected future returns predictions depend more on the current policy, adding noise to the target values until the policy converges.
 
 Unless discounting is not zero there will be no need for bootstrapping and we can ignore N-step bootstrapping for these reward functions by setting $N=1$.
 
-Since an action does not affect future states, exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$. The agents were trained for $200\,000$ SGD steps. A full list of the hyper-parameters used is listed in table [[tbl:r1r2_hyper_params]] (most relevant ones are highlighted).
+Since an action does not affect future states, exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$. The agents were trained for $200\,000$ SGD steps. A full list of the hyper-parameters used for experiments with reward functions $R_{simple}$ and $R_{proximity}$ is listed in table [[tbl:r1r2_hyper_params]] (most relevant ones are highlighted).
 
 #+NAME: tbl:r1r2_hyper_params
 | Hyper parameter              | Value                        |
@@ -814,7 +871,7 @@ Since an action does not affect future states, exploration is not as important. 
 
 
 * Incorporating Search
-This is not a RL problem, really. RL is designed to search through an unknown state space. In the previous setup there is no exploration as previous actions do not affect future actions. There is therefore no reason to believe that RL will outperform a carefully designed Supervised learning approach. By transforming the problem to one that requires search we will have a problem that is not trivially solved by supervised learning but where RL can shine. Though this may seem like straightening a screw to make it work with a hammer there may be unforeseen benefits. Of great importance to ML is to represent the problem space in a way that is easy to learn from. Perhaps there is an optimal representation of the problem of ED-/ES-detection that also happens to require search?
+Although RL is designed to be able to perform search through an unknown state space, in the previous setup there is no exploration as previous actions do not affect future actions. There is therefore no reason to believe that RL will outperform a carefully designed Supervised learning approach. By transforming the problem to one that requires search we will have a problem that is not trivially solved by supervised learning but where RL can shine. Though this may seem like straightening a screw to make it work with a hammer there may be unforeseen benefits. Of great importance to ML is to represent the problem space in a way that is easy to learn from. Perhaps there is an optimal representation of the problem of ED-/ES-detection that also happens to require search?
 
 ** Temporal Search
 We could formulate the problem as a search in time where the agent must learn to move the current frame towards the end-phase event. The agent sees the current frame and some number of previous and following frames and can either move the current frame backwards or forwards. The agent can be rewarded with 1 if it moves a step closer to the nearest end-phase frame and -1 if it moves away from it.
@@ -833,13 +890,13 @@ One option is to look at a Region Of Interest (ROI) around a point that the agen
  #+NAME: fig:roi_exploration
  [[./img/roi_exploration.png]]
 
-Another option is to take inspiration from m-mode imaging used in ultrasound. We can define a synthetic m-mode image in terms of a line in the video. The synthetic m-mode image shows how the pixels along this line changes over time. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. This synthetic m-mode exploration formulation adds 6 new actions: move up, move down, move left, move right, rotate left, and rotate right. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
+Another option is to take inspiration from m-mode imaging used in ultrasound. We can define a synthetic m-mode image in terms of a line in the video. The synthetic m-mode image shows how the pixels along this line changes over time. A video can be seen as a 3D data cube, consisting of width, height, and time, but using the synthetic m-mode technique width and height are replaced by the line, effectively removing one spacial dimension while keeping the temporal dimension intact. The m-mode can be seen as taking a 2D slice of the video, as seen in figure [[fig:m_mode_cube]]. Compared to the region of interest exploration scheme, synthetic m-mode exploration allows us to keep more temporal data. This synthetic m-mode exploration formulation adds 6 new actions: move up, move down, move left, move right, rotate left, and rotate right. M-mode imaging is also a well established imaging mode in clinical settings, so this is the method that we want to explore further.
 
  #+CAPTION: An m-mode image is an intersecting plane in 3D "video space".
  #+NAME: fig:m_mode_cube
  [[./img/m_mode_cube.png]]
 
-When moving the line up, down, left, or right, it is done relative to its own rotation. We call this local translation, which is different from global translation where the movement is independent of the rotation of the line. Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, independent of rotation — it simply shifts the m-mode image down or up, respectively.
+When moving the line up, down, left, or right, it is done relative to its own rotation. We call this local translation, which is different from global translation where the movement is independent of the rotation of the line. Local and global translation is visualized in figure [[fig:local_vs_global_mmode_translation]]. Using local translation is presumed to add some rotational invariance, as the rotation of the video itself can be counteracted by the m-mode line without changing the perceived m-mode effects of translation. This also makes the effects of the up- and down-translations trivial, as seen in figure [[fig:m_mode_vertical_movement_effect]] — independent of rotation, it simply shifts the m-mode image down or up, respectively.
 
  #+CAPTION: Global (to the left) versus local (to the right) translation. Local translation means that the movement depends on the direction of the m-mode line.
  #+NAME: fig:local_vs_global_mmode_translation
@@ -852,10 +909,10 @@ When moving the line up, down, left, or right, it is done relative to its own ro
 * M-Mode Binary Classification Environment
 Using a synthetic m-mode search space scheme, we formulate the M-Mode Binary Classification environment. The agent can make one of 8 actions: /Mark current frame as Diastole/, /Mark current frame as Systole/, /Rotate line/ (left or right), /Move line along its pointing direction/ (up or down), and /Move line perpendicular to its pointing direction/ (left or right). The observation includes the synthetic m-mode image of the current line position, but we also want to give the agent explicit information about what it would look like if it moved or rotated the line, and a history of the latest actions.
 
-The observation therefore consists of the synthetic m-mode image for three different rotations (rotated left, not rotated at all, and rotated right) and for three different perpendicular movements (moved to the left, not moved at all, moved to the right), for a total of 9 synthetic m-mode images. The synthetic m-mode image is created by interpolating the line across the video using nearest neighbour. Up and down line movements are not included because they do not provide as much information to the agent, as is visualized in figure [[fig:m_mode_vertical_movement_effect]]. An overview image consisting of the average of the first 50 frames is also included in the observation, as well as the current position of the line overlapping it in a different channel, also visualied in figure [[fig:m_mode_vertical_movement_effect]]. Lastly, we include the last 5 actions taken as a one-hot encoded array of shape $(5, 8)$ — 8 being the number of possible actions. Observations are thus a tuple of an "overview" image of shape $(W, H, 2)$, a synthetic m-mode image of shape $(T, L, 9)$, and an action history array of shape $(5, 8)$, where $W$ and $H$ are the width and height of the video respectively, and $T$ and $L$ are the number of frames (amount of temporal information) and length of the line respectively.
+The observation therefore consists of the synthetic m-mode image for three different rotations (rotated left, not rotated at all, and rotated right) and for three different perpendicular movements (moved to the left, not moved at all, moved to the right), for a total of 9 synthetic m-mode images. The synthetic m-mode image is created by interpolating the line across the video using nearest neighbour. Up and down line movements are not included as additional channels because they do not provide as much information to the agent, as is visualized in figure [[fig:m_mode_vertical_movement_effect]]. An overview image consisting of the average of the first 50 frames is also included in the observation, as well as the current position of the line overlapping it in a different channel, also visualied in figure [[fig:m_mode_vertical_movement_effect]]. Lastly, we include the last 5 actions taken as a one-hot encoded array of shape $(5, 8)$ — 8 being the number of possible actions. Observations are thus a tuple of an "overview" image of shape $(W, H, 2)$, a synthetic m-mode image of shape $(T, L, 9)$, and an action history array of shape $(5, 8)$, where $W$ and $H$ are the width and height of the video respectively, and $T$ and $L$ are the number of frames (amount of temporal information) and length of the line respectively.
 
 
-At the start of an episode the line is placed at a random position. This is in order to force the agent to learn to explore instead of learning to predict the phase from a common starting position. The random position is selected by first placing the line, centered, facing upwards, before translating it in the direction it's facing by a random amount sampled uniformly from the interval $[-0.1H, 0.1H]$, and in the perpendicular direction by a random amount sampled uniformly from the interval $[-0.1W, 0.1W]$, and rotated by an angle sampled uniformly from the interval $[-\frac{\pi}{2}, \frac{\pi}{2}]$ radians. The starting positions are asserted to be within bounds and if a line somehow is generated outside of bounds a new line is generated instead. The random starting positions were verified to be reasonable through visual inspection of a sample of $1\,000$ lines as seen in figure [[fig:m_mode_line_starting_positions]]. An episode ends once the phase of every frame have been predicted by the agent, or until the agent has taken 200 steps. We have to cut the episode off at 200 steps because the agent may now move indefinitely.
+At the start of an episode the line is placed at a random position within in a bounding box. This is in order to force the agent to learn to explore instead of learning to predict the phase from a common starting position. The random position is selected by first placing the line, centered, facing upwards, before translating it in the direction it's facing by a random amount sampled uniformly from the interval $[-0.1H, 0.1H]$, and in the perpendicular direction by a random amount sampled uniformly from the interval $[-0.1W, 0.1W]$, and rotated by an angle sampled uniformly from the interval $[-\frac{\pi}{2}, \frac{\pi}{2}]$ radians. The starting positions are asserted to be within the bounds of the video, and if a line somehow is generated outside of bounds a new line is generated instead. The random starting positions were verified to be reasonable through visual inspection of a sample of $1\,000$ lines as seen in figure [[fig:m_mode_line_starting_positions]]. An episode ends once the phase of every frame have been predicted by the agent, or until the agent has taken 200 steps. We have to cut the episode off at 200 steps because the agent may now move indefinitely. The cut-off number of 200 steps was chosen a bit arbitrary, but given that the average video length is 50 frames, 200 steps should give the agent ample time to find the best synthetic m-mode line position.
 
 #+CAPTION: The union of 100 randomly sampled m-mode lines.
 #+NAME: fig:m_mode_line_starting_positions
@@ -865,13 +922,12 @@ The reward function is the same as in the simple binary classification environme
 
 
 ** Agent Architecture
-We keep the same base architectures as in the simple binary classification environment, but we need to also accomodate the overview image and action history array. This is done by passing all three through their own neural network before concatenating the result and passing it through a couple more fully connected layers. Both the synthetic m-mode image and the overview image is passed through the Atari DQN-paper inspired CNN that is visualized in figure [[fig:simple_dqn_network]], but with the final output layer removed. The action-history array is flattened before being passed into a fully connected layer with 32 outputs followed by a ReLU activation layer. After concatenating the three results they are passed through yet another fully connected layer of 64 outputs and a ReLU activation layer, before being passed through a final fully connected layer with 2 outputs.
+We keep the same base architectures as in the simple binary classification environment, but we need to also accomodate the overview image and action history array. This is done by passing all three through their own neural network before concatenating the result and passing it through a couple more fully connected layers. Both the synthetic m-mode image and the overview image is passed through the Atari DQN-paper inspired CNN that is visualized in figure [[fig:simple_dqn_network]], but with the final output layer removed in order to accommodate concatenation. The action-history array is flattened before being passed into a fully connected layer with 32 outputs followed by a ReLU activation layer. After concatenating the three results they are passed through yet another fully connected layer of 64 outputs and a ReLU activation layer, before being passed through a final fully connected layer with 2 outputs. The network is visualized in figure [[fig:simple_dqn_network_m_mode]].
 
 #+CAPTION: The network architecture of the m-mode agent. An observation consists of three parts. Each part is processed independently by a neural network before being concatenated and used to produce the approximated Q-values.
-#+NAME: simple_dqn_network_m_mode
+#+NAME: fig:simple_dqn_network_m_mode
 [[./img/simple_dqn_network_m_mode.png]]
 
-For the more complex network architecture, we simply swap out the CNN for the synthetic m-mode images with MobileNet-v1.
 
 
 
@@ -883,41 +939,251 @@ For the more complex network architecture, we simply swap out the CNN for the sy
 
 \chapter{Experiments and Results}
 
-This chapter is dedicated to exploring the performance of methods described in the previous chapter through experiments. It is separated into two main parts, one for each environment formulation. The three reward functions are explored: Generalized Average Absolute Frame Difference (GaaFD), a simple binary phase prediction reward $R_1$, and the proximity-based phase prediction reward $R_2$.
 
-* Generalized Average Absolute Frame Difference Reward Function
-We start by exploring the use of GaaFD as defined in equation [[eqn:aafd_generalized]] as the reward function. As explained under [[Generalized Average Absolute Frame Difference Reward Function]] we use a practically infinite value of $N=200$ for N-step bootstrapping and a discount of $\gamma=1.0$. Three low values of the exploration parameter $\epsilon$ is included as experiments: $\epsilon \in \{0.0, 0.01, 0.1\}$. Thus three models are trained, one for each $\epsilon$.
+* Performance Metrics
+The performance metrics is reported in the following four tables. Tables [[tbl:gaafd_best_models_sgd_steps]], [[tbl:r1_best_models_sgd_steps]] and [[tbl:r2_best_models_sgd_steps]] presents the performance of agents traines using $R_{GaaFD}$, $R_{simple}$ and $R_{proximity}$, respectively. Lastly, table [[tbl:best_models_comparison]] presents a comparison between the best models for each reward function.
 
-The results of the trained models can be seen in table [[tbl:gaafd_best_models_sgd_steps]]. A density plot that visualizes the distribution of GaaFD for the models can be seen in figure [[fig:gaafd_best_model_perf]], and a comparison between the GaaFD distribution for ED and ES events can be seen in figure [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows the distribution of mismatches between number of predicted events and number of ground truth events. Figure [[fig:gaafd_training_curves]] shows the learning curve of the three models. The best set of parameters were selected for each model based on these curves. The inference time is reported in table [[tbl:simple_net_inference_speed]].
+Out of all the trained models, the model trained using $R_{simple}$ with a value of $\epsilon=0.5$ performed the best.
 
 #+CAPTION: Performance of agents trained using GaaFD as the reward function on the test dataset.
 #+NAME: tbl:gaafd_best_models_sgd_steps
-|                     | $\epsilon=0.1$ | $\epsilon=0.01$ | $\epsilon=0$ |
-|---------------------+----------------+-----------------+--------------|
-| Best model SGD step | $167\,336$     | $136\,996$      | $95\,616$    |
-| GaaFD               | $5.84$         | $4.59$          | $3.68$       |
-| GaaFD ED            | $5.69$         | $4.84$          | $3.74$       |
-| GaaFD ES            | $5.83$         | $4.20$          | $3.50$       |
-| % valid aaFD        | $0.64$         | $0.70$          | $0.77$       |
-| aaFD                | $3.51$         | $2.71$          | $2.43$       |
+|                     | $\epsilon=0.1$ | $\epsilon=0.01$ | $\epsilon=0.0$ |
+|---------------------+----------------+-----------------+----------------|
+| Best model SGD step | $167\,336$     | $136\,996$      | $95\,616$      |
+| GaaFD               | $5.84$         | $4.59$          | $3.68$         |
+| GaaFD ED            | $5.69$         | $4.84$          | $3.74$         |
+| GaaFD ES            | $5.83$         | $4.20$          | $3.50$         |
+| % valid aaFD        | $63.71\%$      | $70.33\%$       | $76.63\%$      |
+| aaFD                | $3.51$         | $2.71$          | $2.43$         |
+| Accuracy            | $0.82$         | $0.86$          | $0.88$         |
+| Accuracy diastole   | $0.90$         | $0.91$          | $0.94$         |
+| Accuracy systole    | $0.69$         | $0.75$          | $0.77$         |
+| Balanced accuracy   | $0.58$         | $0.67$          | $0.70$         |
 
+#+CAPTION: Performance of agents trained using $R_{simple}$ as the reward function on the test dataset.
+#+NAME: tbl:r1_best_models_sgd_steps
+|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
+|---------------------+----------------+----------------+--------------|
+| Best model SGD step | $6\,220$       | $10\,960$      | $8\,964$     |
+| GaaFD               | $2.52$         | $2.46$         | $2.57$       |
+| GaaFD ED            | $2.48$         | $2.43$         | $2.52$       |
+| GaaFD ES            | $2.47$         | $2.41$         | $2.55$       |
+| % valid aaFD        | $79.30\%$      | $80.26\%$      | $76.95\%$    |
+| aaFD                | $1.71$         | $1.69$         | $1.69$       |
+| Accuracy            | $0.91$         | $0.91$         | $0.91$       |
+| Accuracy diastole   | $0.93$         | $0.93$         | $0.93$       |
+| Accuracy systole    | $0.87$         | $0.88$         | $0.88$       |
+| Balanced accuracy   | $0.80$         | $0.81$         | $0.81$       |
+
+#+CAPTION: Performance of agents trained using $R_{proximity}$ as the reward function on the test dataset.
+#+NAME: tbl:r2_best_models_sgd_steps
+|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
+|---------------------+----------------+----------------+--------------|
+| Best model SGD step | $107\,936$     | $6\,880$       | $7\,096$     |
+| GaaFD               | $2.55$         | $2.56$         | $2.63$       |
+| GaaFD ED            | $2.52$         | $2.56$         | $2.67$       |
+| GaaFD ES            | $2.50$         | $2.48$         | $2.52$       |
+| % valid aaFD        | $78.87\%$      | $79.40\%$      | $76.95\%$    |
+| aaFD                | $1.74$         | $1.80$         | $1.71$       |
+| Accuracy            | $0.91$         | $0.91$         | $0.91$       |
+| Accuracy diastole   | $0.94$         | $0.93$         | $0.93$       |
+| Accuracy systole    | $0.86$         | $0.87$         | $0.88$       |
+| Balanced accuracy   | $0.80$         | $0.80$         | $0.81$       |
+
+#+CAPTION: Performance of the best agent for each explored reward function on the test dataset. The best agent was selected by the best GaaFD score.
+#+NAME: tbl:best_models_comparison
+|                     |    $R_{GaaFD}$ | $R_{simple}$   | $R_{proximity}$ |
+|---------------------+----------------+----------------+-----------------|
+| $\epsilon$          | $\epsilon=0.0$ | $\epsilon=0.5$ |  $\epsilon=0.1$ |
+| Best model SGD step |         95 616 | *10 960*       |         107 936 |
+| GaaFD               |           3.68 | *2.46*         |            2.55 |
+| GaaFD ED            |           3.74 | *2.43*         |            2.52 |
+| GaaFD ES            |           3.50 | *2.41*         |            2.50 |
+| % valid aaFD        |         76.63% | *80.26*        |          78.87% |
+| aaFD                |           2.43 | *1.69*         |            1.74 |
+| Accuracy            |           0.88 | *0.91*         |          *0.91* |
+| Accuracy diastole   |         *0.94* | 0.93           |          *0.94* |
+| Accuracy systole    |           0.77 | *0.88*         |            0.86 |
+| Balanced accuracy   |           0.70 | *0.81*         |            0.80 |
+
+
+* The Impact of Epsilon on Average Absolute Frame Difference
+Lower values of $\epsilon$ yield a better GaaFD score when using $R_{GaaFD}$ as the reward function. This is best seen in figure [[fig:gaafd_best_model_perf]]. There is not a consistent difference between GaaFD on ED- or ES-frames individually, but there is less difference in performance on ES-frames between the training split and the test split, as seen in [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows that lower values of $\epsilon$ also reduces the mismatch between the number of predicted versus ground truth events. This was also clearly seen in table [[tbl:gaafd_best_models_sgd_steps]], where a value of $\epsilon=0.0$ predicted the correct number of events 77% of the time, while $\epsilon=0.1$ and $\epsilon=0.01$ yielded 64% and 70%, respectively. We also see a significant "bump" at 2 mismatched number of predictions for all 3 models.
 
 #+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using GaaFD as the reward function. The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
 #+NAME: fig:gaafd_best_model_perf
 [[./img/gaafd_best_model_perf.png]]
 
-
 #+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using GaaFD as the reward function, only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
 #+NAME: fig:gaafd_best_model_ed_es_perf
 [[./img/gaafd_best_model_ed_es_perf.png]]
 
-#+CAPTION: The difference between the number of predicted events and the number of ground truth events for each model when using GaaFD as the reward function. Most predictions produce the same number of predicted events as ground truth, f.ex. the model with $\epsilon=0$ produces the correct number of events 77% of the time, which can also be seen in table [[tbl:gaafd_best_models_sgd_steps]].
+#+CAPTION: The difference between the number of predicted events and the number of ground truth events for each model when using GaaFD as the reward function. Most predictions produce the same number of predicted events as ground truth, e.g. the model with $\epsilon=0$ produces the correct number of events 77% of the time, which can also be seen in table [[tbl:gaafd_best_models_sgd_steps]].
 #+NAME: fig:gaafd_mismatched_predictions
 [[./img/gaafd_mismatched_predictions.png]]
+
+
+
+
+The choice of $\epsilon$ did not matter as much for agents trained using $R_{simple}$ or $R_{proximity}$, compared to those trained using $R_{GaaFD}$, as seen in figures [[fig:r1_gaafd_performance]] and [[fig:r2_gaafd_performance]]. As with $R_{GaaFD}$, $R_{simple}$ and $R_{proximity}$ showed little consistent difference in performance between gaaFD on ED- or ES-frame individually, as seen in figures [[fig:r1_edes_gaafd_performance]] and [[fig:r2_edes_gaafd_performance]]. Figure [[fig:r1r2_num_pred_mismatch]] further shows that there is little difference between values of $\epsilon$ for predicting the correct number of events as the number of ground truth events, both for $R_{simple}$ and $R_{proximity}$.
+
+
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$) when using $R_{simple}$ as the reward function. The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
+#+NAME: fig:r1_gaafd_performance
+[[./img/r1r2_res/r1_gaafd_performance.png]]
+
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{simple}$ as the reward function, only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
+#+NAME: fig:r1_edes_gaafd_performance
+[[./img/r1r2_res/r1_edes_gaafd_performance.png]]
+
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$) when using $R_{proximity}$ as the reward function. The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
+#+NAME: fig:r2_gaafd_performance
+[[./img/r1r2_res/r2_gaafd_performance.png]]
+
+#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{proximity}$ as the reward function, only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
+#+NAME: fig:r2_edes_gaafd_performance
+[[./img/r1r2_res/r2_edes_gaafd_performance.png]]
+
+
+#+CAPTION: The difference between the number of predicted events and the number of ground truth events for each model when using $R_{simple}$ (left) and $R_{proximity}$ (right) as the reward function. Most predictions produce the same number of predicted events as ground truth, e.g. the model with $\epsilon=0.5$ and $R_{simple}$ as the reward function produces the correct number of events 80% of the time, which can also be seen in table [[tbl:r1_best_models_sgd_steps]].
+#+NAME: fig:r1r2_num_pred_mismatch
+[[./img/r1r2_res/r1r2_num_pred_mismatch.png]]
+
+
+
+
+* The Impact of Reward Function and Epsilon on Accuracy 
+Accuracy and balanced accuracy are not the main metrics that we want to optimize for, but it is useful to report them to get better insight into how the model performs.
+
+The accuracy of the agents trained using $R_{GaaFD}$ show a similar pattern as with GaaFD, as lower values of $\epsilon$ give better scores. This can be seen in figure [[fig:gaafd_best_model_accuracy]] as well as in table [[tbl:gaafd_best_models_sgd_steps]]. Figure [[fig:gaafd_best_model_accuracy]] also shows this when accounting for class imbalance through balanced accuracy. All 3 models performs perform better at classifying diastole frames compared to systole frames, as visualized in figure [[fig:gaafd_best_model_accuracy_ed_es]].
+
+
+#+CAPTION: Gaussian KDE of the accuracy and balanced accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using GaaFD as the reward function. The left plot shows the accuracy. The right plot shows the balanced accuracy, which accounts more for class-imbalance.
+#+NAME: fig:gaafd_best_model_accuracy
+[[./img/gaafd_best_model_accuracy.png]]
+
+#+CAPTION: Gaussian KDE of the accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using GaaFD as the reward function for diastole or systole phase predictions individually. Left plot shows the accuracy for diastole frame predictions. The right plot shows the accuracy for systole frame predictions.
+#+NAME: fig:gaafd_best_model_accuracy_ed_es
+[[./img/gaafd_best_model_accuracy_ed_es.png]]
+
+
+
+Again, the choice of $\epsilon$ did not matter as much for models trained using $R_{simple}$ or $R_{proximity}$ with regards to accuracy and balanced accuracy, as seen in figure [[fig:simp_best_model_accuracy]] and [[fig:prox_best_model_accuracy]]. These models also perform better at classifying diastole frames compared to systole frames.
+
+#+CAPTION: Gaussian KDE of the accuracy and balanced accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{simple}$ as the reward function. The left plot shows the accuracy. The right plot shows the balanced accuracy, which accounts more for class-imbalance.
+#+NAME: fig:simp_best_model_accuracy
+[[./img/simp_best_model_accuracy.png]]
+
+#+CAPTION: Gaussian KDE of the accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{simple}$ as the reward function for diastole or systole phase predictions individually. Left plot shows the accuracy for diastole frame predictions. The right plot shows the accuracy for systole frame predictions.
+#+NAME: fig:simp_best_model_accuracy_ed_es
+[[./img/simp_best_model_accuracy_ed_es.png]]
+
+#+CAPTION: Gaussian KDE of the accuracy and balanced accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{proximity}$ as the reward function. The left plot shows the accuracy. The right plot shows the balanced accuracy, which accounts more for class-imbalance.
+#+NAME: fig:prox_best_model_accuracy
+[[./img/prox_best_model_accuracy.png]]
+
+#+CAPTION: Gaussian KDE of the accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{proximity}$ as the reward function for diastole or systole phase predictions individually. Left plot shows the accuracy for diastole frame predictions. The right plot shows the accuracy for systole frame predictions.
+#+NAME: fig:prox_best_model_accuracy_ed_es
+[[./img/prox_best_model_accuracy_ed_es.png]]
+
+
+* Learning Curves
+For models trained using $R_{GaaFD}$, lower values of $\epsilon$ converge faster, as seen in the training curve in figure [[fig:gaafd_training_curves]]. There is no apparent degradation in performance over time that would indicate that the models start to overfit at some point, but the models trained using $\epsilon=0.0$ or $\epsilon=0.01$ perform slightly better on the training split than on the test split. This is not apparent for the model trained using $\epsilon=0.1$. The loss curves for all models follow a peculiar pattern where it starts with sinking rapidly, before increasing again, followed by a slow decrease until it (presumably) converges, as seen in figure [[fig:gaafd_loss_curves]]. Interestingly, the model trained using a value of $\epsilon=0.01$ reaches a higher loss than the other two at its peak following the rapid sinking at the start. Also interesting, the model trained using the highest value of $\epsilon$ has a loss curve sitting between the other two.
 
 #+CAPTION: The learning curves of using GaaFD as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
 #+NAME: fig:gaafd_training_curves
 [[./img/gaafd_learning_curves.png]]
+
+
+#+CAPTION: The training loss over time for different values of epsilon. The left plot shows the full y-axis, while the right plot shows the same plots but with a zoomed-in y-axis.
+#+NAME: fig:gaafd_loss_curves
+[[./img/gaafd_loss_curves.png]]
+
+
+
+
+
+Lower values of $\epsilon$ yields less overfitting both for models trained using $R_{simple}$ and $R_{proximity}$, as seen in figures [[fig:r1_learning_curves]] and [[fig:r2_learning_curves]]. In fact, the models are able to reach perfect accuracy on the training split, at the cost of worse performance on the test split, as seen in figure [[fig:r1r2_train_val_comparison_learning_curves]].
+
+
+
+#+CAPTION: The training curves of using $R_{simple}$ as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: fig:r1_learning_curves
+[[./img/r1r2_res/r1_learning_curves.png]]
+
+#+CAPTION: The training curves of using $R_{proximity}$ as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
+#+NAME: fig:r2_learning_curves
+[[./img/r1r2_res/r2_learning_curves.png]]
+
+#+CAPTION: The GaaFD over training time (gradient descent steps) on the validation set (solid pink and blue line) and the training set (dashed pink and blue lines). The GaaFD on the training set reaches 0, meaning perfect predictions.
+#+NAME: fig:r1r2_train_val_comparison_learning_curves
+[[./img/r1r2_res/r1r2_train_val_comparison_learning_curves.png]]
+
+
+
+The loss curves for models trained using $R_{simple}$ or $R_{proximity}$ does not show the same peculiar pattern as those trained using $R_{GaaFD}$. They all decrease quite rapidly at first before slowing down until convergence. The model trained with the lowest value of $\epsilon$, $\epsilon=0.1$, converge the fastest. The models trained using $R_{proximity}$ also converge faster overall.
+
+#+CAPTION: The training loss over time for different values of epsilon. Left: an agent trained using $R_{simple}$. Right: an agent trained using $R_{proximity}$.
+#+NAME: fig:r1r2_loss
+[[./img/r1r2_res/r1r2_loss.png]]
+
+
+
+Models trained using $R_{proximity}$ consistently perform better at the metric of GaaFD in later iterations of training, though this is most appararent long after the models have overfit on the training split. The models trained using $R_{simple}$ have indications of performing better at the metric of balanced accuracy, though the difference is mostly apparent in the models trained using a value of $\epsilon=0.1$. Even though $R_{proximity}$ performs better at the important metric of GaaFD after overfitting occur, the best model overall belongs to the model trained using $R_{simple}$ with a value of $\epsilon=0.5$.
+
+
+#+CAPTION: Comparison of the training curves using $R_{simple}$ versus $R_{proximity}$ for different values of of the exploratio parameter $\epsilon$. Top row shows the GaaFD over training time (gradient descent steps). Bottom row shows the balanced accuracy over training time. Each column correspond to one of the agents, $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$, respectively.
+#+NAME: fig:r1r2_comparison_learning_curves
+[[./img/r1r2_res/r1r2_comparison_learning_curves.png]]
+
+
+
+
+
+
+
+* The Impact of Reward Function and Epsilon on Q-Values
+For DQN, the Q-values dictate what actions are taken. This section plots the Q-values for the best and worst performing videos for each reward function and value of epsilon used for the reward function. These results are largely qualitative but shed light on how the models "reason" about the frames in a video.
+
+Figures [[fig:gaafd_best_videos_q]], [[fig:r1_q_best_videos]], and [[fig:r1_q_best_videos]] plot the Q-values of each frame in the 3 best performing videos for that model for models trained with $R_{GaaFD}$, $R_{simple}$, and $R_{proximity}$, respectively, and for each value of $\epsilon$. Likewise, Figures [[fig:gaafd_best_videos_q]], [[fig:r1_q_best_videos]], and [[fig:r1_q_best_videos]] plots the same, but for the 3 worst performing videos.
+
+The effect of a higher value of $\epsilon$ of agents trained with $R_{GaaFD}$ is that the values of marking a frame as diastole or as systole grows closer, as seen in figure [[fig:gaafd_best_videos_q]]. There is also a noticable positive spike for systole values in the middle of the diastole phase, mostly visible for lower values of $\epsilon$.
+
+The effect of using $R_{simple}$ over $R_{proximity}$ seems to be that $R_{simple}$ causes less noisy Q-values. Interestingly, the spikes in the middle of systole is also visible for agents trained with $R_{simple}$ and $R_{proximity}$, though slightly less than for $those trained with R_{GaaFD}$.
+
+
+#+CAPTION: The Q-values for three of the best predicted videos for each model trained using $R_{GaaFD}$. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents time in the video. 
+#+NAME: fig:gaafd_best_videos_q
+[[./img/gaafd_best_videos_q.png]]
+
+#+CAPTION: The Q-values for three of the best predicted videos for each model trained using $R_{simple}$. Top row is the model with $\epsilon=0.1$, middle row is the model with $\epsilon=0.5$, and the bottom row is the model with $\epsilon=1.0$. The x-axis represents time in the video. 
+#+NAME: fig:r1_q_best_videos
+[[./img/r1r2_res/r1_q_best_videos.png]]
+
+#+CAPTION: The Q-values for three of the best predicted videos for each model trained using $R_{proximity}$. Top row is the model with $\epsilon=0.1$, middle row is the model with $\epsilon=0.5$, and the bottom row is the model with $\epsilon=1.0$. The x-axis represents time in the video. 
+#+NAME: fig:r2_q_best_videos
+[[./img/r1r2_res/r2_q_best_videos.png]]
+
+
+
+
+
+#+CAPTION: The Q-values for three of the worst predicted videos for each model trained using $R_{GaaFD}$. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents time in the video.
+#+NAME: fig:gaafd_worst_videos_q
+[[./img/gaafd_worst_videos_q.png]]
+
+#+CAPTION: The Q-values for three of the worst predicted videos for each model trained using $R_{simple}$. Top row is the model with $\epsilon=0.1$, middle row is the model with $\epsilon=0.5$, and the bottom row is the model with $\epsilon=1.0$. The x-axis represents time in the video. 
+#+NAME: fig:r1_q_worst_videos
+[[./img/r1r2_res/r1_q_worst_videos.png]]
+
+#+CAPTION: The Q-values for three of the worst predicted videos for each model trained using $R_{proximity}$. Top row is the model with $\epsilon=0.1$, middle row is the model with $\epsilon=0.5$, and the bottom row is the model with $\epsilon=1.0$. The x-axis represents time in the video. 
+#+NAME: fig:r2_q_wrong_videos
+[[./img/r1r2_res/r2_q_wrong_videos.png]]
+
+
+
+* Inference speed
+The inference time is faster on the CPU than the GPU when we include IO roundtrip time. However, ignoring IO, the network performs extremely fast on the GPU; processing a batch of 128 frames takes just a little over a milliseconds, producing a framerate of over $125\,000$ FPS. This is merely considered a "fun-fact", however, and a realistic scenario would include IO roundtrip time. A single frame may be processed on the CPU in 0.80 milliseconds, meaning that it can likely be included as a step in a processing stream.
 
 
 #+CAPTION: The compilation time and average elapsed time over 1000 calls for the neural network, on the CPU and on the GPU, with or without IO overhead.
@@ -937,92 +1203,58 @@ The results of the trained models can be seen in table [[tbl:gaafd_best_models_s
 
 
 
+* M-Mode Binary Classification Environment
+A single experiment was run using the M-Mode Binary Classification Environment (MMBCE), the result of which can be seen in table [[tbl:mmode_best_model_metrics]]. The percentage of episodes where the agent actively explores its environment by moving the synthetic m-mode line is reported in addition to the key metrics. The agent is said to have explored if at least one of the actions in the episode moved or rotated the line. The GaaFD is also reported for episodes where the agent performs some exploration and where it performs no exploration, individually.
+
+The agent trained on the MMBCE performs worse than any agent trained on the BCE, as seen in table [[tbl:mmode_best_model_metrics]]. It also performs very little exploration of the environment, where almost 35% of episodes contain no movement of the synthetic m-mode line at all. Figure [[fig:action_frequencies_mmode]] show the distribution of actions taken by the agent on the test split. Over 90% of actions were marking the current frame as either diastole or systole.
+
+Furthermore, in the episodes where the agent /did/ perform any type of exploration, the agent performed worse than in the ones it did not move the synthetic m-mode line at all, as visualized in [[fig:mmode_gaafd_explore_or_not]]. Table [[tbl:mmode_best_model_metrics]] report that the agent had an average GaaFD score of $5.47$ for episodes where it performed exploration, versus $3.13$ in episode where the line was still.
+
+
+#+CAPTION: Performance of agents trained on the m-mode binary classification environment.
+#+NAME: tbl:mmode_best_model_metrics
+| Best model SGD step                    | $23\,080$ |
+| GaaFD                                  | $4.66$    |
+| GaaFD ED                               | $4.85$    |
+| GaaFD ES                               | $4.37$    |
+| % episodes with exploration            | $65.22\%$ |
+| % episodes without exploration         | $34.78\%$ |
+| GaaFD for episodes with exploration    | $5.47$    |
+| GaaFD for episodes without exploration | $3.13$    |
+| % valid aaFD                           | $59.29\%$ |
+| aaFD                                   | $2.22$    |
+
+
+#+CAPTION: A bar chart showcasing the distribution of actions selected by the agent. To the left are all actions, while to the right are only movement actions, i.e. marking a frame as diastole or systole not included. The vast majority of actions are that of marking frames as diastole or systole.
+#+NAME: fig:action_frequencies_mmode
+[[./img/action_frequencies_mmode.png]]
+
+
+#+CAPTION: A density plot of GaaFD for episodes where the agent performed no other actions than marking frames as diastole or systole, i.e. no exploration, versus the density plot of GaaFD for episodes where the agent moved the synthetic m-mode line in any way at least once.
+#+NAME: fig:mmode_gaafd_explore_or_not
+[[./img/mmode_gaafd_explore_or_not.png]]
+
+
+And finally, the MMBCE agent is significantly slower at inference than the BCE agents, taking multiple seconds to evaluate a full video of 128 frames. It also takes more than 3 times as long when running the agent on the GPU.
+
+#+CAPTION: The average compilation and run time for predicting the phase of 128 frames in a video (including IO overhead).
+#+NAME: tbl:mmode_inference
++--------+------------------+--------------------------------+
+| Device | Compilation time | Average run time for 128 steps |
++--------+------------------+--------------------------------+
+| CPU    | 389.70 ms        | 3169.83 ms                     |
++--------+------------------+--------------------------------+
+| GPU    | 2384.04 ms       | 9738.50 ms                     |
++--------+------------------+--------------------------------+
 
 
 
 
-* Simple- and Proximity-Based Reward Functions
-Next, we explore the use of $R_1$ and $R_2$, as defined in [[eqn:simple_reward]] and [[eqn:proximity_reward]], respectively. Three values of $\epsilon$ are included for each reward function, $\epsilon \in \{0.1, 0.5, 1.0\}$, for a total of 6 experiments. 
-
-The results of the models trained using $R_1$ as the reward function can be seen in table [[tbl:r1_best_models_sgd_steps]]. The results of the models trained using $R_2$ as the reward function can be seen in table [[tbl:r2_best_models_sgd_steps]]. 
-
-
-A density plot that visualizes the distribution of GaaFD for the models can be seen in figure [[fig:gaafd_best_model_perf]], and a comparison between the GaaFD distribution for ED and ES events can be seen in figure [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows the distribution of mismatches between number of predicted events and number of ground truth events. Figure [[fig:gaafd_training_curves]] shows the learning curve of the three models. The best set of parameters were selected for each model based on these curves. The inference time is reported in table [[tbl:simple_net_inference_speed]].
 
 
 
 
-#+CAPTION: Performance of agents trained using $R_1$ (simple) as the reward function on the test dataset.
-#+NAME: tbl:r1_best_models_sgd_steps
-|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
-|---------------------+----------------+----------------+--------------|
-| Best model SGD step | $6\,220$       | $10\,960$      | $8\,964$     |
-| GaaFD               | $2.52$         | $2.46$         | $2.57$       |
-| GaaFD ED            | $2.48$         | $2.43$         | $2.52$       |
-| GaaFD ES            | $2.47$         | $2.41$         | $2.55$       |
-| % valid aaFD        | $0.79$         | $0.80$         | $0.77$       |
-| aaFD                | $1.71$         | $1.69$         | $1.69$       |
 
-#+CAPTION: Performance of agents trained using $R_2$ (proximity-based) as the reward function on the test dataset.
-#+NAME: tbl:r2_best_models_sgd_steps
-|                     | $\epsilon=0.1$ | $\epsilon=0.5$ | $\epsilon=1$ |
-|---------------------+----------------+----------------+--------------|
-| Best model SGD step | $107\,936$     | $6\,880$       | $7\,096$     |
-| GaaFD               | $2.55$         | $2.56$         | $2.63$       |
-| GaaFD ED            | $2.52$         | $2.56$         | $2.67$       |
-| GaaFD ES            | $2.50$         | $2.48$         | $2.52$       |
-| % valid aaFD        | $0.79$         | $0.79$         | $0.77$       |
-| aaFD                | $1.74$         | $1.80$         | $1.71$       |
-
-
-
-
-A density plot that visualizes the distribution of GaaFD and a comparison between the GaaFD distribution for ED and ES events individually for the models trained using $R_1$ as the reward function can be seen in figures [[fig:r1_gaafd_performance]] and [[fig:r1_edes_gaafd_performance]]. The same can be seen for the models trained using $R_2$ as the reward function in figures [[fig:r2_gaafd_performance]] and [[fig:r2_edes_gaafd_performance]].
-
-#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$) when using $R_1$ (simple) as the reward function. The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
-#+NAME: fig:r1_gaafd_performance
-[[./img/r1r2_res/r1_gaafd_performance.png]]
-
-#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_1$ (simple) as the reward function, only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
-#+NAME: fig:r1_edes_gaafd_performance
-[[./img/r1r2_res/r1_edes_gaafd_performance.png]]
-
-#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$) when using $R_2$ (proximity-based) as the reward function. The left plot compares all three models on the test-set. The middle plot compares all three models on the train-set. The right plot shows the difference between the two as a means to visualize model overfitting.
-#+NAME: fig:r2_gaafd_performance
-[[./img/r1r2_res/r2_gaafd_performance.png]]
-
-#+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_2$ (proximity-based) as the reward function, only accounting for either ED- or ES-events individually. The upper row compares the performance on ED and ES for each model. The bottom row shows the difference in GaaFD-density on the test-set versus the train-set as a means to visualize model overfitting.
-#+NAME: fig:r2_edes_gaafd_performance
-[[./img/r1r2_res/r2_edes_gaafd_performance.png]]
-
-
-
-Figure [[fig:gaafd_mismatched_predictions]] shows the distribution of mismatches between number of predicted events and number of ground truth events for models trained using $R_1$ and $R_2$. 
-
-
-#+CAPTION: The difference between the number of predicted events and the number of ground truth events for each model when using $R_1$ (simple, left) and $R_2$ (proximity-based, right) as the reward function. Most predictions produce the same number of predicted events as ground truth, f.ex. the model with $\epsilon=0.5$ and $R_1$ as the reward function produces the correct number of events 80% of the time, which can also be seen in table [[tbl:r1_best_models_sgd_steps]].
-#+NAME: fig:r1r2_num_pred_mismatch
-[[./img/r1r2_res/r1r2_num_pred_mismatch.png]]
-
-Figure [[fig:r1_learning_curves]] and figure [[fig:r2_learning_curves]] show the learning curvea of the models with different value of $\epsilon$ for models trained using $R_1$ and $R_2$, respectively. The best set of parameters were selected for each model based on these curve. Figure [[fig:r1r2_comparison_learning_curves]] shows a comparison of the two different reward functions for different values of $\epsilon$.
-
-
-#+CAPTION: The training curves of using $R_1$ (simple reward) as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
-#+NAME: fig:r1_learning_curves
-[[./img/r1r2_res/r1_learning_curves.png]]
-
-#+CAPTION: The training curves of using $R_2$ (proximity reward) as the reward function for different values of the exploration parameter $\epsilon$. Left: GaaFD over training time (gradient descent steps). Middle: Balanced accuracy over training time. Right: The difference in GaaFD between the validation set and the training set over training time, positive values indicating overfitting on the training set. Each point in the curve is calculated on 50 random videos in the validation (or training) set. The curves have been smoothed using a gaussian filter with a kernel standard deviation of 4 to reduce noise due to the low sample size of each data point. The overfitting (right) plot has additionally been smoothed using a gaussian filter with a kernel standard deviation of 50 to make sure that overall trend is visible.
-#+NAME: fig:r2_learning_curves
-[[./img/r1r2_res/r2_learning_curves.png]]
-
-
-
-#+CAPTION: Comparison of the training curves using $R_1$ (simple reward) versus $R_2$ (proximity reward) for different values of of the exploratio parameter $\epsilon$. Top row shows the GaaFD over training time (gradient descent steps). Bottom row shows the balanced accuracy over training time. Each column correspond to one of the agents, $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$, respectively.
-#+NAME: fig:r1r2_comparison_learning_curves
-[[./img/r1r2_res/r1r2_comparison_learning_curves.png]]
-
-
-The inference time is the same as reported in table [[tbl:simple_net_inference_speed]], as the neural network Q-approximator is the same for all experiments.
 
 
 
@@ -1030,7 +1262,7 @@ The inference time is the same as reported in table [[tbl:simple_net_inference_s
 * Generalized Average Absolute Frame Difference
 From the learning curves in figure [[fig:gaafd_training_curves]] we see that the agent does indeed over time learn to make correct predictions. Interestingly, the best agent is the one who performs no exploration and "explores" greedily at every step. It also converges faster on a solution, though they are all arguably very slow, taking tens of thousands of SGD steps to converge. Even a value of $\epsilon=0.01$, meaning that only 1 percent of actions are random, significantly reduces performance and convergence speed.
 
-Not surprisingly, over time the agent will perform better on the training data compared to the validation data, as is visualized in the right-most plot in figure [[fig:gaafd_training_curves]]. This is less apparent the agent that uses a value of $\epsilon=0.1$ as the overfitting curve, whose positive values indicate worse performance on the validation set compared to the training set, remain closer to 0. For neither agent the increased relative performance on the training set appears to have a negative impact on the validation performance, so overfitting is not a big issue.
+Not surprisingly, over time the agent will perform better on the training data compared to the validation data, as is visualized in the right-most plot in figure [[fig:gaafd_training_curves]]. This is less apparent for the agent that uses a value of $\epsilon=0.1$ as the overfitting curve, whose positive values indicate worse performance on the validation set compared to the training set, remain closer to 0. For neither agent the increased relative performance on the training set appears to have a negative impact on the validation performance, so overfitting is not a big issue.
 
 The reason behind these results is likely due to the learner having access to noisier signals the higher the value of $\epsilon$. Recall that the agent only receives a reward at the very end of the episode which on average lasts for 50 steps. Any mistake in those 50 steps will be penalized and the agent has no way of knowing whether it was penalized for an action taken under its policy or an action taken randomly.
 
@@ -1039,29 +1271,7 @@ Further evidence of this can be found in the loss curves, as generally the model
 Another interesting feature of the loss curves is the valleys in the beginning of training. In the beginning of training the model has no knowledge about the data and any prediction will be random. As the actors learn which action to pick the sample data distribution changes, reflecting the new policies. This in turn creates a change in loss as the learner "catches up" to the new policy. As the model approaches a good estimate of the true Q-value $Q^*$ it will make less mistakes, and in turn the loss will decrease.
 
 
-TODO: Here we run simulation of model with increasing accuracy and see what the GaaFD variance and mean look like. It's not perfect smiulation since we only increase accuracy, not "GaaFD"-accuracy.
 
-#+CAPTION: TODO
-#+NAME: fig:gaafd_model_simulation_curves
-[[./img/gaafd_model_simulation_curves.png]]
-
-
-(TODO: what does it mean that the blue curve has lower loss than the dark-blue/purple one?)
-
-
-
-
-#+CAPTION: The training loss over time for different values of epsilon. The left plot shows the full y-axis, while the right plot shows the same plots but with a zoomed-in y-axis.
-#+NAME: fig:gaafd_loss_curves
-[[./img/gaafd_loss_curves.png]]
-
-
-
-TODO: Explain how ES performance is better than ED performance. Hypothesis: systole phase is shorter therefore mistakes are closer to ES on average.
-
-TODO: Explain how (for $\epsilon=0.1$) GaaFD is higher (worse) than both the GaaFD for only ED and only ES. It's because when we filter out events sometimes there are no events to predict.
-
-TODO: Discuss GaaFD-density plots
 
 To compare against other state-of-the-art models we use aaFD, but as discussed in earlier sections aaFD is not defined on videos whose number of predictions does not equal the number of ground truth events. As seen in table [[tbl:gaafd_best_models_sgd_steps]], the best model of the three generates the correct number of predictions in 77% of the cases, the worst model 64%. Disregarding these low numbers, and/or assuming there are methods of cleaning up the predictions such that aaFD becomes valid, we can filter out the invalid predictions for each model and compare their aaFD. This is seen in [[fig:gaafd_mismatched_predictions]]. Unsurprisingly, the model with $\epsilon=0$ who performs the best on GaaFD also makes the fewest mistakes in number of predictions. We also see a small bump at 2 mismatched number of predictions. This may be due to the fact that the model sometimes predicts rogue frames with wrong labels, perhaps due to noise, who are quickly fixed in the following frames. This creates two events in rapid succession, as visualized in figure [[ed_es_from_predictions_2]].
 
@@ -1077,24 +1287,10 @@ To compare against other state-of-the-art models we use aaFD, but as discussed i
 
 Peeking inside the machinery of the DQN-agent, we see a potential cause of the performance discrepancy between the three models. For every frame the agent predicts the future returns of marking a frame as diastole or marking it as systole. These predictions are plotted in [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. It is apparent that the model that uses $\epsilon=0$ is better at differentiating the value of taking either action for a given state. 
 
-#+CAPTION: The Q-values for three of the best predicted videos for each model. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents tiime in the video. 
-#+NAME: fig:gaafd_best_videos_q
-[[./img/gaafd_best_videos_q.png]]
-
-
-#+CAPTION: The Q-values for three of the worst predicted videos for each model. Top row is the model with $\epsilon=0$, middle row is the model with $\epsilon=0.01$, and the bottom row is the model with $\epsilon=0.1$. The x-axis represents tiime in the video.
-#+NAME: fig:gaafd_worst_videos_q
-[[./img/gaafd_worst_videos_q.png]]
 
 
 
 
-
-TODO: Also show example of frames from video of good video and bad video with corresponding q-values.
-
-TODO: What does the in-the-middle spikes represent in the gaafd_best_videos_q plot?
-
-TODO: Plot the best/worst videos as per each model's performance. Now each column is the same video, selected as the best for one of the models.
 
 
 
@@ -1105,51 +1301,33 @@ TODO: Plot the best/worst videos as per each model's performance. Now each colum
 
 
 * Simple- and Proximity-Based Reward Functions
-From the learning curves in figure [[fig:r1_learning_curves]] and figure [[fig:r2_learning_curves]] we see that the agent is able to learn to make correct predictions much faster than when using GaaFD as the reward function. This is very likely due to the GaaFD reward signal being much sparser than $R_1$ and $R_2$ — $R_1$ and $R_2$ simply provides information more efficiently, and with less noise, to the learner.
+From the learning curves in figure [[fig:r1_learning_curves]] and figure [[fig:r2_learning_curves]] we see that the agent is able to learn to make correct predictions much faster than when using GaaFD as the reward function. This is very likely due to the GaaFD reward signal being much sparser than $R_{simple}$ and $R_{proximity}$ — $R_{simple}$ and $R_{proximity}$ simply provides information more efficiently, and with less noise, to the learner.
 
 Compared to GaaFD, these models also reach their best performance much faster, though the performance on the validation set visibly degrades as the model starts to overfit. The exception to this is the model of the agent that has been trained using $\epsilon=0.1$, i.e. the agent that most often greedily takes actions, which seemingly doesn't overfit that much. 
 
-*...training curves*
 
 To explain the fact that the least explorative agent is the one that overfits the least on the training set it is useful to think of exploration in this case as a means of sampling the training data. No action affects future states in this environment, so the agent is not exploring to discover long-term strategies. It instead provides the learner only with samples of which it believes are the best and this, perhaps surprisingly, seems to have a regularizing effect.
 
 However, despite the regularization, the agent is still able to achieve perfect accuracy and GaaFD on the training set. Figure [[fig:r1r2_train_val_comparison_learning_curves]] plots the learning curves of the agents on both the training set and the validation set. 
 
-#+CAPTION: The GaaFD over training time (gradient descent steps) on the validation set (solid pink and blue line) and the training set (dashed pink and blue lines). The GaaFD on the training set reaches 0, meaning perfect predictions.
-#+NAME: fig:r1r2_train_val_comparison_learning_curves
-[[./img/r1r2_res/r1r2_train_val_comparison_learning_curves.png]]
 
 
 
-The effect of the reward function is also visible in the learning curves if we plot them for agents trained with $R_1$ and agents trained with $R_2$ together, as in figure [[fig:r1r2_comparison_learning_curves]]. The blue curves are the performance of agents trained using $R_1$ and the pink curves are the performance of agents trained using $R_2$. Looking only on the right side of the plots, i.e. as the agent approaches $200\,000$ SGD steps, we see a clear pattern. The upper plots show GaaFD, in which lower values are better, and therefore $R_2$ is the better reward function, at least for agents with $\epsilon=0.1$. The lower plots show balanced accuracy, in which higher values are better, and in this case $R_1$ is definitely the better reward function. So, it would seem that the reward function that was deliberately designed to be more similar to GaaFD turned out to get a better GaaFD score, even though it actually performs worse on a metric based on accuracy. This indicates that an agent trained using $R_2$ reward makes more errors compared to an agent trained using $R_1$, but the errors are less often severe. However, this is only when looking at the right side of the plot, where the agent is already fitted to the training set. If we look at the curve at the point of the lowest GaaFD score the simple reward function $R_1$ outperforms $R_2$. This is likely due to $R_2$ being a more difficult function to estimate, as its values span multiple values, while $R_1$ can only be either $1$ or $-1$. 
+The effect of the reward function is also visible in the learning curves if we plot them for agents trained with $R_{simple}$ and agents trained with $R_{proximity}$ together, as in figure [[fig:r1r2_comparison_learning_curves]]. The blue curves are the performance of agents trained using $R_{simple}$ and the pink curves are the performance of agents trained using $R_{proximity}$. Looking only on the right side of the plots, i.e. as the agent approaches $200\,000$ SGD steps, we see a clear pattern. The upper plots show GaaFD, in which lower values are better, and therefore $R_{proximity}$ is the better reward function, at least for agents with $\epsilon=0.1$. The lower plots show balanced accuracy, in which higher values are better, and in this case $R_{simple}$ is definitely the better reward function. So, it would seem that the reward function that was deliberately designed to be more similar to GaaFD turned out to get a better GaaFD score, even though it actually performs worse on a metric based on accuracy. This indicates that an agent trained using $R_{proximity}$ reward makes more errors compared to an agent trained using $R_{simple}$, but the errors are less often severe. However, this is only when looking at the right side of the plot, where the agent is already fitted to the training set. If we look at the curve at the point of the lowest GaaFD score the simple reward function $R_{simple}$ outperforms $R_{proximity}$. This is likely due to $R_{proximity}$ being a more difficult function to estimate, as its values span multiple values, while $R_{simple}$ can only be either $1$ or $-1$. 
 
-
-*...COMPARISON PLOTS*
-
-
-Compared to the loss curves of agents trained using GaaFD as the reward, agents trained using $R_1$ and $R_2$ yield a more familiar-looking loss curve. The loss curves in figure [[fig:r1r2_loss]] is seen dropping sharply in the beginning before slowly approaching some minimum. This is likely because in this case where discounting is $0.0$ the value of taking an action does not depend on the current policy, and thus the distribution of returns-estimations doesn't change as the policy changes as it did when using GaaFD as the reward function.
+Compared to the loss curves of agents trained using GaaFD as the reward, agents trained using $R_{simple}$ and $R_{proximity}$ yield a more familiar-looking loss curve. The loss curves in figure [[fig:r1r2_loss]] is seen dropping sharply in the beginning before slowly approaching some minimum. This is likely because in this case where discounting is $0.0$ the value of taking an action does not depend on the current policy, and thus the distribution of returns-estimations doesn't change as the policy changes as it did when using GaaFD as the reward function.
 
 Again, the agent with the lowest amount of exploration, plotted as the pink curve, stands out from the other models, its loss seeming to decrease faster in the beginning.
 
-#+CAPTION: The training loss over time for different values of epsilon. Left: an agent trained using $R_1$ (simple reward). Right: an agent trained using $R_2$ (proximity reward).
-#+NAME: fig:r1r2_loss
-[[./img/r1r2_res/r1r2_loss.png]]
 
 
 
 
 
-
-Again, we select the parameters at the step where GaaFD was lowest on the validation set for each of the three $\epsilon$ values and each of $R_1$ and $R_2$, giving us 6 trained models. Before doing so we smooth the curves using a Gaussian filter with a kernel standard deviation of 20 such that the selected parameters are not selected due to randomly sampling 50 easy videos. The SGD step of the selected model parameters and the overall performance of that model are listed in table [[tbl:r1_best_models_sgd_steps]] and table [[tbl:r2_best_models_sgd_steps]]. TODO: Rewrite this, and maybe merge with the /exact/ same paragraph as in GaaFD reward?
-
+Again, we select the parameters at the step where GaaFD was lowest on the validation set for each of the three $\epsilon$ values and each of $R_{simple}$ and $R_{proximity}$, giving us 6 trained models. Before doing so we smooth the curves using a Gaussian filter with a kernel standard deviation of 20 such that the selected parameters are not selected due to randomly sampling 50 easy videos. The SGD step of the selected model parameters and the overall performance of that model are listed in table [[tbl:r1_best_models_sgd_steps]] and table [[tbl:r2_best_models_sgd_steps]].
 
 
 
-
-
-
-
-*...DENSITY PLOTS*
 
 
 
@@ -1160,33 +1338,45 @@ One consequence of selecting the model with $\epsilon=0.1$ at a late time-step (
 
 
 
-*Q-values*
-
-#+CAPTION: TODO
-#+NAME: r1_q_best_videos
-[[./img/r1r2_res/r1_q_best_videos.png]]
-
-#+CAPTION: TODO
-#+NAME: r1_q_worst_videos
-[[./img/r1r2_res/r1_q_worst_videos.png]]
-
-#+CAPTION: TODO
-#+NAME: r2_q_best_videos
-[[./img/r1r2_res/r2_q_best_videos.png]]
-
-#+CAPTION: TODO
-#+NAME: r2_q_wrong_videos
-[[./img/r1r2_res/r2_q_wrong_videos.png]]
 
 
 
+* Why Use Reinforcement Learning?
+In the experiments that uses the reward function $R_{GaaFD}$ we have seen that the RL agent is able to learn from a very sparse reward signal. This makes RL a very general tool that can be used when supervised learning methods are not applicable. However, there's no such thing as a free lunch, and bringing in the whole RL machinery for a classification task brings a lot of complexity.
+
+The methods that have been used in this thesis suffer from low data efficiency compared to a supervised learning approach. Each sample given to the learner is of only one of the phases, as only one phase is predicted at every step. We also applied additional data sampling constraints on the learner by enforcing that a data item should be sampled 0.5 on average, i.e. half of the data is discarded. For the formulations where the agent's actions don't affect future actions, such as in BCE with either phase classification reward function $R_{simple}$ and $R_{proximity}$, the sampling should arguably be at least 1. The value of 0.5 for these experiments was due to running the experiments with $R_{GaaFD}$ first, and it was overlooked in subsequent experiments.
+
+The use of the environment abstraction for sampling was also a big performance bottleneck for the BCE ennvironment. Every new sample had to be created by stepping through the environment which occured on the CPU. For the BCU environment, whose next states were completely independent on the action taken by the actors, this abstraction limited us from batching the inference on the GPU. Because the environment abstraction is such an important part of the RL ecosystem and libraries we still opted to use it.
+
+A synthetic m-mode version of BCE was included to give RL a fair shot at proving its usefulness. The search for an m-mode to base its decisions off of is something that would be very difficult to solve for using supervised learning, and here RL is assumed to actually be the best tool for the job. However, this was a very hard problem to solve, presumably too complex for the current setup, and the benefits are not all apparent. Even if it did work, its inference would have been much slower than that of BCE, since there would be no way of batching forward passes through the neural network.
+
+However, even though RL may not be the best tool for the job of ED-/ES-frame detection, it is still a promosing techonology, especially for problems that require exploration.
 
 
+
+* Lack of Comparison Experiments
+Only one other study was found to report their model's performance on the Echonet dataset \cite{lane_multibeat_2021}. This is considered a weakness of this project and getting access to multiple datasets early in the project should have been a priority. This makes it hard to gain precise insight into the performance of the methods versus supervised learning methods.
+
+In their paper the authors report an average aaFD of $2.30$ and $3.49$ for ED and ES events. Our best model can report an average aaFD of $1.69$ overall, but this is only for 80% of the videos as 20% have an incorrect number of predicted events with respect to ground truth events. The authors does not report how many, if any, of the videos had an incorrect number of predicted events.
 
 
 
 
-\chapter{Conclusion}
+
+
+
+
+\chapter{Conclusion and Further Work}
+We are now ready to answer the original research questions:
+
+*Is it possible to use Reinforcement Learning for the task of ED-/ES-frame detection?* Yes, there are multiple ways, but some are more efficient than others. Rl is very flexible and allows us to model the problem in many different ways, both in terms of reward functions and environment dynamics.
+
+*How does the formulation of the problem as a Reinforcement Learning problem affect the performance of the model?* We have seen that the design of the reward function matters a lot. If the reward signal is too sparse then it will be more difficult for the agent to learn, which may result in poorer performance, as seen in our experiments. Our test results comparing the reward function $R_{simple}$ and $R_{proximity}$ shows that $R_{simple}$ performs better at aaFD, even though $R_{proximity}$ was specifically designed to be more similar to aaFD. This is despite the learning curves seen in figure [[fig:r1r2_comparison_learning_curves]] indicating that $R_{proximity}$ performs better at GaaFD after the models have begun to overfit, because $R_{simple}$ is able to reach a better score just before overfitting occurs.
+
+Furthermore, the value of $\epsilon$ has been seen to be an important hyper parameter for these tasks. For the sparse GaaFD reward function, using a value of $\epsilon=0$ yielded the best results. For $R_{simple}$ and $R_{proximity}$, the difference between different values of $\epsilon$ had little effect on the performance of the best model, but seemed to have a regularizing effect. It would be interesting to dive deeper into why this happens, and perhaps how we can take advantage of it inwhen sampling data for supervised learning.
+
+
+
 
 
 

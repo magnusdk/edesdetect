@@ -4,6 +4,18 @@
 
 * TODOs
 
+Explain what "end-to-end" means in background. Why does it matter? why not create features by hand?
+
+Include this in background: ML is the study and development of algorithms that can learn from experience. If given enough examples, ML can approximate any mapping between input and output data \cite{zhang_dive_2020}.
+
+Explain RNN GRU in background.
+
+
+Describe that there are different views to be imaged in background. Mention apical-4-chamber specifically.
+
+
+
+
 TODO: Mention the deadly triad in Q-learning with function approximators.
 TODO: Write about why we chose DQN, what alternatives we considered, etc.
 
@@ -21,14 +33,59 @@ TODO: Write about why we chose DQN, what alternatives we considered, etc.
  - Future work could be using Policy Gradient methods
 
 ** TODO Discussion
-- Sparse reward signal may make the results worse. Can be counteracted by: what? n-step? Less dicsount (gamma closer to 1.0)? Using "advantage" for Q-function? Actor-critic network agent?
+
+TODO: Also show example of frames from video of good video and bad video with corresponding q-values.
+
+TODO: What does the in-the-middle spikes represent in the gaafd_best_videos_q plot?
+
+TODO: Plot the best/worst videos as per each model's performance. Now each column is the same video, selected as the best for one of the models.
+
+
+(TODO: GaaFD, what does it mean that the blue curve has lower loss than the dark-blue/purple one?)
+
+
+TODO: Explain how ES performance is better than ED performance. Hypothesis: systole phase is shorter therefore mistakes are closer to ES on average.
+
+TODO: Explain how (for $\epsilon=0.1$) GaaFD is higher (worse) than both the GaaFD for only ED and only ES. It's because when we filter out events sometimes there are no events to predict.
+
+TODO: Discuss GaaFD-density plots
 
 
 
 
+** Simulation experiment
+Describe this under methodology
+TODO: Here we run simulation of model with increasing accuracy and see what the GaaFD variance and mean look like. It's not perfect smiulation since we only increase accuracy, not "GaaFD"-accuracy.
+
+#+CAPTION: TODO
+#+NAME: fig:gaafd_model_simulation_curves
+[[./img/gaafd_model_simulation_curves.png]]
 
 
-
-
+TODO: Fix all plots that names $R_1$ or $R_2$.
 
 * Scratch
+
+
+* TODO From meeting [9/12]
+- [ ] Results should summarize the research (this is important)
+- [ ] Add units to axes where it is hard to know what's going on
+- [ ] Fix LaTeX tables
+- [X] Move all plots to results
+- [X] R1 and R2 not clear what they are.
+- [X] Don't mention that libraries are from Deepmind (irrelevant)
+- [X] f.ex -> f.e or a.e
+- [X] What is a density plot (methodology)
+- [X] Increase graphics width
+- [X] Include abstract (with conclusions)
+- [X] Remove borders around links
+- [X] Discussion: Why reinforcement learning? Did it make sense in the end?
+
+
+
+
+
+
+We can use \clearpage to force figures to render at specific points.
+
+
