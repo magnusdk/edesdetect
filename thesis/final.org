@@ -51,7 +51,7 @@ After which, to center images, regex-replace:
 \chapter*{Abstract}
 
 
-The thesis explores ways of formulating the problem of detecting the key cardiac phases, i.e., the End Diastolic (ED) and End Systolic (ES) phases, as a Reinforcement Learning (RL) problem, and whether there are any benefits in doing so. Of particular interest is the design of the RL reward function. Three reward functions are explored: one based on a generalization of the performance metric of Average Absolute Frame Difference (aaFD) that is only given to the agent at the end of an episode, and two based on per-frame phase classification given at every step. Additionally, two formulations of the RL environment are explored: Binary Classification Environment (BCE), designed to be a direct reformulation of a supervised binary classification task, and M-Mode Binary Classification Environment (MMBCE), designed to provide the agent with the ability to explore the environment using synthetic m-mode imaging. Because of time constraints, MMBCE was only preliminary explored, yet the results indicate that the problem is too complex for the current setup and requires more work before we can draw any conclusions on its feasibility.
+The thesis explores ways of formulating the problem of detecting the key cardiac phases from ultrasound videos, i.e., the end diastolic (ED) and end systolic (ES) phases, as a reinforcement learning (RL) problem, and whether there are any benefits in doing so. Of particular interest is the design of the RL reward function. Three reward functions are explored: one based on a generalization of the performance metric of average absolute frame difference (aaFD) that is only given to the agent at the end of an episode, and two based on per-frame phase classification given at every step. Additionally, two formulations of the RL environment are explored: binary classification environment (BCE), designed to be a direct reformulation of a supervised binary classification task, and m-mode binary classification environment (MMBCE), designed to provide the agent with the ability to explore the environment using synthetic m-mode imaging. Because of time constraints, MMBCE was only preliminary explored, yet the results indicate that the problem is too complex for the current setup and requires more work before we can draw any conclusions on its feasibility.
 
 Experiments show that an RL agent is able to learn to perform phase detection even when the reward signal is very sparse. However, the less sparse reward functions perform better on nearly all metrics. The best agent predicts the correct number of ED and ES events in $80.26\%$ of the videos on the test set, on which it yields an aaFD score of $1.69$. It is concluded that there are multiple ways of formulating the problem of phase detection as a reinforcement learning problem, but not all formulations are equal. Reward sparsity and environment complexity contribute negatively to performance overall. There are also indications that lower values of the $\epsilon$ -greedy exploration hyperparameter $\epsilon$ have a regularizing effect on the model, prompting further research.
 
@@ -76,22 +76,22 @@ Experiments show that an RL agent is able to learn to perform phase detection ev
 * Motivation
 Cardiovascular disease is the number one cause of death globally, taking an estimated 17.9 million lives each year \cite{noauthor_cardiovascular_nodate}. It is important to make a timely diagnosis so that patients receive early treatment risk assessment. One standard tool used for diagnosis is cardiac imaging; non-invasive imaging of the heart.
 
-In order to obtain images of the heart, clinicians use tools such as Magnetic Resonance Imaging (MRI), Computerized Tomography (CT) scans, or ultrasound. MRI and CT are less routinely used due to being expensive, having limited availability and a prolonged acquisition time, and using radiation for CT scans. Furthermore, both MRI and CT scans can not be performed if the patient has any metal in their body, such as a pacemaker or metal implants. Ultrasound, on the other hand, is comparatively inexpensive. It is also more flexible; there even exists handheld devices that can be carried by hand and brought on-site. Ultrasound does have a lower imaging quality compared to, for example, MRI \cite{mordi_efficacy_2017}, and the images can be challenging to interpret due to ultrasound-specific artifacts. Despite this, it is still preferable in many cases because of the reasons mentioned above.
+In order to obtain images of the heart, clinicians use tools such as magnetic resonance imaging (MRI), computerized tomography (CT) scans, or ultrasound. MRI and CT are less routinely used due to being expensive, having limited availability and a prolonged acquisition time, and using radiation for CT scans. Furthermore, both MRI and CT scans can not be performed if the patient has any metal in their body, such as a pacemaker or metal implants. Ultrasound, on the other hand, is comparatively inexpensive. It is also more flexible; there even exists handheld devices that can be carried by hand and brought on-site. Ultrasound does have a lower imaging quality compared to, for example, MRI \cite{mordi_efficacy_2017}, and the images can be challenging to interpret due to ultrasound-specific artifacts. Despite this, it is still preferable in many cases because of the reasons mentioned above.
 
-Many heart measurements depend on two key events in the cardiac cycle: End-Diastole (ED) and End-Systole (ES). Roughly speaking, ED is when the heart is the most relaxed, and ES is when it is the most contracted. Left ventricular ejection fraction is an example of an important measurement that is calculated from ED and ES frames of the cardiac cycle.
+Many heart measurements depend on two key events in the cardiac cycle: end-diastole (ED) and end-systole (ES). Roughly speaking, ED is when the heart is the most relaxed, and ES is when it is the most contracted. Left ventricular ejection fraction is an example of an important measurement that is calculated from ED and ES frames of the cardiac cycle.
 
 A recent study has reported that the average time taken for manually annotating ED and ES frames from visual cues from a video of 1 to 3 heartbeats is 26 seconds, with a standard deviation of $\pm 11$ seconds \cite{lane_multibeat_2021}. Furthermore, because there is not much movement around these frames, the predicted ED and ES frames may differ between different operators. It may even differ for the same operator predicting on the same video at different times. Automating ED/ES frame detection is desirable because it can help reduce annotation time and create a more robust and deterministic result.
 
-Machine learning methods show promising results on several tasks within medical imaging, as is explored in the following chapter. For ED/ES frame detection, the most recent methods utilize Supervised Deep Learning, a family of methods in which a computer program is shown examples of correct predictions and, over time, learns to make the correct predictions itself. Reinforcement Learning (RL) is another family of methods that have as of yet not been explored for the problem of ED/ES frame detection. RL is able to outperform humans in complex tasks, such as mastering the board game Go in 2016 \cite{silver_mastering_2016} or becoming among the 0.2% best players in the world in the video game Starcraft II \cite{vinyals_grandmaster_2019}. However, RL can do more than just play games, and many medical imaging applications also show promising potential \cite{zhou_deep_2021}.
+Machine learning methods show promising results on several tasks within medical imaging, as is explored in the following chapter. For ED/ES frame detection, the most recent methods utilize supervised deep learning, a family of methods in which a computer program is shown examples of correct predictions and, over time, learns to make the correct predictions itself. Reinforcement learning (RL) is another family of methods that have as of yet not been explored for the problem of ED/ES frame detection. RL is able to outperform humans in complex tasks, such as mastering the board game Go in 2016 \cite{silver_mastering_2016} or becoming among the 0.2% best players in the world in the video game Starcraft II \cite{vinyals_grandmaster_2019}. However, RL can do more than just play games, and many medical imaging applications also show promising potential \cite{zhou_deep_2021}.
 
 
 * Goal and Research Question
-The goal of this Master's project is to explore the use of RL for automatically detecting the ED and ES frames from an ultrasound video. It is interesting from a healthcare perspective because it may open the doors for better automated tools. Yet, it is arguably more interesting from a research perspective because RL is not an obvious choice for this task. RL is built for tasks that require strategic reasoning, but ED/ES frame detection is fundamentally a classification problem.
+The goal of this thesis is to explore the use of RL for automatically detecting the ED and ES frames from an ultrasound video. It is interesting from a healthcare perspective because it may open the doors for better automated tools. Yet, it is arguably more interesting from a research perspective because RL is not an obvious choice for this task. RL is built for tasks that require strategic reasoning, but ED/ES frame detection is fundamentally a classification problem.
 
 We pose the following research questions:
 
-- *Is it possible to use Reinforcement Learning for the task of ED-/ES-frame detection?*
-- *How does the formulation of the problem as a Reinforcement Learning problem affect the performance of the model?*
+- *Is it possible to use reinforcement learning for the task of ED-/ES-frame detection?*
+- *How does the formulation of the problem as a reinforcement learning problem affect the performance of the model?*
 
 Of importance to all types of machine learning is formulating the problem in a way that makes it easier to learn for the computer. That is, optimizing the /inductive bias/ by incorporating human knowledge into the algorithm itself. Using RL for ED/ES frame detection may open up possibilities of seeing the problem from a new perspective, allowing us the add the right set of inductive bias.
 
@@ -125,7 +125,7 @@ During a cardiac cycle, the different chambers are filled at different times. At
 There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite{mada_razvan_o_how_2015}:
 1. Finding the frame with the maximum left ventricle volume (for ED) and the frame with the minimum left ventricle volume (for ES).
 2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
-3. Analyzing a simultaneously acquired Electrocardiogram (ECG) signal.
+3. Analyzing a simultaneously acquired electrocardiogram (ECG) signal.
 
 These methods can be visualized in the Wiggers diagram, as seen in figure [[fig:wiggers_diagram]], which plots several key events in the cardiac cycle and the corresponding values of various measurements.
 
@@ -137,10 +137,10 @@ Out of these three, using the ECG signal is the least preferable. This is becaus
  [[./img/wiggers_diagram.png]]
 
 * What is Ultrasound?
-What we as humans perceive as sound are simply vibrations of the particles that surround us. Sound waves push particles together, creating an increase in pressure. Particles in an area of high pressure move to areas of lower pressure, which creates a chain reaction where a pressure field moves through particles. This is called wave propagation and is lightly illustrated in figure [[fig:pressure_wave_propagation]]. Sound is simply waves of pressure propagating through a medium.
+What we as humans perceive as sound are simply vibrations of the particles that surround us. Sound waves push particles together, creating an increase in pressure. Particles in an area of high pressure move to areas of lower pressure, which creates a chain reaction where a pressure field moves through particles. This is called wave propagation and is informally illustrated in figure [[fig:pressure_wave_propagation]]. Sound is simply waves of pressure propagating through a medium.
 
 #+NAME: fig:pressure_wave_propagation
-#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles push back as the pressure increases, moving the pressure field. Warning: this image is just a representation of how particles interact — real particles do not look like this.
+#+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles push back as the pressure increases, moving the pressure field. Warning: This image is just a representation of how particles interact — real particles do not look like this.
 [[./img/pressure_wave_propagation.png]]
 
 
@@ -278,7 +278,7 @@ Gradient descent scales to an arbitrary number of parameters. This lets us optim
 The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as both the model and the loss function is differentiable then we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient and whether it contains a lot of local minima. 
 
 
-We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as those of cats or of dogs. We may consider the data set as part of the loss function, as we want to minimize the error of the model on these specific data. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called Stochastic Gradient Descent (SGD) and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once.
+We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as those of cats or of dogs. We may consider the data set as part of the loss function, as we want to minimize the error of the model on these specific data. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called stochastic gradient descent (SGD) and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once.
 
 Another aspect of great importance is to instill what's called inductive bias into the model; that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some important features are explored in the next section.
 
@@ -327,7 +327,7 @@ One way to reduce the chance of overfitting is to use regularizers. Regularizers
 
 
 ** Supervised, Semi-Supervised, and Unsupervised Learning
-One way of designing the loss function is to define it as the difference between the predicted values from the model and ground truths that were labeled beforehand. Learning methods that use these kinds of loss functions are generally called Supervised Learning, as if a "supervisor" tells the model what the right answer ought to have been.
+One way of designing the loss function is to define it as the difference between the predicted values from the model and ground truths that were labeled beforehand. Learning methods that use these kinds of loss functions are generally called supervised learning, as if a "supervisor" tells the model what the right answer ought to have been.
 
 If we don't have access to ground truth labels we can instead define the loss in other ways. TODO: semi-supervised and unsupervised
 
@@ -341,7 +341,7 @@ TODO: Run Grammarly on above sections (once they are finished).
 ** Reinforcement Learning
 RL allows an agent to learn a strategy, called a /policy/, that maximizes the total reward received through interacting with an environment. RL can leverage time in a way that neither supervised nor unsupervised learning is able to because it takes future decisions into account when deciding on the next action. An RL agent can make a decision now that has no immediate benefit but will lead to a better result in the future.
 
- At the core of RL are Markov Decision Processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
+ At the core of RL are markov decision processes (MDP) \cite{sutton_reinforcement_2018}, which can be described using four elements:
 
  - The state space $S$
  - The action space $A$
@@ -373,7 +373,7 @@ One way to select an action is to predict the following state's value after taki
 
 TODO: Mention epsilon-greedy policy and UCB
 
-One algorithm for updating the state value function is called Temporal Difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration, as seen in equation [[eqn:state_value_function]]. $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is able to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
+One algorithm for updating the state value function is called temporal difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration, as seen in equation [[eqn:state_value_function]]. $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is able to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
 
 #+NAME: eqn:state_value_function
@@ -403,7 +403,7 @@ We assume that there exists a way to approximate the value of states in a much m
  Much of today's research into RL goes into scaling it up to larger state-spaces. Methods that scale RL by modifying the Q-learning algorithm are called "action-value methods," but they are not the only ones to do so. Policy gradient is another popular set of methods that can learn a parameterized policy directly, without consulting a value function \cite{sutton_reinforcement_2018}. Policy gradient methods may more naturally model continuous action spaces as it outputs a distribution of action probabilities instead of the values of a discrete set of actions. As seen in later chapters, the RL formulations used in this thesis all use discrete action spaces, and only action-value methods are considered for this thesis.
 
 *** Deep Q-Network
-The modified Q-learning algorithm was termed Deep Q-Network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
+The modified Q-learning algorithm was termed deep q-network \cite{mnih_human-level_2015} (DQN) for its ability to take advantage of recent deep learning advances and deep neural networks.
 
 The original DQN algorithm takes the raw pixel values from an Atari game as input, followed by three convolutional layers and two fully connected layers. The final fully connected layer outputs one value for each possible action, approximating the expected value of taking each action given the state, i.e., $Q(s, a)$. An $\epsilon$ -greedy policy then chooses either the action with the highest approximated value with probability $1 - \epsilon$ or a random action with probability $\epsilon$.
 
@@ -544,13 +544,13 @@ This work serves as inspiration for this thesis and helps guide our RL formulati
 
 
 
-\chapter{Datasets}
+\chapter{The Dataset}
 Overview of the chapter.
 Short description of the different datasets used.
 
 
 * Echonet-Dynamic Dataset
-The Echonet-Dynamic Dataset\cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and Respirometer-information, and downsampled from its original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view, and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
+The Echonet-Dynamic Dataset\cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and respirometer-information, and downsampled from its original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view, and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
 
 The dataset consists of three parts: /FileList.csv/ contains general information about each video, its variables are listed in table [[tbl:echonet_filelist_variables]]. /VolumeTracings.csv/ contains the volume tracings and ED/ES frame index of each video, its variables are listed in table [[tbl:echonet_volumetracings_variables]]. And finally /Videos/, containing all the ultrasound videos in =.avi= format. Video frame samples can be seen in figure [[fig:echonet_samples]].
 
@@ -620,7 +620,7 @@ The summed absolute frame difference should at most have one peak if the frames 
 [[./img/phase_diff_plots.png]]
 
 
-The videos already have the same size of 112-by-112, but the Frames-Per-Seconds (FPS) differs. Luckily, most videos in the dataset have the same FPS — almost 80% of the videos have exactly 50 FPS. The smallest FPS is 18, and the highest FPS is 138. See figure [[fig:echonet_fps_histogram]] for a histogram (logarithmic scale on the y-axis) of the different FPS values.
+The videos already have the same size of 112-by-112, but the frames-per-seconds (FPS) differs. Luckily, most videos in the dataset have the same FPS — almost 80% of the videos have exactly 50 FPS. The smallest FPS is 18, and the highest FPS is 138. See figure [[fig:echonet_fps_histogram]] for a histogram (logarithmic scale on the y-axis) of the different FPS values.
 
 To normalize the videos with a much smaller FPS than 50, we would have to add information to them by inserting new frames. However, this may add unwanted bias to the data, and it is not obvious how to label the interpolated frames when the video goes from one phase to another. We would have to remove frames to normalize the videos with a much higher FPS. Unless the FPS is a multiple of 50, we risk introducing varying FPS to the video, which may confuse the model. For example, if a video has 75 FPS, we could opt to remove every third frame to make it 50 FPS, but this would make it seem like the heart moves slightly faster every third frame.
 
@@ -643,8 +643,12 @@ A full Echonet-Dynamic dataset pipeline is visualized in figure [[fig:dataset_pi
 
 
 
+
+\chapter{Methodology}
+
+
 * Environment Formulation
-As described in section [[Reinforcement Learning]], a Markov Decision Process (MDP), which is at the core of RL, can be described using four elements: the state space, the action space, the transition function, and the reward function. The states and actions dictate what information the agent receives from the environment and how it can, in turn, interact with the environment. The transition function defines the effect of actions on the environment. The reward function defines the goal of the agent.
+As described in section [[Reinforcement Learning]], a markov decision process (MDP), which is at the core of RL, can be described using four elements: the state space, the action space, the transition function, and the reward function. The states and actions dictate what information the agent receives from the environment and how it can, in turn, interact with the environment. The transition function defines the effect of actions on the environment. The reward function defines the goal of the agent.
 
 ** Binary Classification Environment
 BCE is visualized in figure [[fig:binary_classification_environment_loop]]. After observing the current and adjacent frames, the agent takes an action predicting that the current frame is either in the diastole or systole phase and receives a reward dependent on its prediction before the environment moves the current frame one frame forward.
@@ -653,7 +657,7 @@ BCE is visualized in figure [[fig:binary_classification_environment_loop]]. Afte
 #+NAME: fig:binary_classification_environment_loop
 [[./img/binary_classification_environment_loop.png]]
 
-More formally, the observation $o_t$ at time $t$ is the current frame in the video prepended by the $N$ previous frames and the $N$ next frames. The shape of an observation is thus $(W, H, 2N+1)$. The agent takes the observation as-is and takes one of two actions: /Mark current frame as Diastole/ or /Mark current frame as Systole/. After taking an action $a_t$, the agent receives a reward $r_{t+1}$ and is presented with the next observation $o_{t+1}$. The current frame is moved one frame forwards after each action is taken, and the episode ends when there are no more labeled frames left.
+More formally, the observation $o_t$ at time $t$ is the current frame in the video prepended by the $N$ previous frames and the $N$ next frames. The shape of an observation is thus $(W, H, 2N+1)$. The agent takes the observation as-is and takes one of two actions: /Mark current frame as diastole/ or /Mark current frame as systole/. After taking an action $a_t$, the agent receives a reward $r_{t+1}$ and is presented with the next observation $o_{t+1}$. The current frame is moved one frame forwards after each action is taken, and the episode ends when there are no more labeled frames left.
 
 Given that videos from the dataset are 112-by-112, the only two hyper-parameters for this setup are $N$ and the choice of reward function. Increasing $N$ means that the agent has access to more temporal information but at the cost of increased computational and memory requirements and a decrease in the number of videos with enough adjacent frames on either side. The number of valid videos for a given $N$ and the change in the number of valid videos is plotted in figure [[fig:n_valid_videos_for_n]]. As a starting point, $N$ was selected rather arbitrarily to be $3$. This means that an observation has the shape $(112, 112, 7)$, having $2\times 3 + 1 = 7$ channels.
 
@@ -670,7 +674,7 @@ Given that videos from the dataset are 112-by-112, the only two hyper-parameters
 
 
 ** Reward Function Design
- The standard metric for this task is the Average Absolute Frame Difference (aaFD), as defined in equation [[eqn:aafd]]. aaFD measures the precision and accuracy of predictions by measuring the frame difference between each ground truth event $y_t$ and the corresponding prediction $\hat{y}_t$ generated by the model — a lower aaFD meaning that the model is making fewer errors. $t$ is the index of a specific event, of which there are $N$ in total.
+ The standard metric for this task is the average absolute frame difference (aaFD), as defined in equation [[eqn:aafd]]. aaFD measures the precision and accuracy of predictions by measuring the frame difference between each ground truth event $y_t$ and the corresponding prediction $\hat{y}_t$ generated by the model — a lower aaFD meaning that the model is making fewer errors. $t$ is the index of a specific event, of which there are $N$ in total.
 
  #+NAME: eqn:aafd
  \begin{equation}
@@ -702,7 +706,7 @@ Similarly, we could base it on the ground truth events and take the distance to 
 
  Using negative GaaFD (negative because we wish to minimize it) as a reward function for RL means optimizing the agent directly for our main metric aaFD. However, it has one final flaw: it is only defined on whole episodes. This means that the agent has to run an entire episode before getting a reward, making the reward signal sparse.
 
- Instead, we could frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either Diastole or Systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
+ Instead, we could frame the problem as a simple classification problem where the agent must classify individual frames as either ED, ES, or neither. This allows us to give a reward at each step depending on whether the prediction was correct or not. One problem with this approach is that there is a heavy class imbalance because most frames are neither ED nor ES. A solution to this is to instead predict the phase, either diastole or systole, as it is trivial to find ED and ES from the phase by finding the frames where it transitions from one to the other.
 
 From this, we can define a simple reward function $R_{simple}$ that gives a reward of $1$ if the predicted phase was correct and $-1$ if it was incorrect, as seen in equation [[eqn:simple_reward]]. The information that the agent receives from the reward signal $R_{simple}$ is slightly different from the one defined through GaaFD, as GaaFD penalizes predictions that are more wrong heavier than those that are close to the ground truth.
 
@@ -787,9 +791,9 @@ During training, the updated parameters of the model are continuously evaluated 
 
 The primary evaluation metric for the trained model is aaFD. However, some videos may not receive the same number of predicted events as there are ground truth events, so aaFD is undefined. Because of this, aaFD is only reported for videos where it is defined. Additionally, the percentage of videos with a defined aaFD is reported. The corresponding ground truth event to each predicted event is chosen to be the closest one, and we can therefore use GaaFD, as defined in equation [[eqn:aafd_generalized]], for calculating aaFD.
 
-It may also be interesting to see the density plots of GaaFD for all videos and compare the performance of the agent on ED- and ES-frames individually. The density plots used are an approximation of the continuous distribution of GaaFD. A histogram may also be used, but density plots were found to be easier to compare using density plots. They are created using Gaussian kernel Estimation (KDE) \cite{scott_multivariate_1992}. The kernel bandwidth is automatically selected using Scott's rule, the default selection method for SciPy's KDE implementation.
+It may also be interesting to see the density plots of GaaFD for all videos and compare the performance of the agent on ED- and ES-frames individually. The density plots used are an approximation of the continuous distribution of GaaFD. A histogram may also be used, but density plots were found to be easier to compare using density plots. They are created using gaussian kernel estimation (KDE) \cite{scott_multivariate_1992}. The kernel bandwidth is automatically selected using Scott's rule, the default selection method for SciPy's KDE implementation.
 
-Because the RL problem formulation is similar to a regular binary classification problem, accuracy and balanced accuracy are also reported. Accuracy and balanced accuracy are defined on frame phase predictions instead of end-phase events. Accuracy is simply the percentage of correctly labeled frames, as defined in equation [[eqn:accuracy]], where $1(y=\hat{y})$ is the indicator function. Given that there is a class imbalance between diastole and systole frames, balanced accuracy gives a more representative score of the actual model performance. Balanced accuracy weights systole frames accuracy higher than diastole frames and is defined in equation [[eqn:balanced_accuracy]]. $TP$, $FP$, $TN$, and $FN$ stand for True Positives, False Positives, True Negatives, and False Negatives, respectively. It is also defined as the average between the sensitivity and the specificity. The balanced accuracy score is also rescaled such that it gives a score in the range $[-1, 1]$, where $0$ means that the model's predictions are random, and $-1$ and $1$ mean that the predictions are all incorrect or all correct, respectively.
+Because the RL problem formulation is similar to a regular binary classification problem, accuracy and balanced accuracy are also reported. Accuracy and balanced accuracy are defined on frame phase predictions instead of end-phase events. Accuracy is simply the percentage of correctly labeled frames, as defined in equation [[eqn:accuracy]], where $1(y=\hat{y})$ is the indicator function. Given that there is a class imbalance between diastole and systole frames, balanced accuracy gives a more representative score of the actual model performance. Balanced accuracy weights systole frames accuracy higher than diastole frames and is defined in equation [[eqn:balanced_accuracy]]. $TP$, $FP$, $TN$, and $FN$ stand for "true positives", "false positives", "true negatives", and "false negatives", respectively. It is also defined as the average between the sensitivity and the specificity. The balanced accuracy score is also rescaled such that it gives a score in the range $[-1, 1]$, where $0$ means that the model's predictions are random, and $-1$ and $1$ mean that the predictions are all incorrect or all correct, respectively.
 
 #+NAME: eqn:accuracy
 \begin{equation}
@@ -876,7 +880,7 @@ Since an action does not affect future states, exploration is not as important. 
 
 
 * Incorporating Search
-Although RL is designed to be able to perform a search through an unknown state space, in the previous setup, there is no exploration as previous actions do not affect future actions. Therefore, there is no reason to believe that RL will outperform a carefully designed Supervised learning approach. By transforming the problem to one that requires search, we will have a problem not trivially solved by supervised learning but where RL can shine. Though this may seem like straightening a screw to make it work with a hammer, there may be unforeseen benefits. Of great importance to ML is to represent the problem space such that it is easy for an algorithm to learn from it. Perhaps there is an optimal representation of the problem of ED-/ES-detection that also happens to require search?
+Although RL is designed to be able to perform a search through an unknown state space, in the previous setup, there is no exploration as previous actions do not affect future actions. Therefore, there is no reason to believe that RL will outperform a carefully designed supervised learning approach. By transforming the problem to one that requires search, we will have a problem not trivially solved by supervised learning but where RL can shine. Though this may seem like straightening a screw to make it work with a hammer, there may be unforeseen benefits. Of great importance to ML is to represent the problem space such that it is easy for an algorithm to learn from it. Perhaps there is an optimal representation of the problem of ED-/ES-detection that also happens to require search?
 
 ** Temporal Search
 We could formulate the problem as a search in time where the agent must learn to move the current frame towards the end-phase event. The agent sees the current frame and some number of previous and following frames and can either move the current frame backward or forwards. The agent can be rewarded with 1 if it moves a step closer to the nearest end-phase frame and -1 if it moves away from it.
@@ -889,9 +893,9 @@ There are a handful of issues with this approach. *Issue 1*: we would have to tr
 ** Spatial Search
 Instead of searching through the video frames, we could let the agent search spatially in the video. In this formulation, the agent only has access to a part of the images while predicting the phase of frames. Like landmark detection tasks, it can move its focus around in the image, the hope being that it can discover parts of the video, which makes it easier to identify the correct phase. This can be seen as reducing the space and memory requirements at the cost of speed, as the agent has to process a smaller part of the image but may explore multiple steps before making a prediction.
 
-One option is to look at a Region Of Interest (ROI) around a point that the agent can move. Building upon the simple binary classification environment described in previous sections, this would add four new actions: move up, move down, move left, and move right. This is visualized in figure [[fig:roi_exploration]]. Because we reduce the size of the observations, we could either trade it for reduced memory usage or for including more temporal information in terms of included adjacent frames.
+One option is to look at a region of interest (ROI) around a point that the agent can move. Building upon the simple binary classification environment described in previous sections, this would add four new actions: move up, move down, move left, and move right. This is visualized in figure [[fig:roi_exploration]]. Because we reduce the size of the observations, we could either trade it for reduced memory usage or for including more temporal information in terms of included adjacent frames.
 
- #+CAPTION: A Region Of Interest (ROI) is given to the agent, which it can then move around to explore.
+ #+CAPTION: A region of interest (ROI) is given to the agent, which it can then move around to explore.
  #+NAME: fig:roi_exploration
  [[./img/roi_exploration.png]]
 
@@ -912,7 +916,7 @@ Moving the synthetic m-mode line up, down, left, or right is done relative to it
 [[./img/m_mode_vertical_movement_effect.png]]
 
 * M-Mode Binary Classification Environment
-We formulate the M-Mode Binary Classification environment using a synthetic m-mode search space scheme. The agent can make one of 8 actions: /Mark current frame as Diastole/, /Mark current frame as Systole/, /Rotate line/ (left or right), /Move line along its pointing direction/ (up or down), and /Move line perpendicular to its pointing direction/ (left or right). The observation includes the synthetic m-mode image of the current line position. However, we also want to give the agent explicit information about what it would look like if it moved or rotated the line and a history of the latest actions.
+We formulate the m-mode binary classification environment using a synthetic m-mode search space scheme. The agent can make one of 8 actions: /Mark current frame as diastole/, /Mark current frame as systole/, /Rotate line/ (left or right), /Move line along its pointing direction/ (up or down), and /Move line perpendicular to its pointing direction/ (left or right). The observation includes the synthetic m-mode image of the current line position. However, we also want to give the agent explicit information about what it would look like if it moved or rotated the line and a history of the latest actions.
 
 An observation thus consists of the synthetic m-mode image for three different rotations (rotated left, not rotated at all, and rotated right) and for three different perpendicular movements (moved to the left, not moved at all, moved to the right), for a total of 9 synthetic m-mode images. Up and down line movements are not included as additional channels because they do not provide as much information to the agent, as seen in figure [[fig:m_mode_vertical_movement_effect]]. The synthetic m-mode image is created by interpolating the line across the video using nearest-neighbor interpolation. An overview image consisting of the average of the first 50 frames and the current position of the synthetic m-mode line is also included in the observation. Lastly, we include the last five actions taken as a one-hot encoded array of shape $(5, 8)$ — 8 being the number of possible actions. Observations are thus a tuple of:
 
@@ -1228,7 +1232,7 @@ The inference time is faster on the CPU than the GPU when we include IO roundtri
 
 
 * M-Mode Binary Classification Environment
-A single experiment was run using the M-Mode Binary Classification Environment (MMBCE), the result of which can be seen in table [[tbl:mmode_best_model_metrics]]. The percentage of episodes where the agent actively explores its environment by moving the synthetic m-mode line is reported in addition to the key metrics. The agent is said to have explored if at least one of the actions in the episode moved or rotated the line. The GaaFD is also reported for episodes where the agent performs some exploration and where it performs no exploration individually.
+A single experiment was run using the m-mode binary classification environment (MMBCE), the result of which can be seen in table [[tbl:mmode_best_model_metrics]]. The percentage of episodes where the agent actively explores its environment by moving the synthetic m-mode line is reported in addition to the key metrics. The agent is said to have explored if at least one of the actions in the episode moved or rotated the line. The GaaFD is also reported for episodes where the agent performs some exploration and where it performs no exploration individually.
 
 The agent trained on the MMBCE performs worse than any agent trained on the BCE, as seen in table [[tbl:mmode_best_model_metrics]]. It also performs very little exploration of the environment, where almost 35% of episodes contain no movement of the synthetic m-mode line at all. Figure [[fig:action_frequencies_mmode]] show the distribution of actions taken by the agent on the test split. Over 90% of actions were of marking the current frame as either diastole or systole.
 
@@ -1367,9 +1371,9 @@ The authors report an average aaFD of $2.30$ and $3.49$ for ED and ES events in 
 \chapter{Conclusion and Further Work}
 We are now ready to answer the original research questions:
 
-*Is it possible to use Reinforcement Learning for the task of ED-/ES-frame detection?* Yes, there are multiple ways, but some are more efficient than others. RL is very flexible and allows us to model the problem in many different ways, both in terms of reward functions and environment dynamics.
+*Is it possible to use reinforcement learning for the task of ED-/ES-frame detection?* Yes, there are multiple ways, but some are more efficient than others. RL is very flexible and allows us to model the problem in many different ways, both in terms of reward functions and environment dynamics.
 
-*How does the formulation of the problem as a Reinforcement Learning problem affect the performance of the model?* 
+*How does the formulation of the problem as a reinforcement learning problem affect the performance of the model?* 
 We have seen that the design of the reward function matters a lot. If the reward signal is too sparse, it will be more difficult for the agent to learn, resulting in poorer performance, as seen in our experiments. Our test results comparing the reward function $R_{simple}$ and $R_{proximity}$ shows that $R_{simple}$ performs better at aaFD, even though $R_{proximity}$ was specifically designed to be more similar to aaFD. This is despite the learning curves seen in figure [[fig:r1r2_comparison_learning_curves]] indicating that $R_{proximity}$ performs better at GaaFD after the models have begun to overfit because $R_{simple}$ can reach a better score just before overfitting occurs.
 
 Furthermore, the value of $\epsilon$ has been a crucial hyperparameter for these tasks. For the sparse GaaFD reward function, using a value of $\epsilon=0$ yielded the best results. For $R_{simple}$ and $R_{proximity}$, the difference between different values of $\epsilon$ had little effect on the performance of the best model but seemed to have a regularizing effect. It would be interesting to dive deeper into why this happens and perhaps how we can take advantage of it when sampling data for supervised learning.
