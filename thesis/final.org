@@ -110,14 +110,16 @@ What are in each chapter...
 * The Cardiac Cycle
 The human heart is situated in the middle compartment of the chest, between the lungs, and is responsible for keeping the blood flowing by acting as a pump. Blood is used for transporting oxygen and essential nutrients throughout the body and carries metabolic waste such as carbon dioxide to the lungs.
 
- The heart consists of two halves, the left heart and the right heart, as illustrated in figure [[fig:heart_diagram]]. The left heart pumps newly oxygenated blood from the lungs out to the rest of the body, and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, are where the blood first enters the heart, and the lower chambers, the ventricles, are where the blood exits the heart. Each chamber also has valves that are opened and closed during a cardiac cycle to help keep the blood flowing in one direction.
+ The heart consists of two halves, the left heart and the right heart, as illustrated in figure [[fig:heart_diagram]]. The left heart pumps newly oxygenated blood from the lungs out to the rest of the body, and the right heart pumps oxygen-depleted blood back to the lungs. Each side has two chambers, the atrium and the ventricle, for a total of four chambers. The upper chambers, the atria, are where the blood first enters the heart, and the lower chambers, the ventricles, are where the blood exits the heart. Each chamber also has valves that are opened and closed during a cardiac cycle to help keep the blood flowing in one direction \cite{iaizzo_handbook_2010}.
 
- #+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Source: [[https://en.wikipedia.org/wiki/Atrium_(heart)]].
+ #+CAPTION: An illustration of the heart. The heart has two sides, each side having two chambers. Image reproduced from \cite{noauthor_atrium_2022}, License: CC BY-SA 3.0, User: Eric Pierce (Wapcaplet).
  #+NAME: fig:heart_diagram
  [[./img/heart_diagram.png]]
-During a cardiac cycle, the different chambers are filled at different times. At the start of a new cycle, the left and right ventricles relax and are filled with blood from their respective atria. As the ventricles are filled with blood, the pressure increases, which causes the valves from the atria to close. After this, the ventricles start contracting, pushing blood out from the heart. This causes the ventricle pressure to decrease and the aorta pressure to increase, and the valve going out of the ventricle is closed. Finally, blood flows into the atria before the cycle starts over. This is illustrated in figure [[fig:cardiac_cycle_heart_illustration]].
 
- #+CAPTION: The cardiac cycle is illustrated with the direction of blood flow and pressure from and into the atria and ventricles. Source: [[https://en.wikipedia.org/wiki/Heart]].
+
+The stages of the cardiac cycle is illustrated in figure [[fig:cardiac_cycle_heart_illustration]]. During a cardiac cycle, the different chambers are filled at different times. At the start of a new cycle, the left and right ventricles relax and are filled with blood from their respective atria. As the ventricles are filled with blood, the pressure increases, which causes the valves from the atria to close. After this, the ventricles start contracting, pushing blood out from the heart. This causes the ventricle pressure to decrease and the aorta pressure to increase, and the valve going out of the ventricle is closed. Finally, blood flows into the atria before the cycle starts over.
+
+ #+CAPTION: The cardiac cycle is illustrated with the direction of blood flow and pressure from and into the atria and ventricles. Image reproduced from \cite{noauthor_heart_2022}, License: CC BY 3.0, User: OpenStax College.
  #+NAME: fig:cardiac_cycle_heart_illustration
  [[./img/cardiac_cycle_heart_illustration.jpeg]]
 
@@ -127,17 +129,21 @@ There are multiple ways of finding the ED and ES frames in a cardiac cycle \cite
 2. Finding the first frame following the closure of the mitral valve (for ED) and the first frame following the closure of the aortic valve (for ES).
 3. Analyzing a simultaneously acquired electrocardiogram (ECG) signal.
 
-These methods can be visualized in the Wiggers diagram, as seen in figure [[fig:wiggers_diagram]], which plots several key events in the cardiac cycle and the corresponding values of various measurements.
+These methods can be visualized in the Wiggers diagram \cite{mitchell_expanding_2014}, as seen in figure [[fig:wiggers_diagram]], which plots several key events in the cardiac cycle and the corresponding values of various measurements.
 
 Out of these three, using the ECG signal is the least preferable. This is because the methods for detecting the ED and ES frame may become unreliable when given an unconventional ECG signal, such as from patients with cardiomyopathy or regional wall motion abnormalities \cite{mada_razvan_o_how_2015}. Acquiring an ECG signal also requires applying electrodes to the patient, which is not ideal in emergency settings.
 
 
- #+CAPTION: The Wiggers diagram describes the different phases of the cardiac cycle and what they represent in different measurements. Source [[https://en.wikipedia.org/wiki/Wiggers_diagram]].
+ #+CAPTION: The Wiggers diagram describes the different phases of the cardiac cycle and what they represent in different measurements. Image reproduced from \cite{noauthor_wiggers_2021}, License: CC BY-SA 4.0, User: adh30 revised work by DanielChangMD who revised original work of DestinyQx; Redrawn as SVG by xavax.
  #+NAME: fig:wiggers_diagram
  [[./img/wiggers_diagram.png]]
 
 * What is Ultrasound?
-What we as humans perceive as sound are simply vibrations of the particles that surround us. Sound waves push particles together, creating an increase in pressure. Particles in an area of high pressure move to areas of lower pressure, which creates a chain reaction where a pressure field moves through particles. This is called wave propagation and is informally illustrated in figure [[fig:pressure_wave_propagation]]. Sound is simply waves of pressure propagating through a medium.
+In physics, sound can be defined as a phenomenon where energy propagates through a medium — such as gases, liquids, or solids — by the mean of mechanical waves. In the special case of ultrasound, the waves we refer to are longitudinal pressure waves that are, by definition, slightly above the hearable range of humans (above 20 kHz) \cite{szabo_diagnostic_2014}.
+
+Sound waves push particles together, creating an increase in pressure. Particles in an area of high pressure move to areas of lower pressure, which creates a chain reaction where a pressure field moves through particles. This is called wave propagation and is informally illustrated in figure [[fig:pressure_wave_propagation]]. Sound is simply waves of pressure propagating through a medium.
+
+Today, ultrasound form the basis of several advanced technology such as medical imaging probes, sonar, non destructive testing, and more. This thesis only covers echocardiography, a technology for imaging the heart using ultrasound waves.
 
 #+NAME: fig:pressure_wave_propagation
 #+CAPTION: A pressure wave moves through a medium by pushing particles in a medium close together. The particles push back as the pressure increases, moving the pressure field. Warning: This image is just a representation of how particles interact — real particles do not look like this.
@@ -147,15 +153,15 @@ What we as humans perceive as sound are simply vibrations of the particles that 
 
 
 ** Attributes of a Sine Wave
-A basic wave has three attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time, as visualized in figure [[fig:amp_freq_phase]]. Our ears have evolved to sense frequency and amplitude, where frequency determines the pitch of a sound and amplitude determines the loudness. Phase can not be sensed by human ears on its own but can affect the sound in relation to other sound waves.
+A basic wave has three attributes: frequency, how fast it vibrates, amplitude, by how much it vibrates, and phase, where in its cycle a wave is at a given time \cite{manolakis_applied_2011}, as visualized in figure [[fig:amp_freq_phase]]. Our bodies have evolved to sense these properties, where frequency determines the pitch of a sound and amplitude determines the loudness. Sensing phase is a bit more subtle but aid us e.g. in determining the position of the source, relative to us. The relative phase between multiple sounds also affect the resulting sound, as they interfere with each other differently depending on the relative phase.
 
 #+NAME: fig:amp_freq_phase
 #+CAPTION: The left-most plot shows two basic waves where one has twice the amplitude. The middle plot shows two basic waves where one has a higher frequency. The right-most plot shows two basic waves that have different phases.
 [[./img/amp_freq_phase.png]]
 
-A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound can be transformed into its frequency spectrum. As seen in figure [[fig:freq_spectrum]], the frequency spectrum of a sine wave is just a single spike. Adding together two sounds has the same effect as adding their frequency spectrums.
+A basic wave means a sine wave in this context. Every sound can be represented as a sum of sine waves, and every sound can be transformed into its frequency spectrum through the use of the Fourier transformation \cite{manolakis_applied_2011}. As seen in figure [[fig:freq_spectrum]], the frequency spectrum of a sine wave is just a single spike. Because of the linear property of the Fourier transform, adding together two sounds has the same effect as adding their frequency spectrums.
 
-Real-world sounds often have much more complex frequency spectrums, as many more sine waves are needed to represent them. When we hear a piano and a clarinet play the same note, the frequencies with the highest amplitudes are generally the same for both sounds, but the frequency spectrum is much more complex. Musicians speak of overtones — it is the overtones that are different for different instruments playing the same notes. They are referring to the additional frequencies that can be seen in the frequency spectrum.
+Real-world sounds are often more complex than the narrow band sound presented previously. In the nature many acoustic phenomenons can be described by a broadband spectrum, which is a weighted sum of many sine waves. When we hear a piano and a clarinet play the same note, the frequencies with the highest amplitudes are generally the same for both sounds, but the frequency spectrum is much more complex. Musicians speak of overtones — it is the overtones that are different for different instruments playing the same notes. They are referring to the additional frequencies that can be seen in the frequency spectrum.
 
 #+NAME: fig:freq_spectrum
 #+CAPTION: Adding two sounds together also adds their frequency spectrums together.
@@ -167,7 +173,7 @@ Real-world sounds often have much more complex frequency spectrums, as many more
 
 
 ** Attributes of the Medium
-Another important aspect of sound is the medium through which it travels. Properties such as the speed of sound, density, attenuation, and nonlinearity affect how a sound wave propagates through its medium. Speed of sound is how fast a wave propagates through the medium. Assuming that the frequency stays the same, the wavelength will be smaller if the sound speed is lower, as visualized in figure [[fig:conveyor_belt_speed_change]]. Density is how tightly packed the particles are in the medium when at rest. Attenuation is a fancy word for absorption, how much energy the wave loses as it propagates through the medium. Nonlinearity is the property where the speed of sound at a point depends on the pressure at that point. In water, pressure waves propagate faster at higher pressure. The pressure may be caused by the wave itself, in which case the shape of the wave may change, as visualized in figure [[fig:nonlinearity]].
+Another important aspect of sound is the medium through which it travels. Properties such as the speed of sound, density, attenuation, and nonlinearity affect how a sound wave propagates through its medium \cite{johnson_array_1993}. Speed of sound is how fast a wave propagates through the medium. Assuming that the frequency stays the same throughout (which is not always true), the wavelength will be smaller if the sound speed is lower, as visualized in figure [[fig:conveyor_belt_speed_change]]. Density is how tightly packed the particles are in the medium when at rest. Acoustic absorption is an energy loss caused by the viscosity of the propagating medium. The wave energy is then convereted into heat at a molecular level. Attenutation is the reduction of the energy signal caused by either absorption or scattering. Nonlinearity is the property where the speed of sound at a point depends on the pressure at that point. In water, pressure waves propagate faster at higher pressure. The pressure may be caused by the wave itself, in which case the shape of the wave may change, as visualized in figure [[fig:nonlinearity]].
 
 #+NAME: fig:conveyor_belt_speed_change
 #+CAPTION: Even though the rate of packages per second stays the same, the distance between packages decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
@@ -179,7 +185,7 @@ Another important aspect of sound is the medium through which it travels. Proper
 [[./img/nonlinearity.png]]
 
 
-An important concept is "acoustic impedance," which measures how much resistance the wave encounters while propagating through the medium. Acoustic impedance is a function of the speed of sound and density. When a wave propagates out of one medium and into another medium with a different acoustic impedance, a fraction of the energy is reflected. So when one hears a sound being reflected from a wall, it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density, and speed of sound, where $Z$ is the acoustic impedance, and $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor. It determines how much of the energy is reflected, where $Z_1$ is the acoustic impedance of the original medium, and $Z_2$ is the acoustic impedance of the second medium. When $Z_1$ and $Z_2$ are equal, no sound is reflected.
+An important concept is "acoustic impedance," which measures how much resistance the wave encounters while propagating through the medium \cite{szabo_diagnostic_2014}. Acoustic impedance is a function of the speed of sound and density. When a wave propagates out of one medium and into another medium with a different acoustic impedance, a fraction of the energy is reflected. So when one hears a sound being reflected from a wall, it is because the air that the wave travels through and the wall has different acoustic impedance. Equation [[eqn:acoustic_impedance]] shows the relationship between acoustic impedance, density, and speed of sound, where $Z$ is the acoustic impedance, and $\rho$ and $c$ are the density and speed of sound of the medium, respectively. Equation [[eqn:reflection_factor]] is the reflection factor. It determines how much of the energy is reflected, where $Z_1$ is the acoustic impedance of the original medium, and $Z_2$ is the acoustic impedance of the second medium. When $Z_1$ and $Z_2$ are equal, no sound is reflected.
 
 #+NAME: eqn:acoustic_impedance
 \begin{equation}
@@ -194,7 +200,7 @@ RF=\frac{Z_2-Z_1}{Z_2+Z_1}
 
 
 * Echocardiography
-Light is a signal that does not penetrate very far into the body, which is why we cannot simply gaze into each other's hearts. We could, however, imagine a universe where light penetrates all the way, giving off no reflections at all. In this universe, we would not be able to see the heart either; in fact, we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweet spot where the signal can penetrate tissue with enough energy while at the same time being reflected with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
+Light is an electromagnetic signal that does not penetrate very far into the body, which is why we cannot simply gaze into each other's hearts. We could, however, imagine a universe where light penetrates all the way, giving off no reflections at all. In this universe, we would not be able to see the heart either; in fact, we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweet spot where the signal can penetrate tissue with enough energy while at the same time being reflected with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
 
 #+CAPTION: Values of the acoustic wave velocity $c$ and acoustic impedance Z of some substances from \cite{suetens_fundamentals_2017}.
 #+NAME: tbl:acoustic_impedances
@@ -209,7 +215,7 @@ Light is a signal that does not penetrate very far into the body, which is why w
 | Bone              |    4000 |             3.8 to 7.4 |
 | Aluminium         |    6320 |                   17.0 |
 
-Table [[tbl:acoustic_impedances]] lists the speed of sound and acoustic impedance $Z$ of some substances. Notice how there is a significant difference in acoustic impedance between air and soft tissue. If there is air between the sound wave transmitter and the body, most of the energy will be reflected by the skin. To reduce this effect, ultrasound gel, which has a similar acoustic impedance to soft tissue, is applied between the body and the sound wave transmitter. Notice also the difference in acoustic impedance between bone and soft tissue. This has consequences for what we can image in the body, as bones such as the ribcage act as shields to the sound waves.
+Table [[tbl:acoustic_impedances]] lists the speed of sound and acoustic impedance $Z$ of some substances. Notice how there is a large contrast in acoustic impedance between air and soft tissue. If there is air between the sound wave transmitter and the body, most of the energy will be reflected by the skin. To reduce this effect, ultrasound gel, which has a similar acoustic impedance to soft tissue, is applied between the body and the sound wave transmitter. Notice also the difference in acoustic impedance between bone and soft tissue. This has consequences for what we can image in the body, as bones such as the ribcage act as shields to the sound waves.
 
 
 How can we use sound reflections to create images? We can send out a sound signal and measure the time it takes for a reflection to come back. The delay between sending and receiving gives information about the relative distance to various reflectors in the medium from the sound source, as visualized in figure [[fig:sound_tx_rx]]. Suppose we know the speed of sound, and assume that the speed of sound is homogeneous in the medium. In that case, we can approximate the distance that the wave has traveled by multiplying the delay between sending and receiving by the speed of sound (equation [[eqn:reflector_distance_by_delay]]). This assumes that waves always travel in straight lines, which is not always true, but the effect is often negligible in medical ultrasound use cases.
@@ -219,7 +225,7 @@ How can we use sound reflections to create images? We can send out a sound signa
 \text{distance} = \text{delay} \times c 
 \end{equation}
 
-Likewise, suppose we want to know the reflected signal for a given distance away from the sender and receiver. In that case, we can calculate the corresponding delay of a signal traveling that distance and back by dividing the total distance by the speed of sound (equation [[eqn:reflector_delay_by_distance]]). When we know the corresponding delay, we can simply look up its value in the signal through interpolation. To create a whole image, we repeat this process for every point in the image.
+Likewise, suppose we want to know the reflected signal for a given distance away from the transmitter and receiver. In that case, we can calculate the corresponding delay of a signal traveling that distance and back by dividing the total distance by the speed of sound (equation [[eqn:reflector_delay_by_distance]]). When we know the corresponding delay, we can simply look up its value in the signal through interpolation. To create a whole image, we repeat this process for every point in the image.
 
 #+NAME: eqn:reflector_delay_by_distance
 \begin{equation}
@@ -232,25 +238,25 @@ Likewise, suppose we want to know the reflected signal for a given distance away
 
 When we only have a single receiver that measures the reflected sound waves, we can not know the exact location of a given reflector, only the distance. By utilizing more receivers spread over some area, we get more information about where the signal originated from, as there will be a correlation between signals across receivers at the reflecting object.
 
-By utilizing multiple sender elements that can send sound waves independently of each other, we can shape the wavefront as we wish. For example, this lets us focus the energy of the sound wave in a specific area or shape the wavefront to be planar. The Huygens-Fresnel principle states that every point of a wavefront is the source of a new spherical wavefront. We can simulate the Huygens-Fresnel principle by imagining a desired wavefront passing through the sender elements, activating each element when the wave hits it. Each sender element on its own creates a spherical wavefront, but together they make up the desired imagined wavefront. Time delays are to sound waves like a lens is to a magnifying glass. An example of this has been visualized in figure [[fig:huygens_fresnel_focusing]].
+By utilizing multiple sender elements that can send sound waves independently of each other, we can shape the wavefront as we wish. For example, this lets us focus the energy of the sound wave in a specific area or shape the wavefront to be planar. The Huygens-Fresnel principle states that every point of a wavefront is the source of a new spherical wavefront. We can simulate the Huygens-Fresnel \cite{johnson_array_1993} principle by imagining a desired wavefront passing through the sender elements, activating each element when the wave hits it. Each sender element on its own creates a spherical wavefront, but together they make up the desired imagined wavefront. Time delays are to sound waves like a lens is to a magnifying glass \cite{szabo_diagnostic_2014}. An example of this has been visualized in figure [[fig:huygens_fresnel_focusing]].
 
 #+CAPTION: Because of the Huygens-Fresnel principle, we can create a desired wavefront by creating spherical waves at each sender element when the imagined wavefront hits it. The dashed, pink curve represents the imagined desired wavefront as it approaches the sender elements marked by the purple rectangle. Each sender element is activated when the imagined wavefront passes through it, creating new spherical waves, represented by the cyan semi-circles. The generated spherical waves converge on the same point as the imagined wavefront.
 #+NAME: fig:huygens_fresnel_focusing
 [[./img/huygens_fresnel_focusing.png]]
 
-In reality, an ultrasound probe consists of many elements acting both as transmitters and receivers. The elements are made out of piezoelectric material. Piezoelectric materials produce vibrations when given an electric current and, vice-versa, produce an electric current when exposed to vibrations. With a transducer, we can independently apply an electric current to each element to create sound waves with given wavefront characteristics and read off the electric current generated by reflected pressure waves.
+In reality, an ultrasound probe consists of many elements acting both as transmitters and receivers. The elements are made out of piezoelectric material. Piezoelectric materials produce vibrations when given an electric current and, vice-versa, produce an electric current when exposed to vibrations. With a transducer, we can independently apply an electric current to each element to create sound waves with given wavefront characteristics and read off the electric current generated by reflected pressure waves \cite{szabo_diagnostic_2014}.
 
 
 
-There are multiple modes of ultrasound imaging. The two most important modes for this thesis are B-mode imaging and M-mode imaging.
+There are multiple modes of ultrasound imaging. The two most important modes for this thesis are B-mode imaging and M-mode imaging \cite{szabo_diagnostic_2014}.
 
-In B-mode (as in "Brightness"-mode) imaging, an image is created by visualizing the amplitude of the reflected signal as the brightness for a given point. This imaging mode often sends out individual, focused transmits in multiple directions, creating a sector scan — a fan-like image, as seen in [[fig:sector_scan]]. Another method is to transmit unfocused plane waves. A single transmit creates an unfocused image of the scatterers in the medium. However, multiple transmits in different directions may be compounded to create an image of comparable quality to those of focused transmits \cite{montaldo_coherent_2009}.
+In B-mode (as in "Brightness"-mode) imaging, an image is created by visualizing the amplitude of the reflected signal as the brightness for a given point. This imaging mode often sends out individual, focused transmits in multiple directions, creating a sector scan — a fan-like image, as seen in figure [[fig:sector_scan]]. Another method is to transmit unfocused plane waves. A single transmit creates an unfocused image of the scatterers in the medium. However, multiple transmits in different directions may be compounded to create an image of comparable quality to those of focused transmits \cite{montaldo_coherent_2009}.
 
 #+CAPTION: Imaging along different angles from a common starting point creates a sector scan.
 #+NAME: fig:sector_scan
 [[./img/sector_scan.png]]
 
-B-mode imaging provides images of the whole area of interest, but because they require multiple transmits, they also take longer to acquire, as we have to fire each transmit after the other. In extreme cases, this could pose a problem, given that the heart is an organ that moves quite rapidly. If we are transmitting too slow, then the heart may have a noticeably different phase on one side of the sector scan compared to the other. This is not a big problem for 2D images as even multiple transmits can be made and received back in a short period of time, but it does have consequences for the temporal resolution.
+B-mode imaging provides images of the whole area of interest, but because they require multiple transmits, they also take longer to acquire, as we have to fire each transmit after the other. In extreme cases, this could pose a problem, given that the heart is an organ that moves quite rapidly. If we are transmitting too slow, then the heart may have a noticeably different phase on one side of the sector scan compared to the other. This is not a significant problem for 2D images as even multiple transmits can be made and received back in a short period of time, but it does have consequences for the temporal resolution.
 
 In M-mode (as in "Motion"-mode) imaging, only one direction is imaged over time instead of a whole sector. This means that it only requires one transmit per frame, giving it a higher temporal resolution compared to B-mode imaging, but at the cost of only focusing in a single direction. Each transmit can be concatenated into an image where the y-axis represents the amplitudes at different depths, and the x-axis represents time, as seen in figure [[fig:m_mode_example]]. M-mode imaging lets us see the motion of a focused part of the heart in a single image.
 
@@ -271,7 +277,7 @@ Gradient descent is based on calculus. It takes advantage of the fact that even 
 #+NAME: fig:gradient_descent_simple
 [[./img/gradient_descent_simple.png]]
 
-Gradient descent scales to an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually in some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
+Gradient descent scales to an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually in some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in figure [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
 
 
 
@@ -396,7 +402,7 @@ Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha [(r_{t+1} + \gamma max_a Q(s_{t+1},a
 
 
 *** Deep Reinforcement Learning
- A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values\cite{mnih_human-level_2015}. The state-space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them.
+ A modified Q-learning algorithm has been shown to be able to play Atari games simply by looking at the raw pixel values \cite{mnih_human-level_2015}. The state-space thus consists of the pixel values of the current game screen. A simple Atari game has $210\times 160 = 33600$ pixels, and each pixel can be one of $128$ colors \cite{mnih_human-level_2015}. In theory there are $128^{33600} \approx 10^{70803}$ different states. If a computer were able to process $1\,000\,000\,000$ such states every second, it would still take more than $10^{70785}$ years to process all of them.
 
 We assume that there exists a way to approximate the value of states in a much more compressed way. This can be done through function approximation \cite{sutton_reinforcement_2018}, where instead of storing and updating the value estimates in a table, such as with tabular methods, they are approximated using a neural network. This may also allow the agent to generalize state value or state-action value functions to new not-before-seen states.
 
@@ -424,7 +430,7 @@ Using a separate network for generating the targets in the Q-learning update add
 
 
 *** Double Deep Q-Network
-Several improvements have been made to DQN over the years. Q-learning has been shown to produce overly optimistic action values as a result of using the maximum action value as an approximation for the maximum expected action value\cite{h_p_van_hasselt_hado_double_2010}. Double Q-learning attempts to reduce this overestimation by decomposing the target into an action selector and an action value estimator. The regular Q-learning target is written as:
+Several improvements have been made to DQN over the years. Q-learning has been shown to produce overly optimistic action values as a result of using the maximum action value as an approximation for the maximum expected action value \cite{h_p_van_hasselt_hado_double_2010}. Double Q-learning attempts to reduce this overestimation by decomposing the target into an action selector and an action value estimator. The regular Q-learning target is written as:
 
 \[r_{t+1} + \gamma max_a Q(s_{t+1},a)\]
 
@@ -434,10 +440,10 @@ This can be rewritten as:
 r_{t+1} + \gamma Q^A(s_{t+1},argmax_a Q^B(s_{t+1},a))
 \end{equation}
 
-Where $Q^A$ acts as an action value estimator and $Q^B$ acts as an action selector. If $Q^A=Q^B$, then this is just the regular Q-learning target. If we only update the action selector at each update and randomly choose which of the two Q-functions should be used as the action selector at each update, the overestimation is reduced. This also applies to DQN, and it has been shown that using a double DQN results in better policies than using a regular DQN\cite{van_hasselt_deep_2015}.
+Where $Q^A$ acts as an action value estimator and $Q^B$ acts as an action selector. If $Q^A=Q^B$, then this is just the regular Q-learning target. If we only update the action selector at each update and randomly choose which of the two Q-functions should be used as the action selector at each update, the overestimation is reduced. This also applies to DQN, and it has been shown that using a double DQN results in better policies than using a regular DQN \cite{van_hasselt_deep_2015}.
 
 *** Prioritized Replay
-By using experience replay, agents are not forced to process transitions in the exact order that they are experienced. However, because we are sampling the transitions uniformly from the replay memory, all transitions are given equal priority. We might benefit from prioritizing transitions that have a high TD-error magnitude, which acts as a proxy measure of how "surprising" a transition is to the agent\cite{schaul_prioritized_2016}.
+By using experience replay, agents are not forced to process transitions in the exact order that they are experienced. However, because we are sampling the transitions uniformly from the replay memory, all transitions are given equal priority. We might benefit from prioritizing transitions that have a high TD-error magnitude, which acts as a proxy measure of how "surprising" a transition is to the agent \cite{schaul_prioritized_2016}.
 
 Prioritizing experience by the magnitude of the TD-error may introduce a lack of diversity. One of the reasons for this is that an experience that initially had a low TD-error, but that later becomes large as the network is trained, will continue to be down prioritized because the TD-error is only updated when the transition is revisited — and because of its low prioritization, the probability that it will be revisited soon is low. A stochastic sampling method that interpolates between pure greedy prioritization and uniform random sampling is introduced to overcome this challenge.
 
@@ -446,7 +452,7 @@ Another problem with prioritized experience replay is that DQN minimizes the exp
 Prioritized replay is found to speed up an agent's ability to learn by a factor of 2.
 
 *** Dual Deep Q-Network
-In the dueling architecture, or Dual DQN, the network that approximates the Q-function is split into two parts: one for estimating the value of the current state and one for measuring the so-called advantage of taking an action in this state\cite{wang_dueling_2016}. The combination of the state-value estimate and the advantage yields the Q values:
+In the dueling architecture, or Dual DQN, the network that approximates the Q-function is split into two parts: one for estimating the value of the current state and one for measuring the so-called advantage of taking an action in this state \cite{wang_dueling_2016}. The combination of the state-value estimate and the advantage yields the Q values:
 
 \begin{equation}
 Q(s,a)=V(s)+A(s,a)
@@ -461,7 +467,7 @@ Q(s,a)=V(s)+A(s,a)-\frac{\sum_{a}A(s,a)}{N_{actions}}
 The dueling architecture lets the network train the state-value and advantage functions separately.
 
 *** Multi-Step Learning
-We look only one step ahead when constructing the target in the Q-learning update, but this is not a requirement. We could extend it to look $N$ steps ahead if we wanted to, which is called N-step learning or multi-step learning\cite{sutton_reinforcement_2018}.
+We look only one step ahead when constructing the target in the Q-learning update, but this is not a requirement. We could extend it to look $N$ steps ahead if we wanted to, which is called N-step learning or multi-step learning \cite{sutton_reinforcement_2018}.
 
 To use multi-step learning we must look at $N$ consecutive experiences for every update, and sum the appropriately discounted rewards and add it to an appropriately discounted value estimation of the final state in the sequence. The N-step target for a given state $s_t$ is given as:
 
@@ -480,24 +486,24 @@ r_{t+1} + \gamma max_a Q(s_{t+1},a)
 The best choice of $N$ usually lies somewhere between 1 and the length of an episode. This is because bootstrapping works best when it is over a length of time in which a significant and recognizable state change has occurred. Another intuition for why multi-step learning improves performance is that when we look further ahead, we depend less on our estimates of the future.
 
 *** Distributional Reinforcement Learning
-The Q-function is an approximation of the /expected/ returns, but it is also possible to approximate the /distribution/ of returns instead\cite{bellemare_distributional_2017}. It makes sense to think about the returns as a distribution, even when the environment has deterministic rewards, because stochasticity is still introduced while training through various sources. Firstly, state aliasing, the conflation of two or more states into one representation, may cause different amounts of rewards to be observed even though the agent "sees" the same state. Secondly, because of bootstrapping, target values are nonstationary while training, and the returns will take on different values over time. Lastly, approximation errors will make the returns seem stochastic because we only approximate the true Q-function.
+The Q-function is an approximation of the /expected/ returns, but it is also possible to approximate the /distribution/ of returns instead \cite{bellemare_distributional_2017}. It makes sense to think about the returns as a distribution, even when the environment has deterministic rewards, because stochasticity is still introduced while training through various sources. Firstly, state aliasing, the conflation of two or more states into one representation, may cause different amounts of rewards to be observed even though the agent "sees" the same state. Secondly, because of bootstrapping, target values are nonstationary while training, and the returns will take on different values over time. Lastly, approximation errors will make the returns seem stochastic because we only approximate the true Q-function.
 
 Approximating the distribution of returns instead of the expected returns results in more stable learning targets.
 
 *** Noisy Deep Q-Network
-Exploration of the environment is often enabled by using an $\epsilon$ -greedy policy, where $\epsilon$ is gradually reduced. For particularly hard problems, like the Atari game "Montezuma's Revenge", this technique becomes insufficient for exploration\cite{bellemare_unifying_2016}. $\epsilon$ -greedy policies explore with a fixed probability that is the same for every state. An alternative could be to let the network itself learn when it should explore, and for what states. 
+Exploration of the environment is often enabled by using an $\epsilon$ -greedy policy, where $\epsilon$ is gradually reduced. For particularly hard problems, like the Atari game "Montezuma's Revenge", this technique becomes insufficient for exploration \cite{bellemare_unifying_2016}. $\epsilon$ -greedy policies explore with a fixed probability that is the same for every state. An alternative could be to let the network itself learn when it should explore, and for what states. 
 
-NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters\cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyperparameter tuning, but also to apply different amounts of exploration to different states.
+NoisyNet-DQN does this by applying learnable parameterized noise to the value network parameters \cite{fortunato_noisy_2019}. This does not only enable it to change the amount of exploration itself, alleviating the need for hyperparameter tuning, but also to apply different amounts of exploration to different states.
 
 *** Rainbow Deep Q-Network
-Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow\cite{hessel_rainbow_2017} algorithm combines six such improvements:
+Many of the improvements that has been made to DQN may be complementary and could be combined into a single algorithm. The Rainbow \cite{hessel_rainbow_2017} algorithm combines six such improvements:
 
-1. Double DQN\cite{van_hasselt_deep_2015}
-2. Prioritized replay\cite{schaul_prioritized_2016}
-3. Dual DQN\cite{wang_dueling_2016}
-4. Multi-step learning\cite{sutton_reinforcement_2018}
-5. Distributional RL\cite{bellemare_distributional_2017}
-6. Noisy DQN\cite{fortunato_noisy_2019}
+1. Double DQN \cite{van_hasselt_deep_2015}
+2. Prioritized replay \cite{schaul_prioritized_2016}
+3. Dual DQN \cite{wang_dueling_2016}
+4. Multi-step learning \cite{sutton_reinforcement_2018}
+5. Distributional RL \cite{bellemare_distributional_2017}
+6. Noisy DQN \cite{fortunato_noisy_2019}
 
 The authors show that the combined algorithm performs much better than each extension alone in terms of both learning speed and overall performance.
 
@@ -550,7 +556,7 @@ Short description of the different datasets used.
 
 
 * Echonet-Dynamic Dataset
-The Echonet-Dynamic Dataset\cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and respirometer-information, and downsampled from its original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view, and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
+The Echonet-Dynamic Dataset \cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and respirometer-information, and downsampled from its original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view, and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
 
 The dataset consists of three parts: /FileList.csv/ contains general information about each video, its variables are listed in table [[tbl:echonet_filelist_variables]]. /VolumeTracings.csv/ contains the volume tracings and ED/ES frame index of each video, its variables are listed in table [[tbl:echonet_volumetracings_variables]]. And finally /Videos/, containing all the ultrasound videos in =.avi= format. Video frame samples can be seen in figure [[fig:echonet_samples]].
 
@@ -759,7 +765,7 @@ We take advantage of a few additions to the original DQN algorithm: Prioritized 
 
 
 ** Neural Network
-The neural network that approximates the Q-function is inspired by the original Atari DQN paper\cite{mnih_human-level_2015}. It has two convolutional layers and two fully connected layers. A ReLU activation layer follows each layer except for the last one. The first convolutional layer has 16 output channels, a kernel size of 8-by-8, and a stride of 4. The second has 32 output channels, a kernel size of 4-by-4, and a stride of 2. The data is flattened before being passed to the fully connected layers. The first fully connected layer has an output size of 256. The final layer has two outputs, each representing the estimated value of taking one of the actions, given the input state. In total there are $1\,621\,810$ parameters. The network is visualized in figure [[fig:simple_dqn_network]].
+The neural network that approximates the Q-function is inspired by the original Atari DQN paper \cite{mnih_human-level_2015}. It has two convolutional layers and two fully connected layers. A ReLU activation layer follows each layer except for the last one. The first convolutional layer has 16 output channels, a kernel size of 8-by-8, and a stride of 4. The second has 32 output channels, a kernel size of 4-by-4, and a stride of 2. The data is flattened before being passed to the fully connected layers. The first fully connected layer has an output size of 256. The final layer has two outputs, each representing the estimated value of taking one of the actions, given the input state. In total there are $1\,621\,810$ parameters. The network is visualized in figure [[fig:simple_dqn_network]].
 
 #+CAPTION: A visualization of the simple DQN-Atari-paper-inspired CNN.
 #+NAME: fig:simple_dqn_network
@@ -772,7 +778,7 @@ The Adam optimizer \cite{kingma_adam_2017} is used to update the selector parame
 
 
 ** Distributed Training
- As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through a library called Acme\cite{hoffman_acme_2020}. At the center of Acme is another library called Reverb\cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step of the algorithm, Reverb can be used as the communication point between the two. One or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database. A learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner do not need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library called Launchpad\cite{yang_launchpad_2021}.
+ As mentioned, DQN lends itself nicely to distributed training. In this project, this is achieved through a library called Acme \cite{hoffman_acme_2020}. At the center of Acme is another library called Reverb \cite{cassirer_reverb_2021}. Reverb is a database for storing experience replay samples that lets us insert and sample experiences independently. If we separate the learning step and the acting step of the algorithm, Reverb can be used as the communication point between the two. One or more actors, possibly on different machines, can generate experience samples and insert them into the Reverb experience replay database. A learner, also possibly on a different machine, can sample from it to perform gradient descent. The actors and the learner do not need to know about each other, except when an actor needs to update its parameters, in which case it needs to query the learner for the latest trained parameters. It is also trivial to add one or more evaluators that can run in parallel and that only need to query the learner for the latest trained parameters. Inter-process communication is facilitated by a third library called Launchpad \cite{yang_launchpad_2021}.
 
  #+CAPTION: An illustration of the distributed RL training system. Each pink node runs in a separate Python process, and each blue arrow is an inter-process function call facilitated by Launchpad.
  #+NAME: fig:distributed_rl_training
@@ -1036,7 +1042,7 @@ Out of all the trained models, the model trained using $R_{simple}$ with a value
 
 
 * The Impact of Epsilon on Average Absolute Frame Difference
-Lower values of $\epsilon$ yield a better GaaFD score when using $R_{GaaFD}$ as the reward function. This is best seen in figure [[fig:gaafd_best_model_perf]]. There is no consistent difference between GaaFD on ED- or ES-frames individually, but there is less difference in performance on ES-frames between the training split and the test split, as seen in [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows that lower values of $\epsilon$ also reduce the mismatch between the number of predicted versus ground truth events. This was also clearly seen in table [[tbl:gaafd_best_models_sgd_steps]], where a value of $\epsilon=0.0$ predicted the correct number of events 77% of the time, while $\epsilon=0.1$ and $\epsilon=0.01$ yielded 64% and 70%, respectively. We also see a significant "bump" when the difference between predicted and ground truth events is two.
+Lower values of $\epsilon$ yield a better GaaFD score when using $R_{GaaFD}$ as the reward function. This is best seen in figure [[fig:gaafd_best_model_perf]]. There is no consistent difference between GaaFD on ED- or ES-frames individually, but there is less difference in performance on ES-frames between the training split and the test split, as seen in figure [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows that lower values of $\epsilon$ also reduce the mismatch between the number of predicted versus ground truth events. This was also clearly seen in table [[tbl:gaafd_best_models_sgd_steps]], where a value of $\epsilon=0.0$ predicted the correct number of events 77% of the time, while $\epsilon=0.1$ and $\epsilon=0.01$ yielded 64% and 70%, respectively. We also see a significant "bump" when the difference between predicted and ground truth events is two.
 
 #+CAPTION: Gaussian KDE of the GaaFD-performance for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using GaaFD as the reward function. The left plot compares all three models on the test split. The middle plot compares all three models on the train split. The right plot shows the difference between the two as a means to visualize model overfitting.
 #+NAME: fig:gaafd_best_model_perf
@@ -1096,7 +1102,7 @@ The accuracy of the agents trained using $R_{GaaFD}$ show a similar pattern as w
 
 
 
-Again, the choice of $\epsilon$ did not matter as much for models trained using $R_{simple}$ or $R_{proximity}$ with regards to accuracy and balanced accuracy, as seen in figure [[fig:simp_best_model_accuracy]] and [[fig:prox_best_model_accuracy]]. These models also perform better at classifying diastole frames compared to systole frames.
+Again, the choice of $\epsilon$ did not matter as much for models trained using $R_{simple}$ or $R_{proximity}$ with regards to accuracy and balanced accuracy, as seen in figures [[fig:simp_best_model_accuracy]] and [[fig:prox_best_model_accuracy]]. These models also perform better at classifying diastole frames compared to systole frames.
 
 #+CAPTION: Gaussian KDE of the accuracy and balanced accuracy for each model ($\epsilon=0.1$, $\epsilon=0.01$, and $\epsilon=0$) when using $R_{simple}$ as the reward function. The left plot shows the accuracy. The right plot shows the balanced accuracy, which accounts more for class imbalance.
 #+NAME: fig:simp_best_model_accuracy
@@ -1236,7 +1242,7 @@ A single experiment was run using the m-mode binary classification environment (
 
 The agent trained on the MMBCE performs worse than any agent trained on the BCE, as seen in table [[tbl:mmode_best_model_metrics]]. It also performs very little exploration of the environment, where almost 35% of episodes contain no movement of the synthetic m-mode line at all. Figure [[fig:action_frequencies_mmode]] show the distribution of actions taken by the agent on the test split. Over 90% of actions were of marking the current frame as either diastole or systole.
 
-Furthermore, in the episodes where the agent /did/ perform any exploration, the agent performed worse than in the ones it did not move the synthetic m-mode line at all, as visualized in [[fig:mmode_gaafd_explore_or_not]]. Table [[tbl:mmode_best_model_metrics]] reports that the agent had an average GaaFD score of $5.47$ for episodes where it performed exploration versus $3.13$ for episodes where the line was still.
+Furthermore, in the episodes where the agent /did/ perform any exploration, the agent performed worse than in the ones it did not move the synthetic m-mode line at all, as visualized in figure [[fig:mmode_gaafd_explore_or_not]]. Table [[tbl:mmode_best_model_metrics]] reports that the agent had an average GaaFD score of $5.47$ for episodes where it performed exploration versus $3.13$ for episodes where the line was still.
 
 
 #+CAPTION: Performance of agents trained on the m-mode binary classification environment.
@@ -1321,7 +1327,7 @@ For agents trained using $R_{GaaFD}$, we see a relative increase in videos that 
 
 
 
-Peeking inside the machinery of the DQN-agent, we see a potential cause of the performance discrepancy between the three models. For every frame, the agent predicts the future returns of marking a frame as diastole or systole. These predictions are plotted in [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. The model that uses $\epsilon=0$ better differentiates the value of taking either action for a given state. 
+Peeking inside the machinery of the DQN-agent, we see a potential cause of the performance discrepancy between the three models. For every frame, the agent predicts the future returns of marking a frame as diastole or systole. These predictions are plotted in figures [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. The model that uses $\epsilon=0$ better differentiates the value of taking either action for a given state. 
 
 
 
