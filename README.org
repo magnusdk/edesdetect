@@ -31,3 +31,8 @@ Run this command to start a Jupyter Lab server and an SSH tunnel that let's you 
 #+BEGIN_SRC bash
 ssh -L 8888:localhost:8888 USERNAME@ML_NODE -t "cd path/to/edesdetect; ./scripts/start_jupyter_lab_server.sh"
 #+END_SRC
+
+
+* Example GIFs of MMCBE agent
+[[https://github.com/magnusdk/edesdetect/blob/main/TEST_example_0.gif]]
+[[https://github.com/magnusdk/edesdetect/blob/main/TEST_example_10.gif]]
