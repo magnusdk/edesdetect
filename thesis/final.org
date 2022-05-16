@@ -53,7 +53,7 @@ After which, to center images, regex-replace:
 
 The thesis explores ways of formulating the problem of detecting the key cardiac phases from ultrasound videos, i.e., the end diastolic (ED) and end systolic (ES) phases, as a reinforcement learning (RL) problem, and whether there are any benefits in doing so. Of particular interest is the design of the RL reward function. Three reward functions are explored: one based on a generalization of the performance metric of average absolute frame difference (aaFD) that is only given to the agent at the end of an episode, and two based on per-frame phase classification given at every step. Additionally, two formulations of the RL environment are explored: binary classification environment (BCE), designed to be a direct reformulation of a supervised binary classification task, and m-mode binary classification environment (MMBCE), designed to provide the agent with the ability to explore the environment using synthetic m-mode imaging. Because of time constraints, MMBCE was only preliminary explored, yet the results indicate that the problem is too complex for the current setup and requires more work before we can draw any conclusions on its feasibility.
 
-Experiments show that an RL agent is able to learn to perform phase detection even when the reward signal is very sparse. However, the less sparse reward functions perform better on nearly all metrics. The best agent predicts the correct number of ED and ES events in $80.26\%$ of the videos on the test set, on which it yields an aaFD score of $1.69$. It is concluded that there are multiple ways of formulating the problem of phase detection as a reinforcement learning problem, but not all formulations are equal. Reward sparsity and environment complexity contribute negatively to performance overall. There are also indications that lower values of the $\epsilon$ -greedy exploration hyperparameter $\epsilon$ have a regularizing effect on the model, prompting further research.
+Experiments show that an RL agent is able to learn to perform phase detection even when the reward signal is very sparse. However, the less sparse reward functions perform better on nearly all metrics. The best agent predicts the correct number of ED and ES events in $\sim 80\%$ of the videos on the test set, on which it yields an aaFD score of $1.69$. It is concluded that there are multiple ways of formulating the problem of phase detection as a reinforcement learning problem, but not all formulations perform equally well. Reward sparsity and environment complexity contribute negatively to performance overall. There are also indications that lower values of the $\epsilon$ -greedy exploration hyperparameter $\epsilon$ have a regularizing effect on the model, prompting further research.
 
 
 
@@ -72,6 +72,7 @@ Experiments show that an RL agent is able to learn to perform phase detection ev
 
 
 \chapter{Introduction}
+This chapter presents the motivation, goal, and structure of the thesis. Section [[Motivation]] introduces the problem that the thesis aims to solve and gives motivation for why it needs to be solved. Section [[Goal and Research Question]] states the goal and research questions of the thesis explicitly. Lastly, section [[Thesis Structure]] gives an overview of the structure of the rest of the thesis.
 
 * Motivation
 Cardiovascular disease is the number one cause of death globally, taking an estimated 17.9 million lives each year \cite{noauthor_cardiovascular_nodate}. It is important to make a timely diagnosis so that patients receive early treatment risk assessment. One standard tool used for diagnosis is cardiac imaging; non-invasive imaging of the heart.
@@ -91,22 +92,22 @@ The goal of this thesis is to explore the use of RL for automatically detecting 
 We pose the following research questions:
 
 - *Is it possible to use reinforcement learning for the task of ED-/ES-frame detection?*
-- *How does the formulation of the problem as a reinforcement learning problem affect the performance of the model?*
+- *How does formulating the problem as reinforcement learning affect the performance of the model?*
 
 Of importance to all types of machine learning is formulating the problem in a way that makes it easier to learn for the computer. That is, optimizing the /inductive bias/ by incorporating human knowledge into the algorithm itself. Using RL for ED/ES frame detection may open up possibilities of seeing the problem from a new perspective, allowing us the add the right set of inductive bias.
 
 
 
 
-* Limitations of the Work
-
-
 * Thesis Structure
-What are in each chapter...
+The thesis is organized into seven chapters. The first chapter, /Introduction/, (which you are currently reading) states the motivation, goal, and research questions of the thesis. Chapter 2, /Background/, gives an overiew of the concepts and technologies used throughout the thesis, as well as a summarizing previous work on ED-\/ES-frame detection and the use of RL in medical imaging. Chapter 3, /The Dataset/, gives an overview of the data used to train the models, and how it is pre-processed. Chapter 4, /Methodology/, steps through the methods used in the thesis, the decisions taken, and the reasoning behind them. Chapter 5, /Experiments and Results/, reports the results, and the impact of various hyperparameters on the results. Chapter 6, /Discussion/, discusses the results, methodology, and weaknesses of the study. Lastly, chapter 7, /Conclusion/, answers the research questions asked in chapter 1, and gives potential future paths on which to continue research.
+
 
 
 
 \chapter{Background}
+This chapter gives an overview of the concepts and techonologies used throughout the thesis. Section [[The Cardiac Cycle]] describes the function and anatomy of the heart, and its stages through the cardiac cycle. Section [[What is Ultrasound?]] gives a brief introduction to the physics involved in ultrasound. Section [[Echocardiography]] builds upon the physics introduction of the previous section and describes how one can use ultrasound to generate images. It also describes two of the imaging modes for echocardiography: b-mode and m-mode. Section [[Deep Learning]] describes the basics of machine learning, and describes different families of machine learning, including reinforcement learning. Finally, section [[Related Work]] is a survey of previous work on ED- and ES-frame detection and previous use of reinforcement learning in medical imaging.
+
 * The Cardiac Cycle
 The human heart is situated in the middle compartment of the chest, between the lungs, and is responsible for keeping the blood flowing by acting as a pump. Blood is used for transporting oxygen and essential nutrients throughout the body and carries metabolic waste such as carbon dioxide to the lungs.
 
@@ -200,7 +201,7 @@ RF=\frac{Z_2-Z_1}{Z_2+Z_1}
 
 
 * Echocardiography
-Light is an electromagnetic signal that does not penetrate very far into the body, which is why we cannot simply gaze into each other's hearts. We could, however, imagine a universe where light penetrates all the way, giving off no reflections at all. In this universe, we would not be able to see the heart either; in fact, we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweet spot where the signal can penetrate tissue with enough energy while at the same time being reflected with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
+Light is a signal that does not penetrate very far into the body, which is why we cannot simply gaze into each other's hearts. We could, however, imagine a universe where light penetrates all the way, giving off no reflections at all. In this universe, we would not be able to see the heart either; in fact, we would not be able to see any body at all! To be able to look /inside/ something based on reflections alone requires a sweet spot where the signal can penetrate tissue with enough energy while at the same time being reflected with enough energy so that we can measure it. Arguably, we are quite lucky with our universe, at least in terms of cardiac imaging, because sound is such a signal.
 
 #+CAPTION: Values of the acoustic wave velocity $c$ and acoustic impedance Z of some substances from \cite{suetens_fundamentals_2017}.
 #+NAME: tbl:acoustic_impedances
@@ -269,6 +270,7 @@ In M-mode (as in "Motion"-mode) imaging, only one direction is imaged over time 
 
 
 * Deep Learning
+
 ** Gradient Descent
 The most significant deep learning innovations have all used a technique called gradient descent.
 
@@ -289,8 +291,6 @@ We may want to optimize some parameters working on a set of images, for example 
 Another aspect of great importance is to instill what's called inductive bias into the model; that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some important features are explored in the next section.
 
 
-
-
 ** Deep Neural Networks
 Fully connected layers is just a matrix multiplication between the input $x$ and a weigth matrix $w$, often with an additional bias $b$ added, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
 
@@ -306,42 +306,47 @@ S(X) = \frac{1}{1+e^{-x}}
 ReLU = max(0, x)
 \end{equation}
 
-Using just two fully connected layers separated by non-linear activation functions one could represent any arbitrary function, given that one includes enough neurons [TODO: Cite "Multilayer Feedforward Networks are Universal Approximators"]. That does mean that they are the right tool for every job.
+Using just two fully connected layers separated by non-linear activation functions one could represent any arbitrary function, given that one includes enough neurons \cite{hornik_multilayer_1989}. That does mean that they are the right tool for every job.
 
 Fully connected layers combine every input with every output. This does not take advantage of the spatial locality of images. In an image a given pixel is often more related to pixel who lie closer to it. Convolutional layers take advantage of this by applying filters to an image, with each filter only processing a small part of the image at a time. The filters are often small matrices that is applied everywhere in an image.
 
-Each filter has a width and height which determine how many pixels are included in one application of the filter. One may also affect how the filters are applied to an image through stride, which determine how much the sliding window of the filter "skips" for each application. For example a stride of 2 means that the filter moves two pixels for each application. Another hyper-parameter is dilation, which affect the spacing between pixels for an individual application. A dilation of 2 means that every other pixel is ignored when applying the filter.
+Each filter has a width and height which determine how many pixels are included in one application of the filter. One may also affect how the filters are applied to an image through stride, which determine how much the sliding window of the filter "skips" for each application. For example a stride of 2 means that the filter moves two pixels for each application. Another hyperparameter is dilation, which affect the spacing between pixels for an individual application. A dilation of 2 means that every other pixel is ignored when applying the filter.
 
-Another popular layer is the recurrent layer. The recurrent layer is a way of processing sequential data, such as temporal data. Recurrent layers have a unit with hidden state that is applied at every time step. One popular version of a recurrent layer is LSTM [TODO: citation].
+Another popular layer is the recurrent layer. The recurrent layer is a way of processing sequential data, such as temporal data. Recurrent layers have a unit with hidden state that is applied at every time step. Some popular impementations of a recurrent layer are LSTM \cite{hochreiter_long_1997} and GRU \cite{cho_learning_2014}.
 
 
 ** Optimization Process
-For each iteration of gradient descent we update the model's parameters a small step in the opposite direction in order to minimize it. It is important to only update them in a small step each time, otherwise they may overshoot and in the worst case cause the model's performance to diverge. For standard SGD we choose how much to update the parameters using the hyper-parameter $\alpha$ which is often a low number between 0 and 1.
+For each iteration of gradient descent we update the model's parameters a small step in the opposite direction in order to minimize it. It is important to only update them in a small step each time, otherwise they may overshoot and in the worst case cause the model's performance to diverge. For standard SGD we choose how much to update the parameters using the hyperparameter $\alpha$ which is often a low number between 0 and 1.
 
-Using a low $\alpha$ means that we don't update the parameters too much when the gradient is steep, but it also means that the parameters are updated very little when the gradient is near-flat. In addition, we may encounter flat regions of the gradient which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons other optimizers have been developed, such as ADAM [TODO: cite].
+Using a low $\alpha$ means that we don't update the parameters too much when the gradient is steep, but it also means that the parameters are updated very little when the gradient is near-flat. In addition, we may encounter flat regions of the gradient which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons other optimizers have been developed, such as ADAM \cite{kingma_adam_2017} which.
 
-TODO: Explain ADAM
-
-
+# TODO: Explain ADAM
 
 
-** Overfitting and Regularization
-The goal of machine learning is to train models that generalize to data samples outside of the training set. When we optimize a model on a given data distribution we risk making the model specialize too much on that specific distribution. When the model performs significantly better on the data it has been trained on versus unseen data we say that it has overfit.
-
-One way to reduce the chance of overfitting is to use regularizers. Regularizers either augment the training data or put additional constraints on the optimization process such that the the model is likely to overfit. One example is to use data augmentations: random transformations on the training data. In practice, this increases the training dataset as more data are added to it. One could also augment the loss function itself by adding the magnitude of all the parameters, thereby encouraging the network to be less dependent on a small number of features.
-
+The goal of machine learning is to train models that generalize to data samples outside of the training set. When we optimize a model on a given data distribution we risk making the model specialize too much on that specific distribution. When the model performs significantly better on the data it has been trained on versus unseen data we say that it has overfit. Regularizers are tools that attempt to reduce the chanceeffect of overfitting.
 
 
 ** Supervised, Semi-Supervised, and Unsupervised Learning
 One way of designing the loss function is to define it as the difference between the predicted values from the model and ground truths that were labeled beforehand. Learning methods that use these kinds of loss functions are generally called supervised learning, as if a "supervisor" tells the model what the right answer ought to have been.
 
-If we don't have access to ground truth labels we can instead define the loss in other ways. TODO: semi-supervised and unsupervised
+If we don't have access to ground truth labels we can instead define the loss in other ways. 
+
+# TODO: semi-supervised and unsupervised
+
+
+
+
+# TODO: Run Grammarly on above sections (once they are finished).
 
 
 
 
 
-TODO: Run Grammarly on above sections (once they are finished).
+
+
+
+
+
 
 
 ** Reinforcement Learning
@@ -377,7 +382,7 @@ G_t &= r_{t} + \gamma r_{t+1} + \gamma^2 r_{t+1} + \ldots \\
 
 One way to select an action is to predict the following state's value after taking that action. For this we could use the /state value function/ $V_\pi(S_t)$ which estimates the expected return $G_t$ of being in state $s_t$, while following the policy $\pi$. Alternatively, we could use the /state-action value function/ $Q_\pi(s_t, a_t)$ which estimates the expected return of taking action $a_t$ in state $s_t$, while following the policy $\pi$. Both value functions depend on the policy being followed because the policy decides what actions to take in the future, which again has consequences for what rewards the agent expects to receive at subsequent steps. For this setup, the "learning" part of RL could be considered to be updating a value function towards the "optimal value function," defined as the value function that uses the optimal policy when estimating returns. The optimal policy $\pi^*$ is one /(of the possibly many policies)/ that yields the maximum amount of total reward if followed.
 
-TODO: Mention epsilon-greedy policy and UCB
+Another important aspect of RL is the exploration-exploitation trade-off: How often should the agent explore the environment versus exploit its current assumptions about the environment? An agent that never performs exploration, i.e., always acts greedily, may never discover the optimal policy. An agent that only ever explores, i.e., only takes random actions, may end up revisiting the same low-potential states over and over. There is a balance to be made. One way to induce exploration for an agent is to force it take a random action a given percentage of the time. This is called an $\epsilon$ -greedy policy, where $\epsilon$ is the hyperparameter that decides how often the agent takes a random action instead of what it considers to be the best one. E.g., a value of $\epsilon=0.1$ means that the agent takes a random action 10% of the time.
 
 One algorithm for updating the state value function is called temporal difference learning (TD). In TD, the state value function $V(s_t)$ is updated after every step, by comparing the value it expected to see, with a value that takes the newly observed reward $r_{t+1}$ into consideration, as seen in equation [[eqn:state_value_function]]. $(r_{t+1} + \gamma V(s_{t+1}))$ is called the TD-target, and because it incorporates the actual observed reward $r_{t+1}$, it can be considered as a more up-to-date version of the state value function. $(r_{t+1} + \gamma V(s_{t+1})) - V(s_t)$ is called the TD-error. The lower the TD-error is, the better the RL agent is able to reason the value of states, and as such, we want to minimize it. We do this by updating the state value by nudging it slightly towards the TD-target. How far it is nudged at each update is determined by $\alpha$.
 
@@ -527,7 +532,7 @@ They also performed an ablation study on the Rainbow algorithm to see how much e
 
 
 
-* Related Work (State-of-the-art Section (TBD))
+* Related Work
 ** ED-/ES-Detection
 One early attempt for detecting the ED and ES frames took advantage of the rapid mitral valve opening during early diastole \cite{kachenoura_automatic_2007}. By measuring the mean intensity variation over time in a small region of interest, one could capture the mitral valve opening and define the frame corresponding to peak intensity as ES. This signal was, in some cases, disturbed by early longitudinal motion of the heart, which led to falsely labeling frames as ES. In the same paper, the authors introduced another method that took advantage of the left ventricle deformation during the cardiac cycle. With this method, ES was defined as the frame with the lowest correlation with the ED frame. The correlation curve would flatten out because of little movement around systole, making the predictions more uncertain. The best results were achieved when using a combination of both methods. For this, a small time window was selected around ES using the correlation method, and the mean intensity variation method was used to determine the final ES frame prediction.
 
@@ -542,10 +547,6 @@ Non-negative Matrix Factorization (NMF) is another unsupervised learning method 
 [[./img/manifold_and_nmf_comparison.png]]
 
 Other methods use either image segmentation or speckle tracking to track the changes to the left ventricle volume, taking advantage of the fact that it is most expanded during ED and most contracted during ES \cite{barcaro_automatic_2008} \cite{darvishi_measuring_2013} \cite{a_automatic_2015}. However, these methods are prone to significant errors due to noise inherent in cardiac ultrasound or discontinuous edges.
-
-The most successful approaches to ED and ES frame detection so far have been to use supervised learning methods. A 2D video consists of a sequence of 2D images and thus has two spatial dimensions and one temporal dimension. Convolutional Neural Networks (CNN) and Recurrent Neural Networks (RNN) are supervised learning models that can extract spatial and temporal features, respectively. A basic CNN consists of one or more convolutional layers consisting of a set of filters. The filters act as pattern-matchers and are applied to every part of the input image, and each subsequent convolutional layer can capture more high-level features of the image. A basic RNN consists of one or more processing units that are repeatedly applied to the items in the input sequence and can build up a memory of previous items.
-
-Due to the increase in computing power in the form of GPUs, it is possible to train CNNs with many convolutional layers or RNNs with stacked processing units, creating deep networks that can learn increasingly complex image features. This architecture gives rise to the term “Deep Learning” and is what has made some supervised learning methods so successful.
 
 A CNN and an RNN were combined to do spatial and temporal feature extraction to detect the ED and ES frames by Kong et al. in 2016 \cite{kong_recognizing_2016}. The combined network was trained on cardiac MRI data, and it used a Zeiler-Fergus model \cite{zeiler_visualizing_2013} for the CNN, and an LSTM \cite{hochreiter_long_1997} for the RNN. The problem was treated as a regression problem for a function that monotonically decreases during diastole and monotonically increases during systole. Thus, the function being regressed is a latent space representation of the left ventricle volume as it expands and contracts, and the ED and ES frames can be found by finding the highest peaks and lowest valleys of the DL model’s output. This approach was later improved by swapping out the CNN with a ResNet \cite{dezaki_deep_2017}, and then again by swapping it out for a DenseNet \cite{taheri_dezaki_cardiac_2019}, while different choices for the RNN did not significantly improve the performance of the model.
 
@@ -605,9 +606,7 @@ This work serves as inspiration for this thesis and helps guide our RL formulati
 
 
 \chapter{The Dataset}
-Overview of the chapter.
-Short description of the different datasets used.
-
+Only one dataset was used in this thesis. This chapter gives an overview of the dataset used to train the models, how it is organized and how we pre-process it.
 
 * Echonet-Dynamic Dataset
 The Echonet-Dynamic Dataset \cite{ouyang_echonet-dynamic_2019} is an openly available collection of 10,030, 112-by-112 pixels echocardiography videos for studying cardiac motion and chamber volumes. Each video has been cropped and masked to exclude text, ECG- and respirometer-information, and downsampled from its original size into 112-by-112 pixels using cubic interpolation. All videos are of the apical-4-chamber view, and each video is from unique individuals who underwent imaging between 2016 and 2018 as part of routine clinical care at Stanford University Hospital. Images were acquired by skilled sonographers using iE33, Sonos, Acuson SC2000, Epiq 5G, or Epiq 7C ultrasound machines. Each video has been labeled by a registered sonographer and verified by a level 3 echocardiographer in the standard clinical workflow.
@@ -705,6 +704,7 @@ A full Echonet-Dynamic dataset pipeline is visualized in figure [[fig:dataset_pi
 
 
 \chapter{Methodology}
+This chapter steps through the methods used in the thesis, the decisions taken, and the reasoning behind them. Section [[Environment Formulation]] introduces and describes the binary classification environment (BCE), and the design of the three different reward functions $R_{GaaFD}$, $R_{simple}$, and $R_{proximity}$. Section [[Frameworks and Libraries]] gives an overview of the software technologies used to train the models. Section [[Agent Architecture]] describes the architecture of the agent and neural network, and how it was optimized and trained. Section [[Evaluation]] describes how we evaluate the models in the Experiments and Results chapter. Section [[Selection of Hyperparameters]] describes the hyperparameters used in the experiments and why they were chosen. Section [[Incorporating Search]] explores different ways of incorporating search into the environment. Finally, section [[M-Mode Binary Classification Environment]] describes the m-mode binary classification environment (MMBCE), a version of BCE that incorporates searching using a synthetic m-mode image.
 
 
 * Environment Formulation
@@ -719,7 +719,7 @@ BCE is visualized in figure [[fig:binary_classification_environment_loop]]. Afte
 
 More formally, the observation $o_t$ at time $t$ is the current frame in the video prepended by the $N$ previous frames and the $N$ next frames. The shape of an observation is thus $(W, H, 2N+1)$. The agent takes the observation as-is and takes one of two actions: /Mark current frame as diastole/ or /Mark current frame as systole/. After taking an action $a_t$, the agent receives a reward $r_{t+1}$ and is presented with the next observation $o_{t+1}$. The current frame is moved one frame forwards after each action is taken, and the episode ends when there are no more labeled frames left.
 
-Given that videos from the dataset are 112-by-112, the only two hyper-parameters for this setup are $N$ and the choice of reward function. Increasing $N$ means that the agent has access to more temporal information but at the cost of increased computational and memory requirements and a decrease in the number of videos with enough adjacent frames on either side. The number of valid videos for a given $N$ and the change in the number of valid videos is plotted in figure [[fig:n_valid_videos_for_n]]. As a starting point, $N$ was selected rather arbitrarily to be $3$. This means that an observation has the shape $(112, 112, 7)$, having $2\times 3 + 1 = 7$ channels.
+Given that videos from the dataset are 112-by-112, the only two hyperparameters for this setup are $N$ and the choice of reward function. Increasing $N$ means that the agent has access to more temporal information but at the cost of increased computational and memory requirements and a decrease in the number of videos with enough adjacent frames on either side. The number of valid videos for a given $N$ and the change in the number of valid videos is plotted in figure [[fig:n_valid_videos_for_n]]. As a starting point, $N$ was selected rather arbitrarily to be $3$. This means that an observation has the shape $(112, 112, 7)$, having $2\times 3 + 1 = 7$ channels.
 
 #+CAPTION: The effect of $N$ on the size of the dataset. Left: the number of valid videos (videos with at least $N$ adjacent frames on either side) for the whole dataset. Right: the change in the number of valid videos per $N$ for the whole dataset.
 #+NAME: fig:n_valid_videos_for_n
@@ -877,18 +877,18 @@ Finally, models are evaluated on how long it took to train them in clock time an
 
 
 
-* Selection of Hyper-Parameters
+* Selection of Hyperparameters
 ** Generalized Average Absolute Frame Difference Reward Function
 Using GaaFD directly as the reward function has the benefit that we are directly optimizing the agent for the primary performance metric aaFD, as defined in equation [[eqn:aafd]]. However, as discussed in section [[Reward Function Design]], a weakness is that it is only defined at the end of an episode, making the reward signal very sparse. The agent will only get a reward at the last step of an episode, which, on average, lasts for 50 steps.
 
-To solve for reward-sparsity, we use multistep bootstrapping with a value of $N=200$. An episode is automatically terminated once it reaches 200 steps [[fn::Though in the case of the simple binary classification environment, this will never happen because no video has this many frames] so this will, in practice, mean that the agent is trained using the Monte Carlo method.
+To solve for reward-sparsity, we use multistep bootstrapping with a value of $N=200$. An episode is automatically terminated once it reaches 200 steps [fn::Though in the case of BCE, this will never happen because no video has this many frames.] so this will, in practice, mean that the agent is trained using the Monte Carlo method.
  
 We also set the discount value $\gamma=1.0$, which means that an agent tries to maximize all future rewards. A value of $\gamma < 1.0$ means that the calculated returns will be noisier and harder to predict because the discounted returns calculated for steps earlier in an episode would have a lower value than those calculated closer to the end.
 
-The expected returns are assumed to be very sensitive to the current policy as a correctly selected next action's returns may be jeopardized by future wrongly selected actions. This would make it hard for the agent to extract information about which actions were wrong and which were correct. Because of this, we opt to use very low values of the exploration parameter $\epsilon$, as higher values of $\epsilon$ means that actions will be selected at random more often, making the expected returns harder to predict. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The agents were allowed to train until they visually reached a plateau. A full list of the hyper-parameters used is listed in table [[tbl:gaafd_hyper_params]] (most relevant ones are highlighted).
+The expected returns are assumed to be very sensitive to the current policy as a correctly selected next action's returns may be jeopardized by future wrongly selected actions. This would make it hard for the agent to extract information about which actions were wrong and which were correct. Because of this, we opt to use very low values of the exploration parameter $\epsilon$, as higher values of $\epsilon$ means that actions will be selected at random more often, making the expected returns harder to predict. Three values are tested for the exploration hyperparameter $\epsilon$: $\epsilon=0.0$, $\epsilon=0.01$, and $\epsilon=0.1$. The agents were allowed to train until they visually reached a plateau. A full list of the hyperparameters used is listed in table [[tbl:gaafd_hyper_params]] (most relevant ones are highlighted).
 
 #+NAME: tbl:gaafd_hyper_params
-| Hyper parameter              | Value                              |
+| Hyperparameter              | Value                              |
 |------------------------------+------------------------------------|
 | *Epsilon*                    | $\{0.0, 0.01, 0.1\}$               |
 | *Discount*                   | $1.0$                              |
@@ -914,10 +914,10 @@ Using reward functions based on each phase prediction gets around the reward spa
 
 Unless discounting is not zero, there will be no need for bootstrapping, and we can ignore N-step bootstrapping for these reward functions by setting $N=1$.
 
-Since an action does not affect future states, exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly, and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. Three values are tested for the exploration hyper-parameter $\epsilon$: $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$. The agents were trained for $200\,000$ SGD steps. A full list of the hyper-parameters used for experiments with reward functions $R_{simple}$ and $R_{proximity}$ is listed in table [[tbl:r1r2_hyper_params]] (most relevant ones are highlighted).
+Since an action does not affect future states, exploration is not as important. Instead, we can view the exploration variable $\epsilon$ as affecting how input/label pairs are sampled. An exploration value of $\epsilon=1.0$ means that actions are sampled uniformly, and a value of $\epsilon=0.0$ means that actions are sampled based on how good it is assumed to be. Three values are tested for the exploration hyperparameter $\epsilon$: $\epsilon=0.1$, $\epsilon=0.5$, and $\epsilon=1.0$. The agents were trained for $200\,000$ SGD steps. A full list of the hyperparameters used for experiments with reward functions $R_{simple}$ and $R_{proximity}$ is listed in table [[tbl:r1r2_hyper_params]] (most relevant ones are highlighted).
 
 #+NAME: tbl:r1r2_hyper_params
-| Hyper parameter              | Value                        |
+| Hyperparameter              | Value                        |
 |------------------------------+------------------------------|
 | *Epsilon*                    | $\{0.1, 0.5, 1.0\}$          |
 | *Discount*                   | $0.0$                        |
@@ -1040,8 +1040,10 @@ We keep the same base architectures as in the simple binary classification envir
 
 \chapter{Experiments and Results}
 
+This chapter reports the results and the impact of various hyperparameters. Section [[Performance Metrics — An Overview]] gives an overview of the performance metrics for all the trained models in the experiments. Section [[The Impact of Epsilon on Average Absolute Frame Difference]] compares the generalized average absolute frame difference (GaaFD) performance for models trained using different values of the exploration hyperparameter $\epsilon$. Section [[The Impact of Reward Function and Epsilon on Accuracy]] compares the accuracy metric performance for models trained using different reward functions and values of $\epsilon$. Section [[Learning Curves]] report the learning- and loss curves of the different models. Section [[The Impact of Reward Function and Epsilon on Q-Values]] dives into the Q-values produced by the different models and compare them. Section [[Inference Speed]] reports how long it took to just-in-time compile and run the BCE neural network on the CPU and GPU. Finally, [[M-Mode Binary Classification Environment Results]] reports the results of the single MMBCE experiment that was run.
 
-* Performance Metrics
+
+* Performance Metrics — An Overview
 The performance metrics is reported in the following four tables. Tables [[tbl:gaafd_best_models_sgd_steps]], [[tbl:r1_best_models_sgd_steps]] and [[tbl:r2_best_models_sgd_steps]] presents the performance of agents traines using $R_{GaaFD}$, $R_{simple}$ and $R_{proximity}$, respectively. Lastly, table [[tbl:best_models_comparison]] presents a comparison between the best models for each reward function.
 
 Out of all the trained models, the model trained using $R_{simple}$ with a value of $\epsilon=0.5$ performed the best.
@@ -1283,7 +1285,7 @@ The effect of using $R_{simple}$ over $R_{proximity}$ seems to be that $R_{simpl
 
 
 
-* Inference speed
+* Inference Speed
 The inference time is faster on the CPU than the GPU when we include IO roundtrip time. However, ignoring IO, the network performs extremely fast on the GPU; processing a batch of 128 frames takes just a little over a millisecond, producing a framerate of over $125\,000$ FPS. However, this is merely considered a "fun fact." A realistic scenario would include IO roundtrip time. A single frame may be processed on the CPU in 0.80 milliseconds, meaning that it can likely be included as a step in a processing stream.
 
 
@@ -1304,7 +1306,7 @@ The inference time is faster on the CPU than the GPU when we include IO roundtri
 
 
 
-* M-Mode Binary Classification Environment
+* M-Mode Binary Classification Environment Results
 A single experiment was run using the m-mode binary classification environment (MMBCE), the result of which can be seen in table [[tbl:mmode_best_model_metrics]]. The percentage of episodes where the agent actively explores its environment by moving the synthetic m-mode line is reported in addition to the key metrics. The agent is said to have explored if at least one of the actions in the episode moved or rotated the line. The GaaFD is also reported for episodes where the agent performs some exploration and where it performs no exploration individually.
 
 The agent trained on the MMBCE performs worse than any agent trained on the BCE, as seen in table [[tbl:mmode_best_model_metrics]]. It also performs very little exploration of the environment, where almost 35% of episodes contain no movement of the synthetic m-mode line at all. Figure [[fig:action_frequencies_mmode]] show the distribution of actions taken by the agent on the test split. Over 90% of actions were of marking the current frame as either diastole or systole.
@@ -1409,11 +1411,16 @@ TODO: The rest
 
 
 
+* Weaknesses of Using Average Absolute Frame Difference
+aaFD is the key metric that we report but, as has been shown, it is only defined when the number of predicted events equal the number of ground truth events. To report an aaFD score for our models we opt to filter out all samples where the number of predicted events differ from the number of ground truth events. Presumably, these videos have wrongly predicted events because they are more difficult to predict on overall. Thus, filtering out these is a form of selection bias, where the aaFD is reported only on the easiest videos. The related papers don't report this problem, which, presuming this is the case, is why we must also consider the number of videos with the correct number of predicted events when comparing models.
+
+Another weakness of aaFD is that it is sensitive to the FPS of the videos in the dataset. For videos with higher FPS, aaFD will also be proportionally higher. Unless this score is normalized, such as by dividing the score on a video by the video's FPS, it becomes hard to compare results.
 
 
+* Lack of Comparison Experiments
+Only one other study was found to report their model's performance on the Echonet dataset \cite{lane_multibeat_2021}. This is considered a weakness of this project, and getting access to multiple datasets early in the project should have been a priority. This makes it hard to gain precise insight into the performance of the methods versus supervised learning methods.
 
-
-
+The authors report an average aaFD of $2.30$ and $3.49$ for ED and ES events in their paper. Our best model can report an average aaFD of $1.69$ overall, but this is only for 80% of the videos, as 20% have an incorrect number of predicted events compared to ground truth events. The authors do not report how many, if any, of the videos had an incorrect number of predicted events.
 
 
 * Why Use Reinforcement Learning?
@@ -1429,33 +1436,40 @@ However, even though RL may not be the best tool for phase detection, it is stil
 
 
 
-* Lack of Comparison Experiments
-Only one other study was found to report their model's performance on the Echonet dataset \cite{lane_multibeat_2021}. This is considered a weakness of this project, and getting access to multiple datasets early in the project should have been a priority. This makes it hard to gain precise insight into the performance of the methods versus supervised learning methods.
-
-The authors report an average aaFD of $2.30$ and $3.49$ for ED and ES events in their paper. Our best model can report an average aaFD of $1.69$ overall, but this is only for 80% of the videos, as 20% have an incorrect number of predicted events compared to ground truth events. The authors do not report how many, if any, of the videos had an incorrect number of predicted events.
 
 
 
-
-
-
-
-
-\chapter{Conclusions and Further Work}
+\chapter{Conclusion}
+This chapter concludes the work of this thesis. Section [[Answers to the Research Questions]] attempts to answer the original research questions that was posed in section [[Goal and Research Question]]. Section [[Future Work and Research]] presents potential future work and research related to this thesis. Section [[Link to Code Repository]] provides a link to the code used in this thesis.
 
 * Answers to the Research Questions
-We are now ready to answer the original research questions:
+We are now ready to answer the original research questions:\newline \newline
+*Is it possible to use reinforcement learning for the task of ED-/ES-frame detection?*\\
+Yes, there are multiple ways, but some are more efficient than others.
 
-*Is it possible to use reinforcement learning for the task of ED-/ES-frame detection?* Yes, there are multiple ways, but some are more efficient than others. RL is very flexible and allows us to model the problem in many different ways, both in terms of reward functions and environment dynamics.
+We explored using the key metric of average absolute frame difference (aaFD) directly as the reward function, which we called $R_{GaaFD}$. We also explored formulating ED-/ES-frame detection as the phase classification task of marking each frame as either diastole or systole, and designing the reward function around that. The reward function $R_{simple}$ gives a reward of $1$ for correct frame phase predictions and $-1$ for incorrect ones. Likewise, the reward function $R_{proximity}$ gives a reward of $1$ for correct predictions, but a negative reward proportional to how far the prediction was from being the correct phase. Due to reward sparsity, $R_{GaaFD}$ performed the worst, while $R_{simple}$ performed the best. $R_{proximity}$, despite being designed to have similar semantics to aaFD, performed worse than $R_{simple}$. 
 
-*How does the formulation of the problem as a reinforcement learning problem affect the performance of the model?* 
-We have seen that the design of the reward function matters a lot. If the reward signal is too sparse, it will be more difficult for the agent to learn, resulting in poorer performance, as seen in our experiments. Our test results comparing the reward function $R_{simple}$ and $R_{proximity}$ shows that $R_{simple}$ performs better at aaFD, even though $R_{proximity}$ was specifically designed to be more similar to aaFD. This is despite the learning curves seen in figure [[fig:r1r2_comparison_learning_curves]] indicating that $R_{proximity}$ performs better at GaaFD after the models have begun to overfit because $R_{simple}$ can reach a better score just before overfitting occurs.
+We also showed that it is possible to incorporate state-space search by letting the agent explore different synthetic m-mode images from the video. However, due to the additional complexity, this environment formulation made the agents perform worse than when using just a simple environment with no search.
 
-Furthermore, the value of $\epsilon$ has been a crucial hyperparameter for these tasks. For the sparse GaaFD reward function, using a value of $\epsilon=0$ yielded the best results. For $R_{simple}$ and $R_{proximity}$, the difference between different values of $\epsilon$ had little effect on the performance of the best model but seemed to have a regularizing effect. It would be interesting to dive deeper into why this happens and perhaps how we can take advantage of it when sampling data for supervised learning.
+RL is very flexible and allows us to model the problem in many different ways, both in terms of reward functions and environment dynamics.\newline \newline
+*How Does Formulating the Problem as Reinforcement Learning Affect the Performance of the Model?*\\
+We have shown that the design of the reward function matters a lot with regards to how the agent learn from and represent the environment. Reward sparsity degrades performance of the agent. Designing the reward function to be more similar to the key metric makes the agent perform better on that metric in the long run. However, more complex reward functions are harder to learn, so the benefit may not be apparent until long into training, in which case overfitting may counteract any benefit.
+
+Furthermore, we have shown that the exploration parameter $\epsilon$ is crucial for achieving a good performance when the reward signal is very sparse. For the sparse reward function $R_{GaaFD}$, using a value of $\epsilon=0$, i.e. the agent follows a greedy policy, yielded the best results. For $R_{simple}$ and $R_{proximity}$, the difference between different values of $\epsilon$ had little effect on the performance of the best model but seemed to have a regularizing effect. The model with the highest performance trained using $R_{proximity}$ as the reward function on the test split had almost perfect accuracy on the training split.
+
+* Future Work and Research
+It would be interesting to dive deeper into why using lower amounts of exploration has a regularizing effect on the model. Perhaps there is something about the way that the data is sampled in RL that supervised learning can take advantage of.
+
+In order to get a true comparison between the RL approach and a supervised learning approach for the problem of ED-/ES-frame detection we must train a neural network that is as similar as possible to the one we used as the Q-network. We have proved that it is possible to use RL for this task, but not whether there are any true benefits.
+
+As a continuation of this work, it would also be interesting to see whether the performance improves for the RL agents when using more complex neural networks. Does the RL performance, as presented in this thesis, scale as the complexity of the Q-network increases?
+
+The synthetic m-mode representation of the ultrasound videos are interesting because the temporal-to-spatial information ratio is very high, which is presumed to be advantageous for phase detection. Further research could be done to make MMBCE work. Policy-gradient methods may be a better approach than using a DQN because it more naturally model continuous action spaces.
+
+
 
 * Link to Code Repository
 All the code used in this thesis can be found in the public Github repository https://github.com/magnusdk/edesdetect. The repository also contains videos of agents exploring the environment.
-
 
 
 
