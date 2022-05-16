@@ -1,38 +1,23 @@
-* Run locally
-1. Create a file called =config_local.toml=.
-2. Fill in local configuration values. See an example in the following subsection.
-3. Install dependencies via pipenv: =pipenv install=.
+* Master's thesis
+Welcome to the repository of my master's thesis!
 
-** Local configuration example
-This example contains all the needed values:
-#+BEGIN_SRC toml
-[data]
-videos_path = "/some/dirs/data/EchoNet-Dynamic/Videos/"
-filelist_path = "/some/dirs/data/EchoNet-Dynamic/FileList.csv"
-volumetracings_path = "/some/dirs/data/EchoNet-Dynamic/VolumeTracings.csv"
-#+END_SRC
-
-* Run on UiO's Ml-nodes
-To run the code on UiO's Ml-nodes you need [[https://www.uio.no/tjenester/it/forskning/kompetansehuber/uio-ai-hub-node-project/it-resources/ml-nodes/index.html#toc3][access to them]].
-
-** Open project remotely in VSCode
-Because UiO's Ml-nodes uses the =lmod= modules system and the required python version (3.8) isn't loaded by default we have to add a hack to make it work.
-1. Create an SSH-key on the local machine.
-2. Add the public SSH-key of the local machine to the remote machine's =.ssh/authorized_keys=. This step also removes the need to type your password on every connect! :)
-3. Prepend the added =authorized_keys= row such that it looks like this:
-  #+BEGIN_SRC
-  command=". /path/to/repo/edesdetect/scripts/ssh_load_python3.8_on_start.sh" ssh-ed25519 ...rest of SSH public key...
-  #+END_SRC
-4. Verify that you can still log in to the remote server using SSH. Once logged in you should see Python3.8 being loaded (as well some other modules) if you type =module list=.
-5. [[https://code.visualstudio.com/docs/remote/ssh-tutorial][Install the =Remote - SSH= VSCode extension]] and follow the steps in the tutorial.
-
-** Run Jupyter-Lab
-Run this command to start a Jupyter Lab server and an SSH tunnel that let's you connect to it locally:
-#+BEGIN_SRC bash
-ssh -L 8888:localhost:8888 USERNAME@ML_NODE -t "cd path/to/edesdetect; ./scripts/start_jupyter_lab_server.sh"
-#+END_SRC
+This was my first Python project, first big-scale project that I built from scratch, and first machine learning project, so expect things to be a bit messy. :)
 
 
-* Example GIFs of MMCBE agent
+** Abstract
+/The thesis explores ways of formulating the problem of detecting the key cardiac phases from ultrasound videos, i.e., the end diastolic (ED) and end systolic (ES) phases, as a reinforcement learning (RL) problem, and whether there are any benefits in doing so. Of particular interest is the design of the RL reward function. Three reward functions are explored: one based on a generalization of the performance metric of average absolute frame difference (aaFD) that is only given to the agent at the end of an episode, and two based on per-frame phase classification given at every step. Additionally, two formulations of the RL environment are explored: binary classification environment (BCE), designed to be a direct reformulation of a supervised binary classification task, and m-mode binary classification environment (MMBCE), designed to provide the agent with the ability to explore the environment using synthetic m-mode imaging. Because of time constraints, MMBCE was only preliminary explored, yet the results indicate that the problem is too complex for the current setup and requires more work before we can draw any conclusions on its feasibility./
+
+/Experiments show that an RL agent is able to learn to perform phase detection even when the reward signal is very sparse. However, the less sparse reward functions perform better on nearly all metrics. The best agent predicts the correct number of ED and ES events in \sim80% of the videos on the test set, on which it yields an aaFD score of 1.69. It is concluded that there are multiple ways of formulating the problem of phase detection as a reinforcement learning problem, but not all formulations perform equally well. Reward sparsity and environment complexity contribute negatively to performance overall. There are also indications that lower values of the \epsilon -greedy exploration hyperparameter \epsilon have a regularizing effect on the model, prompting further research./
+
+
+** Example GIFs of MMCBE Agent
 [[https://github.com/magnusdk/edesdetect/blob/main/TEST_example_0.gif]]
 [[https://github.com/magnusdk/edesdetect/blob/main/TEST_example_10.gif]]
+
+
+** The Thesis
+[[https://github.com/magnusdk/edesdetect/blob/main/thesis/final.pdf]]
+
+
+** The Code
+The code to run an experiment can be found in [[https://github.com/magnusdk/edesdetect/blob/main/edesdetectrl/train.py][edesdetect.train]].
