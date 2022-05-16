@@ -106,7 +106,7 @@ The thesis is organized into seven chapters. The first chapter, /Introduction/, 
 
 
 \chapter{Background}
-This chapter gives an overview of the concepts and techonologies used throughout the thesis. Section [[The Cardiac Cycle]] describes the function and anatomy of the heart, and its stages through the cardiac cycle. Section [[What is Ultrasound?]] gives a brief introduction to the physics involved in ultrasound. Section [[Echocardiography]] builds upon the physics introduction of the previous section and describes how one can use ultrasound to generate images. It also describes two of the imaging modes for echocardiography: b-mode and m-mode. Section [[Deep Learning]] describes the basics of machine learning, and describes different families of machine learning, including reinforcement learning. Finally, section [[Related Work]] is a survey of previous work on ED- and ES-frame detection and previous use of reinforcement learning in medical imaging.
+This chapter aims to give an intuition and overview of the concepts and techonologies used throughout the thesis. Section [[The Cardiac Cycle]] describes the function and anatomy of the heart, and its stages through the cardiac cycle. Section [[What is Ultrasound?]] gives a brief introduction to the physics involved in ultrasound. Section [[Echocardiography]] builds upon the physics of the previous section and describes how one can use ultrasound to generate images. It also describes two of the imaging modes for echocardiography: b-mode and m-mode. Section [[Deep Learning]] describes the basics of machine learning and the different families of machine learning. Finally, section [[Related Work]] is a survey of previous work on ED- and ES-frame detection and previous use of reinforcement learning in medical imaging.
 
 * The Cardiac Cycle
 The human heart is situated in the middle compartment of the chest, between the lungs, and is responsible for keeping the blood flowing by acting as a pump. Blood is used for transporting oxygen and essential nutrients throughout the body and carries metabolic waste such as carbon dioxide to the lungs.
@@ -174,7 +174,7 @@ Real-world sounds are often more complex than the narrow band sound presented pr
 
 
 ** Attributes of the Medium
-Another important aspect of sound is the medium through which it travels. Properties such as the speed of sound, density, attenuation, and nonlinearity affect how a sound wave propagates through its medium \cite{johnson_array_1993}. Speed of sound is how fast a wave propagates through the medium. Assuming that the frequency stays the same throughout (which is not always true), the wavelength will be smaller if the sound speed is lower, as visualized in figure [[fig:conveyor_belt_speed_change]]. Density is how tightly packed the particles are in the medium when at rest. Acoustic absorption is an energy loss caused by the viscosity of the propagating medium. The wave energy is then convereted into heat at a molecular level. Attenutation is the reduction of the energy signal caused by either absorption or scattering. Nonlinearity is the property where the speed of sound at a point depends on the pressure at that point. In water, pressure waves propagate faster at higher pressure. The pressure may be caused by the wave itself, in which case the shape of the wave may change, as visualized in figure [[fig:nonlinearity]].
+Another important aspect of sound is the medium through which it travels. Properties such as the speed of sound, density, attenuation, and nonlinearity affect how a sound wave propagates through its medium \cite{johnson_array_1993}. Speed of sound is how fast a wave propagates through the medium. Assuming that the frequency stays the same throughout (which is not always true), the wavelength will be smaller if the sound speed is lower, as visualized in figure [[fig:conveyor_belt_speed_change]]. Density is how tightly packed the particles are in the medium when at rest. Acoustic absorption is an energy loss caused by the viscosity of the propagating medium. The wave energy is then converted into heat at a molecular level. Attenutation is the reduction of the energy signal caused by either absorption or scattering. Nonlinearity is the property where the speed of sound at a point depends on the pressure at that point. In water, pressure waves propagate faster at higher pressure. The increased pressure may be caused by the wave itself, in which case the shape of the wave may change, as visualized in figure [[fig:nonlinearity]].
 
 #+NAME: fig:conveyor_belt_speed_change
 #+CAPTION: Even though the rate of packages per second stays the same, the distance between packages decreases when arriving on a slower conveyor belt. This is analogous to a sound wave propagating through a medium where the speed of sound changes. Even though the frequency is the same, the wavelength (the length between each top) decreases when it encounters a lower speed of sound.
@@ -272,17 +272,18 @@ In M-mode (as in "Motion"-mode) imaging, only one direction is imaged over time 
 * Deep Learning
 
 ** Gradient Descent
-The most significant deep learning innovations of the last decade have used a gradient descent technique. Gradient descent takes advantage of the fact that even if we do not know the true nature of some function, if it is differentiable, then we can calculate its slope at a given point. This gives us information about how to update its parameters to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e., reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters a small step in the opposite direction is what is called gradient descent \cite{goodfellow_deep_2016}.
+The most significant deep learning innovations of the last decade have used a gradient descent technique. Gradient descent takes advantage of the fact that even if we do not know the true nature of some function, if it is differentiable, then we can calculate its slope at a given point. This gives us information about how to update its parameters to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as seen in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e., reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters a small step in the opposite direction is what is called gradient descent \cite{goodfellow_deep_2016}.
 
+#+CAPTION: Visualization of gradient descent of a function that takes a single parameter $x$. Nudging $x$ in the opposite direction of the gradient at the current point minimizes the result of the function.
 #+NAME: fig:gradient_descent_simple
 [[./img/gradient_descent_simple.png]]
 
 Gradient descent scales to an arbitrary number of parameters, allowing us to optimize big models. One example could be a model that performs some operation on an image. Suppose we want to process each pixel individually in some parameterizable way at least once. In that case, the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big, the model will take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in figure [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
 
-The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as the model and the loss function are differentiable, we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others, and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient, whether it contains a lot of local minima and how steep it is at regions \cite{zhang_dive_2020}.
+The function that we optimize using gradient descent consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as the model and the loss function are differentiable, we can optimize it using gradient descent. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others, and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient, whether it contains a lot of local minima and how steep it is at regions \cite{zhang_dive_2020}.
 
 
-We may want to optimize some parameters working on a set of images, for example, when training a model to classify pictures as those of cats or dogs. These images represent a distribution that we want the model to approximate. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize at once. It is common to apply gradient descent on just a subset of the whole dataset at once, chosen randomly at each iteration. This is called stochastic gradient descent (SGD), and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once \cite{keskar_large-batch_2017}.
+We may want to optimize some parameters working on a set of images, for example, when training a model to classify pictures as those of cats or dogs. These images define a distribution that we want the model to be able to represent. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. It is common to apply gradient descent on just a subset of the whole dataset at once, chosen randomly at each iteration. This is called stochastic gradient descent (SGD), and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once \cite{keskar_large-batch_2017}.
 
 Deep learning algorithms risk simply memorizing the training data if it has the capacity to do so. Therefore, the performance of a model on the data it has been trained on is not representative of how it would perform on unseen data. It is common to split the data into three splits: training (train), validation (val), and testing (test), where the val and test split are used for performance evaluation only. When the model performs better on the training split at the cost of performance on the others, the model is said to be overfitting. The validation data can be used to monitor the amount of overfitting over time such that we can select the model and hyperparameters that generalize best on the unseen data. This runs the risk of introducing bias towards the validation split, which is why we have the third split, test, used to report the performance of the final model \cite{tan_critical_2021}.
 
@@ -292,9 +293,9 @@ Another aspect of great importance is to instill inductive bias into the model; 
 ** Deep Neural Networks
 Neural networks are data-processing models inspired by a simple view of how our brain's neurons interoperate. On a high level, neural networks are often abstracted into a set of layers. When there are multiple such layers in a neural network, it is often called a "deep" neural network. This section presents some of the neural network layers referenced throughout the thesis.
 
-Fully connected layers process the inputs linearly, i.e., each input $x_i$ is multiplied by some weight $w_{ij}$ and added with some bias $b_{ij}$, and produce a given number of outputs $y_j$. This may be written as matrix multiplication, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
+/Fully connected layers/ process the inputs linearly, i.e., each input $x_i$ is multiplied by some weight $w_{ij}$ and added with some bias $b_{ij}$, and produce a given number of outputs $y_j$. This may be written as matrix multiplication, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
 
-Multiple fully connected layers can be stacked to create a more complex network. However, because they are linear operations, they can only represent linear relationships no matter how many of them are stacked. To allow the network to represent more complex, non-linear relationships, we need to add non-linearity to the network. This is usually done using activation functions. Examples of activation functions are the sigmoid function, seen in equation [[eqn:sigmoid_activation]], or ReLU, seen in [[eqn:relu_activation]].
+Multiple fully connected layers can be stacked to create a more complex network. However, because they are linear operations, they can only represent linear relationships no matter how many of them are stacked. To allow the network to represent more complex, non-linear relationships, we need to add non-linearity to the network. This is usually done using /activation functions/. Examples of activation functions are the sigmoid function, seen in equation [[eqn:sigmoid_activation]], or ReLU, seen in [[eqn:relu_activation]].
 
 #+NAME: eqn:sigmoid_activation
 \begin{equation}
@@ -308,9 +309,9 @@ ReLU = max(0, x)
 
 Using just two fully connected layers separated by non-linear activation functions, one could represent any arbitrary function, given that one includes enough neurons \cite{hornik_multilayer_1989}. That does mean that they are the right tool for every job.
 
-Fully connected layers combine every input with every output. This does, for example, not take advantage of the spatial locality of images. A given pixel is often more related to pixels that lie closer to it in an image. Convolutional layers take advantage of this by applying filters to an image, with each filter only processing a small part of the image at a time. The filters are often small matrices that are applied everywhere in an image.
+Fully connected layers combine every input with every output. This does, for example, not take advantage of the spatial locality of images. A given pixel is often more related to pixels that lie closer to it in an image. /Convolutional layers/ take advantage of this by applying filters to an image, with each filter only processing a small part of the image at a time. The filters are often small matrices that are applied everywhere in an image.
 
-Convolutional layers consist of a set of filters with a width and height. Other important hyperparameters are the stride and dilation, which (among other hyperparameters) affect how the filters are applied to the image. Stride affects the distance in pixels between subsequent applications of the filters \cite{zhang_dive_2020}. Dilation affects the spacing between the parameters in each filter \cite{mahmud_covxnet_2020}. Stride and dilation is best explained through visualization, as seen in figures [[fig:stride]] and [[fig:dilation]].
+Convolutional layers consist of a set of filters with a width and height. Other important hyperparameters are the stride and dilation, which (among other hyperparameters) affect how the filters are applied to the image. Stride affects the distance in pixels between subsequent applications of the filters \cite{zhang_dive_2020}. Dilation affects the spacing between the parameters in each filter \cite{mahmud_covxnet_2020}. Stride and dilation is best explained through visualization, and are illustrated in figures [[fig:stride]] and [[fig:dilation]], respectively.
 
 #+CAPTION: Stride affects the distance between subsequent applications of a filter, visualized here in pink. Left: A stride of 1 moves the filter one pixel at each application. Right: A stride of 2 moves the filter by two pixels at each application.
 #+NAME: fig:stride
@@ -324,20 +325,20 @@ Convolutional layers consist of a set of filters with a width and height. Other 
 
 
 
-Another popular layer is the recurrent layer. The recurrent layer is designed to be efficient at processing sequential data \cite{zhang_dive_2020}. Recurrent layers are not part of the methodology of this thesis but have been used in related work. 
-
-In short, like convolutional layers apply the same filter at every position in an image, recurrent layers apply the same computation at every item in a sequence. Furthermore, it can capture temporal information by also outputting an internal state that is included in the computation for the next item in the sequence. Figure [[fig:recurrent]] illustrates this computation. Some popular implementations of a recurrent layer are LSTM \cite{hochreiter_long_1997} and GRU \cite{cho_learning_2014}.
+Another popular layer is the /recurrent layer/. The recurrent layer is designed to be efficient at processing sequential data \cite{zhang_dive_2020}. Recurrent layers are not part of the methodology of this thesis but have been used in related work. In short, like convolutional layers apply the same filter at every position in an image, recurrent layers apply the same computation at every item in a sequence. Furthermore, it can capture temporal information by also outputting an internal state that is included in the computation for the next item in the sequence. Figure [[fig:recurrent]] illustrates this computation. Some popular implementations of a recurrent layer are LSTM \cite{hochreiter_long_1997} and GRU \cite{cho_learning_2014}.
 
 #+CAPTION: A visualization of a basic recurrent layer. Each pink square represents the same computation that takes an input item, $x$, and a hidden state $h$ and outputs $y$.
 #+NAME: fig:recurrent
 [[./img/recurrent.png]]
+
+Like the fully-connected layers, both convolutional and recurrent layers by itself are linear operations and we need to add non-linearity for them to be able to approximate arbitrary functions.
 
 
 
 ** Optimization Process
 For each iteration of gradient descent, we update the model's parameters a small step in the opposite direction to minimize it. It is crucial only to update them in a small step each time; otherwise, they may overshoot and, in the worst case, cause the model's performance to diverge. For standard SGD, we choose how much to update the parameters using the hyperparameter $\alpha$, often a low number between 0 and 1.
 
-Using a low $\alpha$ means that we do not update the parameters too much when the gradient is steep, but it also means that the parameters are updated very little when the gradient is near-flat. In addition, we may encounter flat regions of the gradient, which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons, more advanced optimizers have been developed, such as ADAM \cite{kingma_adam_2017}.
+Using a low $\alpha$ means that we do not update the parameters too much when the gradient is steep, but it also means that the parameters are updated little when the gradient is not very steep. In addition, we may encounter flat regions of the gradient, which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons, more advanced optimizers have been developed, such as ADAM \cite{kingma_adam_2017}.
 
 Machine learning aims to train models that generalize to data samples outside of the training set. When we optimize a model on given data distribution, we risk making the model specialize too much on that specific distribution, earlier defined as overfitting. /Regularizers/ are tools that attempt to reduce the chance of overfitting \cite{zhang_dive_2020}.
 
@@ -544,7 +545,7 @@ One early attempt for detecting the ED and ES frames took advantage of the rapid
 
 The first method requires the clinician to select multiple landmarks to define the correct region of interest around the mitral valve. The second method assumed that the ED frame has already been found to compute the correlation between it and the other frames. The main disadvantage of this approach is that it is only semi-automated.
 
-It has become more common to apply end-to-end Machine Learning (ML) for fully automating tasks like this in recent times. Gifani et al. (2010) employed manifold learning, an unsupervised learning algorithm used to map high-dimensional data onto a lower-dimensional manifold. Manifold learning tries to ensure that similar points in the high-dimensional space are projected close together in the low-dimensional space. The authors reduced the dimensionality of each frame down to two dimensions, followed by analyzing the density between the projected points to determine the ED and ES frames \cite{gifani_automatic_2010}. This method is based on the fact that there is no prominent change in ventricular volume during the three cardiac phases: isovolumetric contraction, isovolumetric relaxation, and reduced filling. Frames that lay close together, i.e., in dense regions, are considered part of one of these three phases. The projected points move very little in these dense regions, and the three points that had the least movement were selected as representative of three phases. The ED and ES frames were then found by finding the pair of said frames with the minimum correlation. The manifold learning algorithm that the authors used is called Locally Linear Embedding (LLE). In a follow-up paper, they used Isomap instead \cite{gifani_noise_2011}, which yielded better results. When using Isomap, they defined the ED and ES frames as the projected points with the greatest distance between them.
+It has become more common to apply end-to-end Machine Learning (ML) for fully automating tasks like this in recent times. Gifani et al. (2010) employed manifold learning, an unsupervised learning algorithm used to map high-dimensional data onto a lower-dimensional manifold. The authors reduced the dimensionality of each frame down to two dimensions, followed by analyzing the density between the projected points to determine the ED and ES frames \cite{gifani_automatic_2010}. This method is based on the fact that there is no prominent change in ventricular volume during the three cardiac phases: isovolumetric contraction, isovolumetric relaxation, and reduced filling. Frames that lay close together, i.e., in dense regions, are considered part of one of these three phases. The projected points move very little in these dense regions, and the three points that had the least movement were selected as representative of three phases. The ED and ES frames were then found by finding the pair of said frames with the minimum correlation. The manifold learning algorithm that the authors used is called Locally Linear Embedding (LLE). In a follow-up paper, they used Isomap instead \cite{gifani_noise_2011}, which yielded better results. When using Isomap, they defined the ED and ES frames as the projected points with the greatest distance between them.
 
 Non-negative Matrix Factorization (NMF) is another unsupervised learning method that has been employed to reduce the dimensionality of ultrasound videos \cite{yuan_machine_2017}. In this work, rank-2 NMF was used to generate two end-members from a cardiac ultrasound video. The end-members turn out to be quite similar to the ED and ES frames, and the end-member coefficient peaks can be used to find ED and ES. NMF was found to give predictions with less error than LLE and Isomap manifold learning.
 
@@ -554,7 +555,7 @@ Non-negative Matrix Factorization (NMF) is another unsupervised learning method 
 
 Other methods use either image segmentation or speckle tracking to track the changes to the left ventricle volume, taking advantage of the fact that it is most expanded during ED and most contracted during ES \cite{barcaro_automatic_2008} \cite{darvishi_measuring_2013} \cite{a_automatic_2015}. However, these methods are prone to significant errors due to noise inherent in cardiac ultrasound or discontinuous edges.
 
-A CNN and an RNN were combined to do spatial and temporal feature extraction to detect the ED and ES frames by Kong et al. in 2016 \cite{kong_recognizing_2016}. The combined network was trained on cardiac MRI data, and it used a Zeiler-Fergus model \cite{zeiler_visualizing_2013} for the CNN, and an LSTM \cite{hochreiter_long_1997} for the RNN. The problem was treated as a regression problem for a function that monotonically decreases during diastole and monotonically increases during systole. Thus, the function being regressed is a latent space representation of the left ventricle volume as it expands and contracts, and the ED and ES frames can be found by finding the highest peaks and lowest valleys of the DL model’s output. This approach was later improved by swapping out the CNN with a ResNet \cite{dezaki_deep_2017}, and then again by swapping it out for a DenseNet \cite{taheri_dezaki_cardiac_2019}, while different choices for the RNN did not significantly improve the performance of the model.
+A CNN and an RNN were combined to do spatial and temporal feature extraction to detect the ED and ES frames by Kong et al. in 2016 \cite{kong_recognizing_2016}. The combined network was trained on cardiac MRI data, and it used a Zeiler-Fergus model \cite{zeiler_visualizing_2013} for the CNN, and an LSTM \cite{hochreiter_long_1997} for the RNN. The problem was treated as a regression problem for a function that monotonically decreases during diastole and monotonically increases during systole. Thus, the function being regressed is a latent space representation of the left ventricle volume as it expands and contracts, and the ED and ES frames can be found by finding the highest peaks and lowest valleys of the model's output. This approach was later improved by swapping out the CNN with a ResNet \cite{dezaki_deep_2017}, and then again by swapping it out for a DenseNet \cite{taheri_dezaki_cardiac_2019}, while different choices for the RNN did not significantly improve the performance of the model.
 
 Instead of treating the model’s output as a function regression, it has also been treated as a binary classification of either ED or ES \cite{fiorito_detection_2018}. The authors of this paper argued that treating it as a regression problem forced the model to learn a function that was not present in the data because the regressed function does not represent the actual left ventricle volume. They argued further that, in some cases of pathology, such as in the event of post-systolic contraction, the volume might not be smallest at the time of ES. Their model also uses a 3D CNN with a sliding window that does both spatial and temporal feature extraction on the data before being passed into an LSTM. A similar architecture has been used for finding the ED frames in cardiac spectral Doppler imaging \cite{jahren_estimation_2020}. Spectral Doppler is a technique that outputs a spectrogram representing the blood velocity over time. It thus has one spatial dimension and one temporal dimension. A CNN with a sliding window was used to extract spatial and temporal features, followed by a bidirectional GRU that further connects said features temporally. For each patch in the sliding window, the model predicts whether it contains an ED frame and which frame in the patch it is.
 
@@ -710,7 +711,7 @@ A full Echonet-Dynamic dataset pipeline is visualized in figure [[fig:dataset_pi
 
 
 \chapter{Methodology}
-This chapter steps through the methods used in the thesis, the decisions taken, and the reasoning behind them. Section [[Environment Formulation]] introduces and describes the binary classification environment (BCE), and the design of the three different reward functions $R_{GaaFD}$, $R_{simple}$, and $R_{proximity}$. Section [[Frameworks and Libraries]] gives an overview of the software technologies used to train the models. Section [[Agent Architecture]] describes the architecture of the agent and neural network, and how it was optimized and trained. Section [[Evaluation]] describes how we evaluate the models in the Experiments and Results chapter. Section [[Selection of Hyperparameters]] describes the hyperparameters used in the experiments and why they were chosen. Section [[Incorporating Search]] explores different ways of incorporating search into the environment. Finally, section [[M-Mode Binary Classification Environment]] describes the m-mode binary classification environment (MMBCE), a version of BCE that incorporates searching using a synthetic m-mode image.
+This chapter steps through the methods used in the thesis, the decisions taken, and the reasoning behind them. Section [[Environment Formulation]] introduces and describes the binary classification environment (BCE), and the design of the three different reward functions $R_{GaaFD}$, $R_{simple}$, and $R_{proximity}$. Section [[Frameworks and Libraries]] gives an overview of the software technologies used to train the models. Section [[Agent Architecture]] describes the architecture of the agent and neural network, and how it was optimized and trained. Section [[Evaluation]] describes how we evaluate the models in the Experiments and Results chapter. Section [[Selection of Hyperparameters]] describes the hyperparameters used in the experiments and why they were chosen. Section [[Incorporating Search]] explores different ways of incorporating search into the environment. Finally, section [[M-Mode Binary Classification Environment]] describes the m-mode binary classification environment (MMBCE), a version of BCE that incorporates search using a synthetic m-mode image.
 
 
 * Environment Formulation
@@ -725,7 +726,7 @@ BCE is visualized in figure [[fig:binary_classification_environment_loop]]. Afte
 
 More formally, the observation $o_t$ at time $t$ is the current frame in the video prepended by the $N$ previous frames and the $N$ next frames. The shape of an observation is thus $(W, H, 2N+1)$. The agent takes the observation as-is and takes one of two actions: /Mark current frame as diastole/ or /Mark current frame as systole/. After taking an action $a_t$, the agent receives a reward $r_{t+1}$ and is presented with the next observation $o_{t+1}$. The current frame is moved one frame forwards after each action is taken, and the episode ends when there are no more labeled frames left.
 
-Given that videos from the dataset are 112-by-112, the only two hyperparameters for this setup are $N$ and the choice of reward function. Increasing $N$ means that the agent has access to more temporal information but at the cost of increased computational and memory requirements and a decrease in the number of videos with enough adjacent frames on either side. The number of valid videos for a given $N$ and the change in the number of valid videos is plotted in figure [[fig:n_valid_videos_for_n]]. As a starting point, $N$ was selected rather arbitrarily to be $3$. This means that an observation has the shape $(112, 112, 7)$, having $2\times 3 + 1 = 7$ channels.
+Given that videos from the dataset are 112-by-112, the only two hyperparameters for this setup are $N$ and the choice of reward function. Increasing $N$ means that the agent has access to more temporal information but at the cost of increased computational and memory requirements and a decrease in the number of videos with enough adjacent frames on either side. The number of valid videos for a given $N$ and the change in the number of valid videos is plotted in figure [[fig:n_valid_videos_for_n]]. As a starting point, $N$ was selected[fn::Perhaps a bit arbitrarily selected.] to be $3$. This means that an observation has the shape $(112, 112, 7)$, having $2\times 3 + 1 = 7$ channels.
 
 #+CAPTION: The effect of $N$ on the size of the dataset. Left: the number of valid videos (videos with at least $N$ adjacent frames on either side) for the whole dataset. Right: the change in the number of valid videos per $N$ for the whole dataset.
 #+NAME: fig:n_valid_videos_for_n
@@ -982,7 +983,7 @@ Moving the synthetic m-mode line up, down, left, or right is done relative to it
 [[./img/m_mode_vertical_movement_effect.png]]
 
 * M-Mode Binary Classification Environment
-We formulate the m-mode binary classification environment using a synthetic m-mode search space scheme. The agent can make one of 8 actions, as listed in table [[tbl:mmbce_actions]].
+We formulate the m-mode binary classification environment using a synthetic m-mode search space scheme. The agent can make one of 8 actions, as listed in table [[tbl:mmbce_actions]]. The movement magnitude is $1$ pixel, and the rotation is $0.1$ radians.
 
 #+CAPTION: The actions that an agent can take in the MMBCE formulation.
 #+NAME: tbl:mmbce_actions
@@ -1116,6 +1117,7 @@ Out of all the trained models, the model trained using $R_{simple}$ with a value
 | Balanced accuracy   |           0.70 | *0.81*         |            0.80 |
 
 
+\clearpage
 * The Impact of Epsilon on Average Absolute Frame Difference
 Lower values of $\epsilon$ yield a better GaaFD score when using $R_{GaaFD}$ as the reward function. This is best seen in figure [[fig:gaafd_best_model_perf]]. There is no consistent difference between GaaFD on ED- or ES-frames individually, but there is less difference in performance on ES-frames between the training split and the test split, as seen in figure [[fig:gaafd_best_model_ed_es_perf]]. Figure [[fig:gaafd_mismatched_predictions]] shows that lower values of $\epsilon$ also reduce the mismatch between the number of predicted versus ground truth events. This was also clearly seen in table [[tbl:gaafd_best_models_sgd_steps]], where a value of $\epsilon=0.0$ predicted the correct number of events 77% of the time, while $\epsilon=0.1$ and $\epsilon=0.01$ yielded 64% and 70%, respectively. We also see a significant "bump" when the difference between predicted and ground truth events is two.
 
@@ -1161,6 +1163,7 @@ The choice of $\epsilon$ did not matter as much for agents trained using $R_{sim
 
 
 
+\clearpage
 * The Impact of Reward Function and Epsilon on Accuracy 
 Accuracy and balanced accuracy are not the main metrics that we want to optimize for, but it is helpful to report them to understand better how the model performs.
 
@@ -1196,6 +1199,7 @@ Again, the choice of $\epsilon$ did not matter as much for models trained using 
 [[./img/prox_best_model_accuracy_ed_es.png]]
 
 
+\clearpage
 * Learning Curves
 For models trained using $R_{GaaFD}$, lower values of $\epsilon$ converge faster, as seen in the training curve in figure [[fig:gaafd_training_curves]]. There is no apparent degradation in performance over time that would indicate that the models start to overfit at some point, but the models trained using $\epsilon=0.0$ or $\epsilon=0.01$ perform slightly better on the training split than on the test split. This is not apparent for the model trained using $\epsilon=0.1$. The loss curves for all models follow a peculiar pattern where it starts with sinking rapidly before increasing again, followed by a slight decrease until it (presumably) converges, as seen in figure [[fig:gaafd_loss_curves]]. Interestingly, the model trained using a value of $\epsilon=0.01$ reaches a higher loss than the other two at its peak following the rapid sinking at the start. Also interesting, the model trained using the highest value of $\epsilon$ has a loss curve sitting between the other two.
 
@@ -1251,6 +1255,7 @@ Models trained using $R_{proximity}$ consistently perform better at the metric o
 
 
 
+\clearpage
 * The Impact of Reward Function and Epsilon on Q-Values
 For DQN, the Q-values dictate what actions are taken. This section plots the Q-values for each reward function's best and worst-performing videos and the value of epsilon used for the reward function. These results are mainly qualitative but shed light on how the models "reason" about the frames in a video.
 
@@ -1291,6 +1296,7 @@ The effect of using $R_{simple}$ over $R_{proximity}$ seems to be that $R_{simpl
 
 
 
+\clearpage
 * Inference Speed
 The inference time is faster on the CPU than the GPU when we include IO roundtrip time. However, ignoring IO, the network performs extremely fast on the GPU; processing a batch of 128 frames takes just a little over a millisecond, producing a framerate of over $125\,000$ FPS. However, this is merely considered a "fun fact." A realistic scenario would include IO roundtrip time. A single frame may be processed on the CPU in 0.80 milliseconds, meaning that it can likely be included as a step in a processing stream.
 
@@ -1368,52 +1374,46 @@ Moreover, the MMBCE agent is significantly slower at inference than the BCE agen
 
 
 \chapter{Discussion}
-* Generalized Average Absolute Frame Difference Reward Function
+This chapter discusses the results, methodology, and weaknesses of the study. Section [[On Generalized Average Absolute Frame Difference Reward Function]] discusses the results of the models trained using $R_{GaaFD}$ and the reasoning behind them. Likewise, section [[On Simple and Proximity Based Reward Functions]] discusses the results of the models trained using $R_{simple}$ or $R_{proximity}$. Section [[On M-Mode Binary Classification Environment]] discusses the results of agents trained one the MMBCE environment, and its shortcomings. Section [[Weaknesses of Using Average Absolute Frame Difference]] takes a critical look at the key performance metric for the task of ED-/ES-frame detection, aaFD. Section [[Lack of Comparison Experiments]] discusses a weakness of the thesis in a lack of comparison to related work. Finally, section [[Why Use Reinforcement Learning?]] gives an overview of pros and cons of using RL for tasks that can be solved using supervised learning.
+
+* On Generalized Average Absolute Frame Difference Reward Function
 As seen in table [[tbl:gaafd_best_models_sgd_steps]], the best value of $\epsilon$ when using $R_{GaaFD}$ was $0.0$. This is likely because the learner has access to noisier signals the higher the value of $\epsilon$. Recall that the agent only receives a reward at the very end of the episode, which on average lasts for 50 steps. Any mistake in those 50 steps will be penalized, and the agent has no way of knowing whether it was penalized for an action taken under its policy or an action taken randomly.
 
 Further evidence of this can be found in the loss curves in figure [[fig:gaafd_loss_curves]], as generally, the models with $\epsilon\in\{0.01, 0.1\}$ have a greater loss at the end of training. A greater loss indicates that the model is more "surprised" by the data, which could be explained by the fact that when it makes a mistake through random exploration, the model will not know which action in the episode was the true culprit.
 
 Another interesting feature of the loss curves is the valleys at the beginning of training. At the beginning of training, the model has no knowledge about the data, and any prediction will be random. As the actors learn which action to pick, the sample data distribution changes, reflecting the new policies. This in turn creates a change in loss as the learner "catches up" to the new policy. As the model approaches a reasonable estimate of the true Q-value $Q^*$, it will make fewer mistakes, and the loss will decrease.
 
+Peeking inside the machinery of the DQN-agents trained using $R_{GaaFD}$, we see a potential cause of the performance discrepancy between the three models. For every frame, the agent predicts the future returns of marking a frame as diastole or systole. These predictions are plotted in figures [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. The model that uses $\epsilon=0$ better differentiates the value of taking either action for a given state. The models trained with higher values of $\epsilon$ estimate that there is a smaller difference in values of marking the current frame as diastole or as systole.
+
+The "spikes" in estimated systole in the middle of diastole returns seen in [[fig:gaafd_best_videos_q]] indicate that these frames are ambiguous to the agent. What this ambiguity is is hard to tell, but it seems to be consistent. It may be due to the fact that the heart moves very little in the middle of the diastole phase. If that is the case, it may be beneficial to increase $N$, the number of adjacent frames, for the observations.
+
+As is consistent with previous work on ED-/ES-frame detection, systole phase is trickier to predict than diastole phase. Not only are there naturally fewer systole examples, but the frames around ES also change very little.
 
 
-
-
-
-
-
-
-
-
-
-* On Reporting Average Absolute Frame Difference 
-For all three reward functions, the percentage of videos on which we may calculate aaFD is relatively low, with the best agent predicting the correct number of events in just 80.26% of the videos. This must be considered when comparing the result against related work that has not reported this problem in their results.
-
-For agents trained using $R_{GaaFD}$, we see a relative increase in videos that have a difference in the number of predicted and ground truth events equal to 2. This may be because the model sometimes predicts rogue frames with wrong labels, perhaps due to noise, which are quickly fixed in the following frames. This creates two events in rapid succession, as visualized in figure [[ed_es_from_predictions_2]]. Post-processing the predictions and removing noise will likely decrease the mismatch between the number of predicted and ground truth events.
+In figure [[fig:gaafd_mismatched_predictions]] we see a relative increase in videos that have a difference in the number of predicted and ground truth events equal to 2. This may be because the model sometimes predicts rogue frames with wrong labels, perhaps due to noise, which are quickly fixed in the following frames. This creates two events in rapid succession, as visualized in figure [[ed_es_from_predictions_2]]. Post-processing the predictions and removing noise will likely decrease the mismatch between the number of predicted and ground truth events.
 
 #+CAPTION: A single wrongly predicted phase that is corrected right after creates two incorrect events.
 #+NAME: ed_es_from_predictions_2
 [[./img/ed_es_from_predictions.png]]
 
 
+* On Simple and Proximity Based Reward Functions
+From the learning curves in figure [[fig:r1_learning_curves]] and figure [[fig:r2_learning_curves]] we see that the agent is able to learn to make correct predictions much faster than when using GaaFD as the reward function. This is very likely due to the GaaFD reward signal being much sparser than $R_{simple}$ and $R_{proximity}$ — $R_{simple}$ and $R_{proximity}$ simply provides information more efficiently, and with less noise, to the learner.
 
+Compared to GaaFD, these models also reach their best performance much faster, though the performance on the validation set visibly degrades as the model starts to overfit. The exception to this is the model of the agent that has been trained using $\epsilon=0.1$, i.e. the agent that most often greedily takes actions, which seemingly doesn't overfit that much. 
 
-* Q-Values
+To explain the fact that the least explorative agent is the one that overfits the least on the training set it is useful to think of exploration in this case as a means of sampling the training data. No action affects future states in this environment, so the agent is not exploring to discover long-term strategies. It instead provides the learner only with samples of which it believes are the best and this, perhaps surprisingly, seems to have a regularizing effect. However, despite the regularization, the agent is still able to achieve perfect accuracy and GaaFD on the training set, as seen in figure [[fig:r1r2_train_val_comparison_learning_curves]].
 
+The effect of the reward function is also visible in the learning curves if we plot them for agents trained with $R_{simple}$ and agents trained with $R_{proximity}$ together, as in figure [[fig:r1r2_comparison_learning_curves]]. The blue curves are the performance of agents trained using $R_{simple}$ and the pink curves are the performance of agents trained using $R_{proximity}$. Looking only on the right side of the plots, i.e. as the agent approaches $200\,000$ SGD steps, we see a clear pattern. The upper plots show GaaFD, in which lower values are better, and therefore $R_{proximity}$ is the better reward function, at least for agents with $\epsilon=0.1$. The lower plots show balanced accuracy, in which higher values are better, and in this case $R_{simple}$ is definitely the better reward function. So, it would seem that the reward function that was deliberately designed to be more similar to GaaFD turned out to get a better GaaFD score, even though it actually performs worse on a metric based on accuracy. This indicates that an agent trained using $R_{proximity}$ reward makes more errors compared to an agent trained using $R_{simple}$, but the errors are less often severe. However, this is only when looking at the right side of the plot, where the agent is already fitted to the training set. If we look at the curve at the point of the lowest GaaFD score the simple reward function $R_{simple}$ outperforms $R_{proximity}$. This is likely due to $R_{proximity}$ being a more difficult function to estimate, as its values span multiple values, while $R_{simple}$ can only be either $1$ or $-1$. 
 
+Compared to the loss curves of agents trained using GaaFD as the reward, agents trained using $R_{simple}$ and $R_{proximity}$ yield a more familiar-looking loss curve. The loss curves in figure [[fig:r1r2_loss]] is seen dropping sharply in the beginning before slowly approaching some minimum. This is likely because in this case where discounting is $0.0$ the value of taking an action does not depend on the current policy, and thus the distribution of returns-estimations doesn't change as the policy changes as it did when using GaaFD as the reward function. Again, the agent with the lowest amount of exploration, plotted as the pink curve, stands out from the other models, its loss seeming to decrease faster in the beginning.
 
-Peeking inside the machinery of the DQN-agent, we see a potential cause of the performance discrepancy between the three models. For every frame, the agent predicts the future returns of marking a frame as diastole or systole. These predictions are plotted in figures [[fig:gaafd_best_videos_q]] and [[fig:gaafd_worst_videos_q]]. The model that uses $\epsilon=0$ better differentiates the value of taking either action for a given state. 
+There is surprisingly little difference in the shape of the Q-values for the models trained using $R_{simple}$ verus the models trained using $R_{proximity}$. This is further proof that $R_{proximity}$ does not add significant value to the agent, perhaps because of the increased complexity.
 
+* On M-Mode Binary Classification Environment
+We were not able to create an agent that can explore the environment. There may still be advantages to this approach, however, given that we are able to make it work. The presented search can be viewed as a type of focus where the model only attend to a small part of the state-space at once. This may produce more efficient networks at the cost of possibly having to perform inference multiple times per phase prediction.
 
-
-
-TODO: The rest
-
-
-
-
-
-
+Its failure may be due to the exploration strategy. Using an $\epsilon$ -greedy policy may be too inefficient for exploring the combinatorically large search space of moving the synthetic m-mode line freely before predicting the phase. 
 
 
 
@@ -1427,6 +1427,8 @@ Another weakness of aaFD is that it is sensitive to the FPS of the videos in the
 Only one other study was found to report their model's performance on the Echonet dataset \cite{lane_multibeat_2021}. This is considered a weakness of this project, and getting access to multiple datasets early in the project should have been a priority. This makes it hard to gain precise insight into the performance of the methods versus supervised learning methods.
 
 The authors report an average aaFD of $2.30$ and $3.49$ for ED and ES events in their paper. Our best model can report an average aaFD of $1.69$ overall, but this is only for 80% of the videos, as 20% have an incorrect number of predicted events compared to ground truth events. The authors do not report how many, if any, of the videos had an incorrect number of predicted events.
+
+We could have increased the number of valid results comparison by training and testing the agents on different datasets, such as MultiBeat dataset by Lane et al. \cite{lane_multibeat_2021}, or the Camus echocardiographic image segmentation dataset \cite{leclerc_deep_2019}.
 
 
 * Why Use Reinforcement Learning?
