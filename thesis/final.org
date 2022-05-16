@@ -272,29 +272,29 @@ In M-mode (as in "Motion"-mode) imaging, only one direction is imaged over time 
 * Deep Learning
 
 ** Gradient Descent
-The most significant deep learning innovations have all used a technique called gradient descent.
-
-Gradient descent is based on calculus. It takes advantage of the fact that even if we don't know the true nature of some function, if it is differentiable, then we can calculate its slope at a given point. The slope is also called the gradient and it gives us information about how to update its parameters in order to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e. reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, then we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters in the opposite direction is what's called gradient descent.
+The most significant deep learning innovations of the last decade have used a gradient descent technique. Gradient descent takes advantage of the fact that even if we do not know the true nature of some function, if it is differentiable, then we can calculate its slope at a given point. This gives us information about how to update its parameters to maximize or minimize the result. This is easily visualized when we have a differentiable function that takes a single parameter $x$, as in figure [[fig:gradient_descent_simple]]. Even though we may now know the true shape of the function, as represented by the dashed line, we can calculate its slope. If we nudge $x$ in the opposite direction of the slope, i.e., reduce $x$ if the slope tends upwards and vice-versa, and repeat this multiple times, we will eventually reach a minimum where the slope becomes $0$. This iterative process of calculating the gradient at a point and updating the parameters a small step in the opposite direction is what is called gradient descent \cite{goodfellow_deep_2016}.
 
 #+NAME: fig:gradient_descent_simple
 [[./img/gradient_descent_simple.png]]
 
-Gradient descent scales to an arbitrary number of parameters. This lets us optimize complex models that take a lot of parameters. One example could be that of a model that performs some operation on an image. If we want to process each pixel individually in some parameterizable way then the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big then the model would take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in figure [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
+Gradient descent scales to an arbitrary number of parameters, allowing us to optimize big models. One example could be a model that performs some operation on an image. Suppose we want to process each pixel individually in some parameterizable way at least once. In that case, the number of parameters is at least equal to the number of pixels in the image. If the image is 100-by-100 pixels big, the model will take at least $10\,000$ parameters. It is no longer possible to visualize this high-dimensional parameter space as we did in figure [[fig:gradient_descent_simple]], but the principles still hold, and gradient descent still works the same way.
+
+The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as the model and the loss function are differentiable, we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others, and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient, whether it contains a lot of local minima and how steep it is at regions \cite{zhang_dive_2020}.
 
 
+We may want to optimize some parameters working on a set of images, for example, when training a model to classify pictures as those of cats or dogs. These images represent a distribution that we want the model to approximate. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize at once. It is common to apply gradient descent on just a subset of the whole dataset at once, chosen randomly at each iteration. This is called stochastic gradient descent (SGD), and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once \cite{keskar_large-batch_2017}.
 
-The function that we optimize using SGD consists of two parts: a model and a loss function. The job of the model is to perform the task at hand, and the job of the loss function is to quantify the error of the model so that we can minimize it. As long as both the model and the loss function is differentiable then we can optimize it using SGD. Not all models and not all loss functions are equally good, however. Some models may better represent the problem at hand than others and some loss functions may produce gradients that are easier to optimize for than others. One important aspect is the shape of the gradient and whether it contains a lot of local minima. 
+Deep learning algorithms risk simply memorizing the training data if it has the capacity to do so. Therefore, the performance of a model on the data it has been trained on is not representative of how it would perform on unseen data. It is common to split the data into three splits: training (train), validation (val), and testing (test), where the val and test split are used for performance evaluation only. When the model performs better on the training split at the cost of performance on the others, the model is said to be overfitting. The validation data can be used to monitor the amount of overfitting over time such that we can select the model and hyperparameters that generalize best on the unseen data. This runs the risk of introducing bias towards the validation split, which is why we have the third split, test, used to report the performance of the final model \cite{tan_critical_2021}.
 
-
-We may want to optimize some parameters working on a set of images, for example when training a model to classify pictures as those of cats or of dogs. We may consider the data set as part of the loss function, as we want to minimize the error of the model on these specific data. Because of either memory or computational constraints, there may be too many pictures in the dataset for the model to try to optimize for at once. In this case it is common to apply gradient descent on just a subset of the full dataset at once, chosen randomly at each iteration. This is called stochastic gradient descent (SGD) and, perhaps surprisingly, it is often better at generalizing on the dataset than using gradient descent on the whole dataset at once.
-
-Another aspect of great importance is to instill what's called inductive bias into the model; that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some important features are explored in the next section.
+Another aspect of great importance is to instill inductive bias into the model; that is, implicit knowledge about the task at hand. Some models capture implicit knowledge about the problem at hand better than others, and some relevant models are explored in the following section.
 
 
 ** Deep Neural Networks
-Fully connected layers is just a matrix multiplication between the input $x$ and a weigth matrix $w$, often with an additional bias $b$ added, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
+Neural networks are data-processing models inspired by a simple view of how our brain's neurons interoperate. On a high level, neural networks are often abstracted into a set of layers. When there are multiple such layers in a neural network, it is often called a "deep" neural network. This section presents some of the neural network layers referenced throughout the thesis.
 
-Multiple fully connected layers can be stacked to create a more complex network. However, beneath the hood each layer is performing matrix operations, which are linear operations, and no matter how linear layers are stacked they can only represent linear relationships. To allow the network to represent more complex, non-linear relationships we need to additionally add non-linearity to the network. This is usually done using activation functions. Examples of activation functions are the sigmoid function, seen in equation [[eqn:sigmoid_activation]], or ReLU, seen in [[eqn:relu_activation]].
+Fully connected layers process the inputs linearly, i.e., each input $x_i$ is multiplied by some weight $w_{ij}$ and added with some bias $b_{ij}$, and produce a given number of outputs $y_j$. This may be written as matrix multiplication, such that $\hat{y} = wx+b$. The shape of the matrix $w$ determines the number of output neurons it produces.
+
+Multiple fully connected layers can be stacked to create a more complex network. However, because they are linear operations, they can only represent linear relationships no matter how many of them are stacked. To allow the network to represent more complex, non-linear relationships, we need to add non-linearity to the network. This is usually done using activation functions. Examples of activation functions are the sigmoid function, seen in equation [[eqn:sigmoid_activation]], or ReLU, seen in [[eqn:relu_activation]].
 
 #+NAME: eqn:sigmoid_activation
 \begin{equation}
@@ -306,40 +306,46 @@ S(X) = \frac{1}{1+e^{-x}}
 ReLU = max(0, x)
 \end{equation}
 
-Using just two fully connected layers separated by non-linear activation functions one could represent any arbitrary function, given that one includes enough neurons \cite{hornik_multilayer_1989}. That does mean that they are the right tool for every job.
+Using just two fully connected layers separated by non-linear activation functions, one could represent any arbitrary function, given that one includes enough neurons \cite{hornik_multilayer_1989}. That does mean that they are the right tool for every job.
 
-Fully connected layers combine every input with every output. This does not take advantage of the spatial locality of images. In an image a given pixel is often more related to pixel who lie closer to it. Convolutional layers take advantage of this by applying filters to an image, with each filter only processing a small part of the image at a time. The filters are often small matrices that is applied everywhere in an image.
+Fully connected layers combine every input with every output. This does, for example, not take advantage of the spatial locality of images. A given pixel is often more related to pixels that lie closer to it in an image. Convolutional layers take advantage of this by applying filters to an image, with each filter only processing a small part of the image at a time. The filters are often small matrices that are applied everywhere in an image.
 
-Each filter has a width and height which determine how many pixels are included in one application of the filter. One may also affect how the filters are applied to an image through stride, which determine how much the sliding window of the filter "skips" for each application. For example a stride of 2 means that the filter moves two pixels for each application. Another hyperparameter is dilation, which affect the spacing between pixels for an individual application. A dilation of 2 means that every other pixel is ignored when applying the filter.
+Convolutional layers consist of a set of filters with a width and height. Other important hyperparameters are the stride and dilation, which (among other hyperparameters) affect how the filters are applied to the image. Stride affects the distance in pixels between subsequent applications of the filters \cite{zhang_dive_2020}. Dilation affects the spacing between the parameters in each filter \cite{mahmud_covxnet_2020}. Stride and dilation is best explained through visualization, as seen in figures [[fig:stride]] and [[fig:dilation]].
 
-Another popular layer is the recurrent layer. The recurrent layer is a way of processing sequential data, such as temporal data. Recurrent layers have a unit with hidden state that is applied at every time step. Some popular impementations of a recurrent layer are LSTM \cite{hochreiter_long_1997} and GRU \cite{cho_learning_2014}.
+#+CAPTION: Stride affects the distance between subsequent applications of a filter, visualized here in pink. Left: A stride of 1 moves the filter one pixel at each application. Right: A stride of 2 moves the filter by two pixels at each application.
+#+NAME: fig:stride
+[[./img/stride.png]]
+
+#+CAPTION: Dilation affects the spacing between the parameters in each filter. Left: A dilation of 1 means that each parameter is spaced apart by 1 pixel. Right: A dilation of 2 means that each parameter is spaced apart by 2 pixels.
+#+NAME: fig:dilation
+[[./img/dilation.png]]
+
+
+
+
+
+Another popular layer is the recurrent layer. The recurrent layer is designed to be efficient at processing sequential data \cite{zhang_dive_2020}. Recurrent layers are not part of the methodology of this thesis but have been used in related work. 
+
+In short, like convolutional layers apply the same filter at every position in an image, recurrent layers apply the same computation at every item in a sequence. Furthermore, it can capture temporal information by also outputting an internal state that is included in the computation for the next item in the sequence. Figure [[fig:recurrent]] illustrates this computation. Some popular implementations of a recurrent layer are LSTM \cite{hochreiter_long_1997} and GRU \cite{cho_learning_2014}.
+
+#+CAPTION: A visualization of a basic recurrent layer. Each pink square represents the same computation that takes an input item, $x$, and a hidden state $h$ and outputs $y$.
+#+NAME: fig:recurrent
+[[./img/recurrent.png]]
+
 
 
 ** Optimization Process
-For each iteration of gradient descent we update the model's parameters a small step in the opposite direction in order to minimize it. It is important to only update them in a small step each time, otherwise they may overshoot and in the worst case cause the model's performance to diverge. For standard SGD we choose how much to update the parameters using the hyperparameter $\alpha$ which is often a low number between 0 and 1.
+For each iteration of gradient descent, we update the model's parameters a small step in the opposite direction to minimize it. It is crucial only to update them in a small step each time; otherwise, they may overshoot and, in the worst case, cause the model's performance to diverge. For standard SGD, we choose how much to update the parameters using the hyperparameter $\alpha$, often a low number between 0 and 1.
 
-Using a low $\alpha$ means that we don't update the parameters too much when the gradient is steep, but it also means that the parameters are updated very little when the gradient is near-flat. In addition, we may encounter flat regions of the gradient which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons other optimizers have been developed, such as ADAM \cite{kingma_adam_2017} which.
+Using a low $\alpha$ means that we do not update the parameters too much when the gradient is steep, but it also means that the parameters are updated very little when the gradient is near-flat. In addition, we may encounter flat regions of the gradient, which can be hard to move past regardless of the chosen value of $\alpha$. For these reasons, more advanced optimizers have been developed, such as ADAM \cite{kingma_adam_2017}.
 
-# TODO: Explain ADAM
-
-
-The goal of machine learning is to train models that generalize to data samples outside of the training set. When we optimize a model on a given data distribution we risk making the model specialize too much on that specific distribution. When the model performs significantly better on the data it has been trained on versus unseen data we say that it has overfit. Regularizers are tools that attempt to reduce the chanceeffect of overfitting.
+Machine learning aims to train models that generalize to data samples outside of the training set. When we optimize a model on given data distribution, we risk making the model specialize too much on that specific distribution, earlier defined as overfitting. /Regularizers/ are tools that attempt to reduce the chance of overfitting \cite{zhang_dive_2020}.
 
 
-** Supervised, Semi-Supervised, and Unsupervised Learning
-One way of designing the loss function is to define it as the difference between the predicted values from the model and ground truths that were labeled beforehand. Learning methods that use these kinds of loss functions are generally called supervised learning, as if a "supervisor" tells the model what the right answer ought to have been.
+** Supervised and Unsupervised Learning
+One way of designing the loss function is to define it as the difference between the predicted values from the model and ground truths labeled beforehand. Learning methods that use these kinds of loss functions are generally called supervised learning, as if a "supervisor" tells the model what the correct answer ought to have been.
 
-If we don't have access to ground truth labels we can instead define the loss in other ways. 
-
-# TODO: semi-supervised and unsupervised
-
-
-
-
-# TODO: Run Grammarly on above sections (once they are finished).
-
-
-
+When we do not have access to the data's ground truths, we must define the loss in other ways. This is called unsupervised learning. An example of unsupervised learning is manifold learning. Manifold learning tries to ensure that similar points in the high-dimensional space are projected close together in the low-dimensional space \cite{zheng_manifold_2009}.
 
 
 
